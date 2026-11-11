@@ -362,6 +362,8 @@ input, select, textarea { font-family: inherit; }
 .module-switch button svg { font-size: 17px; }
 .module-switch button:hover { color: var(--ink); }
 .module-switch button.on { background: var(--surface); color: var(--brand); box-shadow: var(--shadow); }
+.module-switch.stacked { grid-template-columns: 1fr; }
+.module-switch.stacked button { justify-content: flex-start; padding: 0 12px; }
 .module-name { display: block; font-size: 11.5px; color: var(--muted); text-align: center; margin-top: 8px; }
 
 /* ---------- Socorro: detalle de evento ---------- */
@@ -582,3 +584,52 @@ input, select, textarea { font-family: inherit; }
 .user-pick { margin-top: 8px; border: 1px solid var(--line); border-radius: 10px; max-height: 240px; overflow-y: auto; padding: 0 10px; }
 .user-pick li { cursor: pointer; }
 .user-pick li.on { background: var(--brand-50); margin: 0 -10px; padding-left: 10px; padding-right: 10px; }
+
+/* ---------- Estándares transversales · Talento humano ---------- */
+.th-pct { display: inline-flex; align-items: center; gap: 8px; }
+.th-pct-track { display: block; width: 80px; height: 7px; border-radius: 99px; background: var(--line-2); overflow: hidden; }
+.th-pct-track > span { display: block; height: 100%; border-radius: 99px; }
+.th-pct > b { font-size: 12.5px; color: var(--ink); }
+.th-photo { width: 76px; height: 76px; border-radius: 50%; border: 2px dashed var(--line); background: var(--line-2); display: inline-flex; align-items: center; justify-content: center; color: var(--muted); font-size: 26px; cursor: pointer; overflow: hidden; padding: 0; flex: 0 0 auto; }
+.th-photo img { width: 100%; height: 100%; object-fit: cover; }
+.th-avatar { width: 64px; height: 64px; border-radius: 50%; background: var(--brand-50); color: var(--brand); display: inline-flex; align-items: center; justify-content: center; font-size: 30px; overflow: hidden; flex: 0 0 auto; }
+.th-avatar.sm { width: 36px; height: 36px; font-size: 18px; }
+.th-avatar img { width: 100%; height: 100%; object-fit: cover; }
+.th-row { cursor: pointer; }
+.th-row:hover td { background: #FAFAFB; }
+.th-expires { display: flex; gap: 18px; align-items: flex-end; flex-wrap: wrap; padding: 12px 14px; border: 1px solid var(--line-2); border-radius: 10px; background: #FAFAFB; }
+.th-file { display: flex; align-items: center; gap: 10px; padding: 14px; border: 2px dashed var(--line); border-radius: 10px; cursor: pointer; color: var(--muted); font-size: 13.5px; }
+.th-file svg { font-size: 22px; color: var(--brand); flex: 0 0 auto; }
+.th-file:hover { border-color: var(--brand); }
+.th-seg { display: inline-flex; gap: 4px; padding: 3px; background: var(--line-2); border-radius: 8px; }
+.th-seg button { border: 0; background: transparent; padding: 5px 10px; border-radius: 6px; font-size: 12.5px; font-weight: 600; color: var(--muted); cursor: pointer; white-space: nowrap; }
+.th-seg button.on { background: var(--surface); box-shadow: var(--shadow); color: var(--ink); }
+.th-seg button.on.ok { color: var(--ok); } .th-seg button.on.bad { color: var(--bad); }
+.th-chips { display: flex; gap: 6px; flex-wrap: wrap; padding: 12px 20px 4px; }
+.th-chips button { border: 1px solid var(--line); background: var(--surface); border-radius: 99px; padding: 4px 11px; font-size: 12.5px; cursor: pointer; color: var(--ink-2); }
+.th-chips button.on { background: var(--brand); border-color: var(--brand); color: #fff; }
+.th-alerts { padding: 4px 20px 8px; max-height: 560px; overflow: auto; }
+.th-alerts li { cursor: pointer; }
+.th-alerts li .grow span { white-space: normal; }
+.icon-bubble.bad { background: var(--bad-50); color: var(--bad); }
+.icon-bubble.warn { background: var(--warn-50); color: var(--warn); }
+.th-kpi-link { color: inherit; text-decoration: none; transition: box-shadow .15s; }
+.th-kpi-link:hover { box-shadow: var(--shadow-lg, 0 6px 18px rgba(0,0,0,.08)); }
+.th-req-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 6px; }
+.th-req { display: flex; justify-content: space-between; align-items: center; gap: 8px; padding: 7px 10px; border: 1px solid var(--line-2); border-radius: 8px; font-size: 13px; }
+.th-req.on { border-color: var(--brand); background: var(--brand-50); }
+.th-req label { display: flex; gap: 6px; align-items: center; cursor: pointer; }
+.th-req-m { font-size: 12px; color: var(--muted); white-space: nowrap; }
+.th-standards { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 14px; }
+.th-std { display: flex; align-items: center; gap: 14px; padding: 16px 18px; text-decoration: none; color: inherit; position: relative; }
+.th-std .grow { flex: 1; min-width: 0; }
+.th-std .grow strong { display: block; color: var(--ink); font-size: 14.5px; }
+.th-std .grow span { font-size: 12.5px; color: var(--muted); }
+.th-std-n { position: absolute; top: 8px; left: 10px; font-size: 11px; font-weight: 700; color: var(--muted); }
+.th-std-go { color: var(--brand); font-size: 20px; }
+a.th-std:hover { box-shadow: var(--shadow-lg, 0 6px 18px rgba(0,0,0,.08)); }
+.th-std.off { opacity: .6; }
+.th-steps { margin: 0; padding-left: 20px; font-size: 13px; line-height: 1.55; }
+.th-steps li { margin-bottom: 6px; }
+.th-guide p { font-size: 13px; line-height: 1.55; margin: 0 0 8px; }
+.th-list-table { font-size: 10.5px; }

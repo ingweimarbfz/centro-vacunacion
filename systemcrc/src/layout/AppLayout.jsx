@@ -25,7 +25,7 @@ const ModuleSwitch = ({ current, user }) => {
   const mods = modulesForUser(user)
   if (mods.length < 2) return null
   return (
-    <div className="module-switch" role="tablist" aria-label="Módulo del sistema">
+    <div className={`module-switch${mods.length > 2 ? ' stacked' : ''}`} role="tablist" aria-label="Módulo del sistema">
       {mods.map((m) => (
         <button key={m.id} type="button" role="tab" aria-selected={current === m.id} title={m.fullLabel}
           className={current === m.id ? 'on' : ''} onClick={() => { rememberModule(m.id); navigate(moduleHome(user, m.id)) }}>
@@ -99,8 +99,10 @@ const AppLayout = () => {
   const shared = ['/perfil', '/firma', '/usuarios', '/configuracion'].some((p) => pathname.startsWith(p))
   const [moduleId, setModuleId] = useState(() => {
     if (!shared) return moduleFromPath(pathname)
-    if (!modulesForUser(user).some((m) => m.id === 'ips')) return 'socorro'
-    try { return localStorage.getItem(MODULE_KEY) || 'ips' } catch { return 'ips' }
+    const own = modulesForUser(user).map((m) => m.id)
+    let saved = null
+    try { saved = localStorage.getItem(MODULE_KEY) } catch { /* sin almacenamiento */ }
+    return own.includes(saved) ? saved : own[0] || 'ips'
   })
   useEffect(() => { if (!shared) { const m = moduleFromPath(pathname); setModuleId(m); rememberModule(m) } }, [pathname, shared])
   const sections = navForUser(user, moduleId)

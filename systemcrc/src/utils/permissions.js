@@ -1,7 +1,7 @@
 import {
   MdDashboard, MdThermostat, MdNoteAdd, MdManageSearch, MdPeople, MdSettings, MdPerson,
   MdEmergency, MdInventory2, MdBadge, MdLocalHospital, MdLocalShipping, MdDirectionsCar, MdAssignment, MdSpeed,
-  MdMedicalServices, MdAccountTree, MdVolunteerActivism, MdFactCheck, MdSchool, MdWarehouse, MdCategory, MdSwapHoriz, MdHealing, MdAirportShuttle, MdDraw, MdTune, MdInsights
+  MdMedicalServices, MdAccountTree, MdVolunteerActivism, MdFactCheck, MdSchool, MdWarehouse, MdCategory, MdSwapHoriz, MdHealing, MdAirportShuttle, MdDraw, MdTune, MdInsights, MdGroups, MdRule, MdMenuBook, MdFolderShared
 } from 'react-icons/md'
 
 export const ROLE_LABELS = {
@@ -46,8 +46,10 @@ export const siteHas = (user, service) => {
 // El administrador puede mostrar u ocultar módulos a cada usuario (Usuarios → Módulos). El administrador ve todo.
 export const USER_MODULES = {
   ips: [['ips_dashboard', 'Dashboard de IPS'], ['citologias', 'Citologías'], ['traslado', 'Traslado asistencial (ambulancias)'], ['temperatura', 'Registro de temperatura'], ['equipos', 'Hoja de vida de equipos']],
-  socorro: [['og_dashboard', 'Dashboard de Operaciones Generales'], ['socorro', 'Socorro (eventos y emergencias)'], ['educacion', 'Educación'], ['personas', 'Personas / voluntarios'], ['reporte_voluntarios', 'Reporte de voluntarios'], ['inventario', 'Inventario y bodegas'], ['flota', 'Flota vehicular'], ['voluntario', 'Panel de voluntario']]
+  socorro: [['og_dashboard', 'Dashboard de Operaciones Generales'], ['socorro', 'Socorro (eventos y emergencias)'], ['educacion', 'Educación'], ['personas', 'Personas / voluntarios'], ['reporte_voluntarios', 'Reporte de voluntarios'], ['inventario', 'Inventario y bodegas'], ['flota', 'Flota vehicular'], ['voluntario', 'Panel de voluntario']],
+  estandares: [['talento_humano', 'Talento humano (hojas de vida, contratos y chequeo)']]
 }
+export const USER_MODULE_GROUPS = { ips: 'IPS', socorro: 'Operaciones Generales', estandares: 'Estándares transversales' }
 export const hasModule = (user, mod) => {
   if (!user) return false
   if (user.role === 'administrador' || !mod) return true
@@ -66,7 +68,8 @@ export const canSee = (user, { roles, module, grantable = true, service } = {}) 
 // Módulos del sistema. Para sumar uno nuevo: agregarlo aquí con su menú y sus rutas en App.jsx.
 export const MODULES = [
   { id: 'ips', label: 'IPS', fullLabel: 'Servicios de IPS', icon: MdLocalHospital, home: '/', visible: (u) => ownItems('ips', u).length > 0 },
-  { id: 'socorro', label: 'Operaciones Generales', fullLabel: 'Operaciones Generales: Socorro y Educación', icon: MdEmergency, home: '/socorro', visible: (u) => ownItems('socorro', u).length > 0 }
+  { id: 'socorro', label: 'Operaciones Generales', fullLabel: 'Operaciones Generales: Socorro y Educación', icon: MdEmergency, home: '/socorro', visible: (u) => ownItems('socorro', u).length > 0 },
+  { id: 'estandares', label: 'Estándares', fullLabel: 'Estándares transversales de habilitación', icon: MdRule, home: '/estandares', visible: (u) => ownItems('estandares', u).length > 0 }
 ]
 export const modulesForUser = (user) => MODULES.filter((m) => m.visible(user))
 
@@ -76,11 +79,11 @@ export const homeFor = (user, preferred) => {
   const first = (m) => ownItems(m, user)[0]?.to
   if (user.role === 'conductor' && canSee(user, { roles: FLEET_DASH, module: 'flota' })) return '/socorro/vehiculos'
   if (user.role === 'voluntario' && canSee(user, { roles: ['voluntario'], module: 'voluntario', grantable: false })) return '/socorro/voluntario'
-  const order = preferred === 'socorro' ? ['socorro', 'ips'] : ['ips', 'socorro']
-  return first(order[0]) || first(order[1]) || '/perfil'
+  const order = [preferred, 'ips', 'socorro', 'estandares'].filter((m, i, a) => m && NAV[m] && a.indexOf(m) === i)
+  return order.map(first).find(Boolean) || '/perfil'
 }
 
-export const moduleFromPath = (pathname) => (pathname.startsWith('/socorro') ? 'socorro' : 'ips')
+export const moduleFromPath = (pathname) => (pathname.startsWith('/socorro') ? 'socorro' : pathname.startsWith('/estandares') ? 'estandares' : 'ips')
 
 const SHARED = [
   {
@@ -142,6 +145,21 @@ const NAV = {
         { to: '/socorro/vehiculos/flota', label: 'Vehículos', icon: MdDirectionsCar, roles: FLEET_VIEW, module: 'flota' },
         { to: '/socorro/vehiculos/preoperacional', label: 'Preoperacional', icon: MdFactCheck, roles: FLEET_VIEW, module: 'flota' },
         { to: '/socorro/vehiculos/reportes', label: 'Reportes diarios', icon: MdAssignment, roles: TRIPS, module: 'flota', grantable: false }
+      ]
+    },
+    ...SHARED
+  ],
+  // Estándares transversales (Resolución 3100 de 2019). Cada estándar se suma como una sección.
+  estandares: [
+    { title: 'General', items: [{ to: '/estandares', label: 'Estándares transversales', icon: MdRule, roles: STAFF, end: true, module: 'talento_humano' }] },
+    {
+      title: '1. Talento humano',
+      items: [
+        { to: '/estandares/talento-humano', label: 'Dashboard', icon: MdDashboard, roles: STAFF, end: true, module: 'talento_humano' },
+        { to: '/estandares/talento-humano/personal', label: 'Hojas de vida', icon: MdFolderShared, roles: STAFF, module: 'talento_humano' },
+        { to: '/estandares/talento-humano/listado', label: 'Listado de talento humano', icon: MdGroups, roles: STAFF, module: 'talento_humano' },
+        { to: '/estandares/talento-humano/instructivo', label: 'Instructivo', icon: MdMenuBook, roles: STAFF, module: 'talento_humano' },
+        { to: '/estandares/talento-humano/configuracion', label: 'Cargos y requisitos', icon: MdTune, roles: ADMIN }
       ]
     },
     ...SHARED

@@ -2,7 +2,7 @@ import React, { useEffect, useMemo, useState } from 'react'
 import { MdPersonAdd, MdSearch, MdEdit, MdDelete, MdPeople, MdErrorOutline, MdViewModule, MdRestartAlt } from 'react-icons/md'
 import api, { errorMessage, getSiteFilter } from '../api/client'
 import { useAuth } from '../context/AuthContext'
-import { ROLE_LABELS, ROLE_DESCRIPTIONS, SITE_TYPES, USER_MODULES } from '../utils/permissions'
+import { ROLE_LABELS, ROLE_DESCRIPTIONS, SITE_TYPES, USER_MODULES, USER_MODULE_GROUPS } from '../utils/permissions'
 import { PageHead, Card, Modal, Avatar, Empty, Spinner, useToast } from '../components/ui'
 
 const ROLE_TONE = { administrador: 'brand', empleado: 'navy', voluntario: 'ok', conductor: 'info' }
@@ -26,7 +26,7 @@ const ModulesField = ({ role, value, byRole, onChange }) => {
       </div>
       {Object.entries(USER_MODULES).map(([group, items]) => (
         <div key={group}>
-          <span className="label">{group === 'ips' ? 'IPS' : 'Operaciones Generales'}</span>
+          <span className="label">{USER_MODULE_GROUPS[group]}</span>
           <div className="rc-checks" style={{ marginTop: 6 }}>
             {items.filter(([k]) => (k !== 'traslado' || role === 'conductor') && (k !== 'voluntario' || role === 'voluntario')).map(([k, l]) => (
               <label key={k} className={`rc-check${current.includes(k) ? ' on' : ''}`}><input type="checkbox" checked={current.includes(k)} onChange={() => toggle(k)} /> {l}</label>

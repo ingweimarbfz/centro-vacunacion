@@ -3,7 +3,7 @@ import { BrowserRouter, Navigate, Route, Routes, useLocation } from 'react-route
 import './styles/ui.css'
 import { AuthProvider, useAuth } from './context/AuthContext'
 import { SettingsProvider } from './context/SettingsContext'
-import { ROUTE_ROLES, homeFor, canSee } from './utils/permissions'
+import { ROUTE_ROLES, homeFor, canSee, moduleFromPath } from './utils/permissions'
 import { Spinner } from './components/ui'
 import AppLayout from './layout/AppLayout'
 import Login from './components/Login'
@@ -44,6 +44,14 @@ import EquipmentPage from './pages/equipos/EquipmentPage'
 import EquipmentDetail from './pages/equipos/EquipmentDetail'
 import SitesPage from './pages/SitesPage'
 import VolunteerPanel from './pages/socorro/VolunteerPanel'
+import StandardsHome from './pages/talento/StandardsHome'
+import ThDashboard from './pages/talento/ThDashboard'
+import StaffPage from './pages/talento/StaffPage'
+import StaffDetail from './pages/talento/StaffDetail'
+import ChecklistSheet from './pages/talento/ChecklistSheet'
+import ThListado from './pages/talento/ThListado'
+import ThGuide from './pages/talento/ThGuide'
+import ThConfig from './pages/talento/ThConfig'
 
 // Protege rutas por sesión y por rol. Si el rol no tiene acceso, vuelve al dashboard.
 const Protected = ({ roles, service, module, grantable, children }) => {
@@ -53,7 +61,7 @@ const Protected = ({ roles, service, module, grantable, children }) => {
   if (!user) return <Navigate to="/login" replace state={{ from: location }} />
   const denied = !canSee(user, { roles, service, module, grantable })
   if (denied) {
-    const home = homeFor(user, location.pathname.startsWith('/socorro') ? 'socorro' : 'ips')
+    const home = homeFor(user, moduleFromPath(location.pathname))
     return <Navigate to={home === location.pathname ? '/perfil' : home} replace />
   }
   return children
@@ -116,6 +124,14 @@ const App = () => (
             <Route path="socorro/inventario/movimientos" element={<Protected module="inventario" roles={STAFF}><MovementsPage /></Protected>} />
             <Route path="socorro/inventario/productos" element={<Protected module="inventario" roles={STAFF}><ProductsPage /></Protected>} />
             <Route path="socorro/inventario/reporte" element={<Protected module="inventario" roles={STAFF}><InventorySheet /></Protected>} />
+            <Route path="estandares" element={<Protected module="talento_humano" roles={STAFF}><StandardsHome /></Protected>} />
+            <Route path="estandares/talento-humano" element={<Protected module="talento_humano" roles={STAFF}><ThDashboard /></Protected>} />
+            <Route path="estandares/talento-humano/personal" element={<Protected module="talento_humano" roles={STAFF}><StaffPage /></Protected>} />
+            <Route path="estandares/talento-humano/personal/:id" element={<Protected module="talento_humano" roles={STAFF}><StaffDetail /></Protected>} />
+            <Route path="estandares/talento-humano/chequeo/:id" element={<Protected module="talento_humano" roles={STAFF}><ChecklistSheet /></Protected>} />
+            <Route path="estandares/talento-humano/listado" element={<Protected module="talento_humano" roles={STAFF}><ThListado /></Protected>} />
+            <Route path="estandares/talento-humano/instructivo" element={<Protected module="talento_humano" roles={STAFF}><ThGuide /></Protected>} />
+            <Route path="estandares/talento-humano/configuracion" element={<Protected roles={ADMIN}><ThConfig /></Protected>} />
           </Route>
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
