@@ -9,7 +9,8 @@ import { DOC_TYPE_LABELS, SEX, BLOOD, today, useCatalogs } from './common'
 const EMPTY = {
   documentType: 'CC', document: '', firstName: '', lastName: '', birthDate: '', sex: '', bloodType: '', phone: '', email: '', address: '', city: '',
   profession: '', professionalCard: '', rethus: '', positionId: '', eps: '', arl: '', pensionFund: '', severanceFund: '',
-  emergencyContact: '', emergencyPhone: '', notes: '', active: true, siteId: ''
+  emergencyContact: '', emergencyPhone: '', notes: '', status: 'activo', siteId: '',
+  specialty: '', assignedService: '', hireDate: '', educationLevel: '', degreeTitle: '', institution: '', graduationYear: '', rethusVerifiedAt: ''
 }
 
 // Formulario de hoja de vida: datos personales, profesionales, de seguridad social y de contacto.
@@ -74,13 +75,29 @@ const StaffForm = ({ initial, onClose, onSaved }) => {
           </div>
         </div>
 
-        <div><span className="label">Perfil profesional y cargo</span>
+        <div><span className="label">Vinculación</span>
           <div className="form-grid" style={{ marginTop: 8 }}>
             {admin && <div className="field"><label>Sede <span className="req">*</span></label><select value={f.siteId} onChange={set('siteId')}><option value="">Selecciona…</option>{sites.map((s) => <option key={s.id} value={s.id}>{s.name}</option>)}</select></div>}
-            <div className="field"><label>Cargo</label><select value={f.positionId} onChange={set('positionId')}><option value="">Sin cargo</option>{(cat?.positions || []).filter((p) => p.active || String(p.id) === f.positionId).map((p) => <option key={p.id} value={p.id}>{p.name}</option>)}</select><span className="hint">Define los requisitos que se verifican</span></div>
-            {field('profession', 'Profesión / ocupación', { placeholder: 'Ej: Enfermera jefe' })}
-            {field('professionalCard', 'Tarjeta / registro profesional')}
+            <div className="field"><label>Cargo (denominación)</label><select value={f.positionId} onChange={set('positionId')}><option value="">Sin cargo</option>{(cat?.positions || []).filter((p) => p.active || String(p.id) === f.positionId).map((p) => <option key={p.id} value={p.id}>{p.name}</option>)}</select><span className="hint">Define los requisitos que se verifican</span></div>
+            <div className="field"><label>Profesión</label><input list="th-professions" value={f.profession} onChange={set('profession')} placeholder="Elige o escribe" /></div>
+            {field('specialty', 'Especialidad', { placeholder: 'NA si no aplica' })}
+            <div className="field"><label>Servicio asignado</label><input list="th-services" value={f.assignedService} onChange={set('assignedService')} placeholder="Ej: VACUNACIÓN" /></div>
+            <div className="field"><label>Fecha de ingreso</label><input type="date" value={f.hireDate} max={today()} onChange={set('hireDate')} /></div>
+            <div className="field"><label>Estado</label><select value={f.status} onChange={set('status')}>{Object.entries(cat?.staffStatus || { activo: 'Activo', inactivo: 'Inactivo', por_eventos: 'Por eventos' }).map(([k, l]) => <option key={k} value={k}>{l}</option>)}</select></div>
+          </div>
+          <datalist id="th-professions">{(cat?.professions || []).map((p) => <option key={p} value={p} />)}</datalist>
+          <datalist id="th-services">{(cat?.services || []).map((p) => <option key={p} value={p} />)}</datalist>
+        </div>
+
+        <div><span className="label">Formación y habilitación legal</span>
+          <div className="form-grid" style={{ marginTop: 8 }}>
+            <div className="field"><label>Nivel máximo de formación</label><select value={f.educationLevel} onChange={set('educationLevel')}><option value="">—</option>{(cat?.educationLevels || []).map((l) => <option key={l} value={l}>{l}</option>)}</select></div>
+            {field('degreeTitle', 'Título obtenido')}
+            {field('institution', 'Institución educativa')}
+            {field('graduationYear', 'Año de graduación', { type: 'number', min: 1950, max: 2100 })}
+            {field('professionalCard', 'Nº tarjeta profesional / resolución')}
             {field('rethus', 'Registro ReTHUS')}
+            <div className="field"><label>Fecha de verificación ReTHUS</label><input type="date" value={f.rethusVerifiedAt} max={today()} onChange={set('rethusVerifiedAt')} /></div>
           </div>
         </div>
 
@@ -96,7 +113,6 @@ const StaffForm = ({ initial, onClose, onSaved }) => {
             <div className="field span-all"><label>Observaciones</label><textarea value={f.notes} onChange={set('notes')} style={{ minHeight: 56 }} /></div>
           </div>
         </div>
-        {editing && <label className="switch"><input type="checkbox" checked={f.active} onChange={set('active')} /> {f.active ? 'Activo (vinculado a la IPS)' : 'Inactivo (retirado)'}</label>}
         {error && <div className="alert bad"><MdErrorOutline /><span>{error}</span></div>}
       </form>
     </Modal>

@@ -2,7 +2,7 @@ import React, { useCallback, useEffect, useRef, useState } from 'react'
 import { Link, useNavigate, useParams } from 'react-router-dom'
 import {
   MdArrowBack, MdEdit, MdDelete, MdPrint, MdAdd, MdErrorOutline, MdSave, MdUploadFile, MdPictureAsPdf, MdVerified, MdWarning,
-  MdWork, MdFactCheck, MdBadge, MdSchool, MdDescription, MdPerson, MdLocalHospital
+  MdWork, MdFactCheck, MdSchool, MdDescription, MdPerson, MdFolderShared, MdCheckCircle, MdCancel, MdHistoryEdu, MdWorkHistory, MdWorkspacePremium
 } from 'react-icons/md'
 import api, { errorMessage } from '../../api/client'
 import { useAuth } from '../../context/AuthContext'
@@ -17,7 +17,7 @@ const DocForm = ({ staff, initial, preset, onClose, onSaved }) => {
   const cat = useCatalogs()
   const [f, setF] = useState(() => editing
     ? { requirementTypeId: initial.requirementTypeId ? String(initial.requirementTypeId) : '', name: initial.name, category: initial.category, issuer: initial.issuer || '', issueDate: initial.issueDate || '', expires: initial.expires, expiryDate: initial.expiryDate || '', hours: initial.hours ?? '', notes: initial.notes || '' }
-    : { requirementTypeId: preset ? String(preset) : '', name: '', category: 'curso', issuer: '', issueDate: '', expires: false, expiryDate: '', hours: '', notes: '' })
+    : { requirementTypeId: preset ? String(preset) : '', name: '', category: 'educacion', issuer: '', issueDate: '', expires: false, expiryDate: '', hours: '', notes: '' })
   const [file, setFile] = useState(null)
   const [error, setError] = useState(''); const [saving, setSaving] = useState(false)
   const fileRef = useRef(null)
@@ -48,7 +48,7 @@ const DocForm = ({ staff, initial, preset, onClose, onSaved }) => {
           <div className="field span-all"><label>Requisito al que corresponde</label>
             <select value={f.requirementTypeId} onChange={set('requirementTypeId')}>
               <option value="">Otro curso o certificado (no es un requisito)</option>
-              {groups.map(([k, l, rs]) => <optgroup key={k} label={l}>{rs.map((r) => <option key={r.id} value={r.id}>{r.name}{r.expires ? ` (vence${r.validityMonths ? ` cada ${r.validityMonths} meses` : ''})` : ''}</option>)}</optgroup>)}
+              {groups.map(([k, l, rs]) => <optgroup key={k} label={l}>{rs.map((r) => <option key={r.id} value={r.id}>{r.code ? `${r.code} ` : ''}{r.name}{r.expires ? ` (vence${r.validityMonths ? ` cada ${r.validityMonths} meses` : ''})` : ''}</option>)}</optgroup>)}
             </select></div>
           <div className="field span-all"><label>Nombre del curso / certificado {!f.requirementTypeId && <span className="req">*</span>}</label><input value={f.name} onChange={set('name')} placeholder={req ? req.name : 'Ej: Curso de soporte vital básico'} /></div>
           {!f.requirementTypeId && <div className="field"><label>Categoría</label><select value={f.category} onChange={set('category')}>{Object.entries(cat?.categories || {}).map(([k, l]) => <option key={k} value={k}>{l}</option>)}</select></div>}
@@ -75,6 +75,7 @@ const DocForm = ({ staff, initial, preset, onClose, onSaved }) => {
 }
 
 // ---------------------------------------------------------------- Contrato
+const OPEN_ENDED = ['indefinido', 'voluntariado', 'convenio', 'otro']
 const ContractForm = ({ staff, initial, onClose, onSaved }) => {
   const editing = Boolean(initial?.id)
   const cat = useCatalogs()
@@ -88,7 +89,7 @@ const ContractForm = ({ staff, initial, onClose, onSaved }) => {
   const submit = async () => {
     setError('')
     if (!f.startDate) return setError('Indica la fecha de inicio.')
-    if (f.contractType !== 'indefinido' && !f.endDate) return setError('Indica la fecha de terminación.')
+    if (!OPEN_ENDED.includes(f.contractType) && !f.endDate) return setError('Indica la fecha de terminación.')
     setSaving(true)
     try {
       const body = { ...f, file: file ? await readAsDataUrl(file) : undefined }
@@ -101,11 +102,11 @@ const ContractForm = ({ staff, initial, onClose, onSaved }) => {
       footer={<><button type="button" className="btn btn-outline" onClick={onClose}>Cancelar</button><button type="button" className="btn btn-primary" onClick={submit} disabled={saving}>{saving ? <Spinner /> : <MdSave />} Guardar</button></>}>
       <div className="stack" style={{ gap: 14 }}>
         <div className="form-grid">
-          <div className="field"><label>Tipo de vinculación</label><select value={f.contractType} onChange={set('contractType')}>{Object.entries(cat?.contractTypes || {}).map(([k, l]) => <option key={k} value={k}>{l}</option>)}</select></div>
+          <div className="field"><label>Tipo de vinculación</label><select value={f.contractType} onChange={set('contractType')}>{(cat?.contractGroups || []).map(([g, t]) => <optgroup key={g} label={g}>{Object.entries(t).map(([k, l]) => <option key={k} value={k}>{l}</option>)}</optgroup>)}</select></div>
           <div className="field"><label>N° de contrato</label><input value={f.number} onChange={set('number')} /></div>
           <div className="field"><label>Cargo / objeto</label><input value={f.positionName} onChange={set('positionName')} /></div>
           <div className="field"><label>Fecha de inicio <span className="req">*</span></label><input type="date" value={f.startDate} onChange={set('startDate')} /></div>
-          <div className="field"><label>Fecha de terminación {f.contractType !== 'indefinido' && <span className="req">*</span>}</label><input type="date" value={f.endDate} min={f.startDate} onChange={set('endDate')} /></div>
+          <div className="field"><label>Fecha de terminación {!OPEN_ENDED.includes(f.contractType) && <span className="req">*</span>}</label><input type="date" value={f.endDate} min={f.startDate} onChange={set('endDate')} /></div>
           <div className="field"><label>Horas semanales</label><input type="number" min="0" max="80" value={f.weeklyHours} onChange={set('weeklyHours')} /></div>
           <div className="field span-all"><label>Observaciones</label><input value={f.notes} onChange={set('notes')} /></div>
         </div>
@@ -122,14 +123,17 @@ const ContractForm = ({ staff, initial, onClose, onSaved }) => {
 // ---------------------------------------------------------------- Lista de chequeo
 const ChecklistForm = ({ staff, onClose, onSaved }) => {
   const [draft, setDraft] = useState(null)
+  const [cats, setCats] = useState({})
   const [date, setDate] = useState(today())
   const [obs, setObs] = useState('')
   const [error, setError] = useState(''); const [saving, setSaving] = useState(false)
-  useEffect(() => { api.get(`/estandares/th/personal/${staff.id}/chequeo/borrador`).then(({ data }) => setDraft(data.items)).catch((e) => setError(errorMessage(e))) }, [staff.id])
+  useEffect(() => { api.get(`/estandares/th/personal/${staff.id}/chequeo/borrador`).then(({ data }) => { setDraft(data.items); setCats(data.categories) }).catch((e) => setError(errorMessage(e))) }, [staff.id])
   const setItem = (i, k, v) => setDraft(draft.map((x, j) => (j === i ? { ...x, [k]: v } : x)))
   const fails = (draft || []).filter((i) => i.mandatory && i.value === 'no_cumple').length
   const submit = async () => {
-    setSaving(true); setError('')
+    setError('')
+    if (draft.some((i) => i.value === 'no_aplica' && !i.observation.trim())) return setError('Justifica en la observación cada ítem marcado como No aplica.')
+    setSaving(true)
     try { const { data } = await api.post(`/estandares/th/personal/${staff.id}/chequeo`, { date, items: draft, observations: obs }); onSaved(data) } catch (e) { setError(errorMessage(e)); setSaving(false) }
   }
   return (
@@ -138,21 +142,30 @@ const ChecklistForm = ({ staff, onClose, onSaved }) => {
         <button type="button" className="btn btn-outline" onClick={onClose}>Cancelar</button><button type="button" className="btn btn-primary" onClick={submit} disabled={saving || !draft?.length}>{saving ? <Spinner /> : <MdSave />} Guardar verificación</button></>}>
       {!draft && !error ? <div className="splash" style={{ minHeight: 120 }}><Spinner /></div> : (
         <div className="stack" style={{ gap: 14 }}>
-          <div className="alert info" style={{ margin: 0 }}><MdFactCheck /><span>El sistema propone el resultado según los soportes cargados. Revisa cada ítem contra el documento original y ajústalo si es necesario.</span></div>
+          <div className="alert info" style={{ margin: 0 }}><MdFactCheck /><span>El sistema propone Sí o No según los soportes cargados (faltantes, vencidos o antecedentes con más de 30 días). Verifica que cada documento esté legible, completo y vigente, y ajusta lo necesario. En Obs. registra faltantes, vencidos, inconsistencias o la justificación del No aplica.</span></div>
           <div className="field" style={{ maxWidth: 220 }}><label>Fecha de verificación</label><input type="date" value={date} max={today()} onChange={(e) => setDate(e.target.value)} /></div>
           {draft?.length === 0 ? <div className="alert warn"><MdWarning /><span>El cargo no tiene requisitos configurados. Configúralos en Cargos y requisitos.</span></div> : (
-            <div className="table-wrap"><table className="table">
-              <thead><tr><th>Requisito</th><th>Soporte</th><th style={{ width: 300 }}>Resultado</th><th>Observación</th></tr></thead>
-              <tbody>{(draft || []).map((it, i) => (
-                <tr key={it.requirementTypeId}>
-                  <td style={{ whiteSpace: 'normal' }}><strong style={{ color: 'var(--ink)' }}>{it.name}</strong>{it.mandatory ? <div className="hint">Obligatorio</div> : <div className="hint">Opcional</div>}</td>
-                  <td><StatusBadge status={it.status} /></td>
-                  <td><div className="th-seg">{Object.entries(CHECK_VALUES).map(([k, [l, tone]]) => (
-                    <button key={k} type="button" className={it.value === k ? `on ${tone}` : ''} onClick={() => setItem(i, 'value', k)}>{l}</button>
-                  ))}</div></td>
-                  <td><input className="input" value={it.observation} onChange={(e) => setItem(i, 'observation', e.target.value)} /></td>
-                </tr>
-              ))}</tbody>
+            <div className="table-wrap"><table className="table th-check-table">
+              <thead><tr><th>Ítem</th><th>Soporte</th><th style={{ width: 270 }}>Cumple</th><th>Obs.</th></tr></thead>
+              <tbody>{Object.entries(cats).map(([cat, label]) => {
+                const rows = (draft || []).map((it, i) => [it, i]).filter(([it]) => it.category === cat)
+                if (!rows.length) return null
+                return (
+                  <React.Fragment key={cat}>
+                    <tr className="th-check-sec"><td colSpan={4}>{label}</td></tr>
+                    {rows.map(([it, i]) => (
+                      <tr key={it.requirementTypeId}>
+                        <td style={{ whiteSpace: 'normal', minWidth: 220 }}><strong style={{ color: 'var(--ink)' }}>{it.code ? `${it.code} ` : ''}{it.name}</strong><div className="hint">{it.mandatory ? 'Obligatorio para este cargo' : 'Según aplique'}{it.description ? ` · ${it.description}` : ''}</div></td>
+                        <td>{it.status === 'faltante' ? <span className="badge">Sin soporte</span> : <StatusBadge status={it.status} />}</td>
+                        <td><div className="th-seg">{Object.entries(CHECK_VALUES).map(([k, [l, tone]]) => (
+                          <button key={k} type="button" className={it.value === k ? `on ${tone}` : ''} onClick={() => setItem(i, 'value', k)}>{k === 'cumple' ? 'Sí' : k === 'no_cumple' ? 'No' : 'No aplica'}</button>
+                        ))}</div></td>
+                        <td><input className="input" value={it.observation} onChange={(e) => setItem(i, 'observation', e.target.value)} placeholder={it.value === 'no_aplica' ? 'Justifica el No aplica' : ''} /></td>
+                      </tr>
+                    ))}
+                  </React.Fragment>
+                )
+              })}</tbody>
             </table></div>
           )}
           <div className="field"><label>Observaciones generales</label><textarea value={obs} onChange={(e) => setObs(e.target.value)} style={{ minHeight: 56 }} /></div>
@@ -164,7 +177,7 @@ const ChecklistForm = ({ staff, onClose, onSaved }) => {
 }
 
 const Spec = ({ label, children }) => <div className="spec"><span>{label}</span><strong>{children || '—'}</strong></div>
-const CAT_ICON = { identificacion: MdBadge, formacion: MdSchool, habilitacion: MdVerified, curso: MdSchool, salud: MdLocalHospital, contractual: MdDescription, otro: MdDescription }
+const CAT_ICON = { documentos: MdDescription, educacion: MdSchool, experiencia: MdWorkHistory, certificados: MdHistoryEdu, calidad: MdWorkspacePremium, otro: MdDescription }
 
 const StaffDetail = () => {
   const { id } = useParams()
@@ -185,6 +198,7 @@ const StaffDetail = () => {
   if (!s) return <div className="splash"><Spinner /> Cargando hoja de vida…</div>
   if (printing) return <StaffSheet staff={s} onBack={() => setPrinting(false)} />
   const c = s.compliance
+  const folder = c.items.filter((i) => i.folder)
   const extra = s.documents.filter((d) => !d.requirementTypeId || !c.items.some((i) => i.documentId === d.id))
 
   return (
@@ -197,7 +211,7 @@ const StaffDetail = () => {
             <div style={{ minWidth: 0 }}>
               <div style={{ display: 'flex', gap: 8, alignItems: 'center', flexWrap: 'wrap', marginBottom: 4 }}>
                 <span className="badge navy">{s.documentType} {s.document}</span>{s.positionName ? <span className="badge">{s.positionName}</span> : <span className="badge warn">Sin cargo</span>}
-                {!s.active && <span className="badge">Inactivo</span>}
+                {s.status !== 'activo' && <span className="badge">{s.statusLabel}</span>}
               </div>
               <h1 style={{ fontSize: 22 }}>{s.fullName}</h1>
               <span style={{ color: 'var(--muted)' }}>{[s.profession, s.siteName].filter(Boolean).join(' · ') || '—'}</span>
@@ -226,9 +240,12 @@ const StaffDetail = () => {
             <Spec label="Contacto de emergencia">{[s.emergencyContact, s.emergencyPhone].filter(Boolean).join(' · ')}</Spec>
           </div>
         </Card>
-        <Card title="Perfil profesional y seguridad social">
+        <Card title="Vinculación, formación y seguridad social">
           <div className="spec-grid">
-            <Spec label="Profesión">{s.profession}</Spec><Spec label="Tarjeta profesional">{s.professionalCard}</Spec><Spec label="ReTHUS">{s.rethus}</Spec>
+            <Spec label="Profesión">{s.profession}</Spec><Spec label="Especialidad">{s.specialty}</Spec><Spec label="Servicio asignado">{s.assignedService}</Spec>
+            <Spec label="Fecha de ingreso">{fmt(s.hireDate)}</Spec><Spec label="Estado">{s.statusLabel}</Spec>
+            <Spec label="Nivel de formación">{s.educationLevel}</Spec><Spec label="Título">{s.degreeTitle}</Spec><Spec label="Institución">{[s.institution, s.graduationYear].filter(Boolean).join(' · ')}</Spec>
+            <Spec label="Tarjeta profesional">{s.professionalCard}</Spec><Spec label="ReTHUS">{[s.rethus, s.rethusVerifiedAt && `verificado ${fmt(s.rethusVerifiedAt)}`].filter(Boolean).join(' · ')}</Spec>
             <Spec label="EPS">{s.eps}</Spec><Spec label="ARL">{s.arl}</Spec><Spec label="Pensiones">{s.pensionFund}</Spec><Spec label="Cesantías">{s.severanceFund}</Spec>
           </div>
           {s.notes && <p style={{ margin: '12px 0 0', whiteSpace: 'pre-wrap', color: 'var(--ink-2)' }}>{s.notes}</p>}
@@ -236,13 +253,26 @@ const StaffDetail = () => {
       </div>
 
       <div style={{ marginTop: 18 }}>
-        <Card flush title="Requisitos del cargo" subtitle={s.positionName ? `Lo que exige el cargo ${s.positionName} y el estado de cada soporte` : 'Asigna un cargo para verificar sus requisitos'} icon={<MdVerified style={{ color: 'var(--brand)' }} />}>
+        <Card title="Estándar por cada profesional" subtitle="Documentos que debe tener la carpeta del profesional" icon={<MdFolderShared style={{ color: 'var(--brand)' }} />}>
+          <div className="th-folder">{folder.map((i) => (
+            <div key={i.requirementTypeId} className={`th-folder-item ${i.status}`}>
+              <span>{i.status === 'vigente' ? <MdCheckCircle /> : i.status === 'por_vencer' ? <MdWarning /> : <MdCancel />}</span>
+              <div><strong>{i.name}</strong><small>{i.status === 'faltante' ? 'Falta el soporte' : i.status === 'vencido' ? `Vencido ${fmt(i.expiryDate)}` : i.expiryDate ? `Vence ${fmt(i.expiryDate)}` : 'Cargado'}</small></div>
+              {i.fileUrl ? <a href={i.fileUrl} target="_blank" rel="noreferrer" aria-label="Ver PDF"><MdPictureAsPdf /></a> : <button type="button" className="btn btn-ghost btn-icon btn-sm" aria-label="Cargar" onClick={() => setModal({ doc: {}, preset: i.requirementTypeId })}><MdUploadFile /></button>}
+            </div>
+          ))}</div>
+          {folder.length === 0 && <p className="hint" style={{ margin: 0 }}>Marca en Cargos y requisitos qué requisitos forman parte del estándar por profesional.</p>}
+        </Card>
+      </div>
+
+      <div style={{ marginTop: 18 }}>
+        <Card flush title="Requisitos que aplican" subtitle={`Requisitos generales del personal${s.positionName ? ` y los del cargo ${s.positionName}` : ' (asigna un cargo para sumar los suyos)'}`} icon={<MdVerified style={{ color: 'var(--brand)' }} />}>
           {c.items.length === 0 ? <Empty icon={<MdVerified />}>{s.positionName ? 'El cargo no tiene requisitos configurados.' : 'Sin cargo asignado.'}</Empty> : (
             <div className="table-wrap" style={{ marginTop: 12 }}><table className="table">
               <thead><tr><th>Requisito</th><th>Estado</th><th>Vence</th><th className="actions" /></tr></thead>
               <tbody>{c.items.map((i) => (
                 <tr key={i.requirementTypeId}>
-                  <td style={{ whiteSpace: 'normal' }}><strong style={{ color: 'var(--ink)' }}>{i.name}</strong> {!i.mandatory && <span className="hint">(opcional)</span>}</td>
+                  <td style={{ whiteSpace: 'normal' }}><strong style={{ color: 'var(--ink)' }}>{i.code ? `${i.code} ` : ''}{i.name}</strong> {!i.mandatory && <span className="hint">(opcional)</span>}</td>
                   <td><StatusBadge status={i.status} /></td>
                   <td>{fmt(i.expiryDate)}</td>
                   <td className="actions">

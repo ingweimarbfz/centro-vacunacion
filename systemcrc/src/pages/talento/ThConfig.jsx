@@ -1,5 +1,5 @@
 import React, { useState } from 'react'
-import { MdAdd, MdEdit, MdDelete, MdErrorOutline, MdSave, MdWork, MdChecklist } from 'react-icons/md'
+import { MdAdd, MdEdit, MdDelete, MdErrorOutline, MdSave, MdWork, MdChecklist, MdDescription } from 'react-icons/md'
 import api, { errorMessage } from '../../api/client'
 import { PageHead, Card, Modal, Empty, Spinner, useToast } from '../../components/ui'
 import { useCatalogs, resetCatalogs } from './common'
@@ -7,7 +7,9 @@ import { Confirm } from './StaffDetail'
 
 const ReqForm = ({ cat, initial, onClose, onSaved }) => {
   const editing = Boolean(initial?.id)
-  const [f, setF] = useState(editing ? { ...initial, validityMonths: initial.validityMonths ?? '', description: initial.description || '' } : { name: '', category: 'curso', expires: false, validityMonths: '', description: '', active: true })
+  const [f, setF] = useState(editing
+    ? { ...initial, code: initial.code || '', sortOrder: initial.sortOrder ?? '', validityMonths: initial.validityMonths ?? '', maxAgeDays: initial.maxAgeDays ?? '', listadoLabel: initial.listadoLabel || '', description: initial.description || '' }
+    : { name: '', code: '', sortOrder: '', category: 'educacion', expires: false, validityMonths: '', maxAgeDays: '', general: false, folder: false, inListado: false, listadoLabel: '', description: '', active: true })
   const [error, setError] = useState(''); const [saving, setSaving] = useState(false)
   const set = (k) => (e) => setF({ ...f, [k]: e.target.type === 'checkbox' ? e.target.checked : e.target.value })
   const submit = async () => {
@@ -20,10 +22,18 @@ const ReqForm = ({ cat, initial, onClose, onSaved }) => {
       footer={<><button type="button" className="btn btn-outline" onClick={onClose}>Cancelar</button><button type="button" className="btn btn-primary" onClick={submit} disabled={saving}>{saving ? <Spinner /> : <MdSave />} Guardar</button></>}>
       <div className="stack" style={{ gap: 14 }}>
         <div className="field"><label>Nombre <span className="req">*</span></label><input value={f.name} onChange={set('name')} placeholder="Ej: Curso de atención a víctimas de violencia sexual" autoFocus /></div>
-        <div className="field"><label>Categoría</label><select value={f.category} onChange={set('category')}>{Object.entries(cat.categories).map(([k, l]) => <option key={k} value={k}>{l}</option>)}</select></div>
+        <div className="grid grid-2" style={{ gap: 12 }}>
+          <div className="field"><label>Sección del formato</label><select value={f.category} onChange={set('category')}>{Object.entries(cat.categories).map(([k, l]) => <option key={k} value={k}>{l}</option>)}</select></div>
+          <div className="field"><label>Numeral / orden</label><div style={{ display: 'flex', gap: 6 }}><input value={f.code} onChange={set('code')} placeholder="2.8" style={{ width: 70 }} /><input type="number" value={f.sortOrder} onChange={set('sortOrder')} placeholder="Orden" /></div></div>
+        </div>
         <label className="switch"><input type="checkbox" checked={f.expires} onChange={set('expires')} /> El soporte vence</label>
-        {f.expires && <div className="field"><label>Vigencia (meses)</label><input type="number" min="1" max="240" value={f.validityMonths} onChange={set('validityMonths')} placeholder="Ej: 24" /><span className="hint">Sirve para calcular el vencimiento desde la fecha de expedición</span></div>}
-        <div className="field"><label>Descripción / norma</label><input value={f.description} onChange={set('description')} /></div>
+        {f.expires && <div className="field"><label>Vigencia (meses)</label><input type="number" min="1" max="240" value={f.validityMonths} onChange={set('validityMonths')} placeholder="Ej: 24" /><span className="hint">Calcula el vencimiento desde la fecha de expedición (cursos: 2 años)</span></div>}
+        <div className="field"><label>Antigüedad máxima al ingreso (días)</label><input type="number" min="1" value={f.maxAgeDays} onChange={set('maxAgeDays')} placeholder="Ej: 30 para antecedentes" /><span className="hint">Si el soporte se expidió antes, la lista de chequeo lo marca como No cumple</span></div>
+        <label className="switch"><input type="checkbox" checked={f.general} onChange={set('general')} /> Aplica a todo el personal (obligatorio sin importar el cargo)</label>
+        <label className="switch"><input type="checkbox" checked={f.folder} onChange={set('folder')} /> Hace parte del estándar por cada profesional</label>
+        <label className="switch"><input type="checkbox" checked={f.inListado} onChange={set('inListado')} /> Mostrar como columna en el listado de talento humano</label>
+        {f.inListado && <div className="field"><label>Título de la columna</label><input value={f.listadoLabel} onChange={set('listadoLabel')} placeholder="Ej: Bioseguridad" /></div>}
+        <div className="field"><label>Descripción / aclaración (ej: Según aplique)</label><input value={f.description} onChange={set('description')} /></div>
         {editing && <label className="switch"><input type="checkbox" checked={f.active} onChange={set('active')} /> {f.active ? 'Activo' : 'Inactivo'}</label>}
         {error && <div className="alert bad"><MdErrorOutline /><span>{error}</span></div>}
       </div>
@@ -51,16 +61,16 @@ const PositionForm = ({ cat, initial, onClose, onSaved }) => {
           <div className="field"><label>Nombre del cargo <span className="req">*</span></label><input value={f.name} onChange={(e) => setF({ ...f, name: e.target.value })} placeholder="Ej: Auxiliar de enfermería" autoFocus /></div>
           <div className="field"><label>Descripción</label><input value={f.description} onChange={(e) => setF({ ...f, description: e.target.value })} /></div>
         </div>
-        <div><span className="label">Requisitos que exige el cargo</span><p className="hint" style={{ margin: '2px 0 8px' }}>Marca los que aplican y si son obligatorios para cumplir el estándar.</p>
+        <div><span className="label">Requisitos que exige el cargo</span><p className="hint" style={{ margin: '2px 0 8px' }}>Los marcados como “todo el personal” ya aplican a todos. Aquí marca los adicionales de este cargo (por ejemplo ReTHUS, tarjeta profesional, SVA o COVE) y si son obligatorios.</p>
           {Object.entries(cat.categories).map(([k, l]) => {
-            const rs = cat.requirements.filter((r) => r.category === k && (r.active || r.id in reqs))
+            const rs = cat.requirements.filter((r) => r.category === k && !r.general && (r.active || r.id in reqs))
             if (!rs.length) return null
             return (
               <div key={k} style={{ marginBottom: 10 }}>
                 <div className="hint" style={{ fontWeight: 700, marginBottom: 4 }}>{l}</div>
                 <div className="th-req-grid">{rs.map((r) => (
                   <div key={r.id} className={`th-req${r.id in reqs ? ' on' : ''}`}>
-                    <label><input type="checkbox" checked={r.id in reqs} onChange={() => toggle(r.id)} /> {r.name}</label>
+                    <label><input type="checkbox" checked={r.id in reqs} onChange={() => toggle(r.id)} /> {r.code ? `${r.code} ` : ''}{r.name}</label>
                     {r.id in reqs && <label className="th-req-m"><input type="checkbox" checked={reqs[r.id]} onChange={(e) => setReqs({ ...reqs, [r.id]: e.target.checked })} /> Obligatorio</label>}
                   </div>
                 ))}</div>
@@ -72,6 +82,32 @@ const PositionForm = ({ cat, initial, onClose, onSaved }) => {
         {error && <div className="alert bad"><MdErrorOutline /><span>{error}</span></div>}
       </div>
     </Modal>
+  )
+}
+
+const FORMAT_NAMES = { chequeo: 'Lista de chequeo de gestión de talento humano', listado: 'Listado / control de talento humano', hoja_vida: 'Hoja de vida del profesional' }
+const FormatsCard = ({ formats, onSaved }) => {
+  const [rows, setRows] = useState(() => Object.fromEntries(Object.keys(FORMAT_NAMES).map((k) => [k, { process: '', code: '', version: '', versionDate: '', ...Object.fromEntries(Object.entries(formats?.[k] || {}).map(([a, b]) => [a, b || ''])) }])))
+  const [busy, setBusy] = useState(''); const [toast, toastNode] = useToast()
+  const save = async (k) => { setBusy(k); try { await api.put(`/estandares/th/formatos/${k}`, rows[k]); onSaved() } catch (e) { toast(errorMessage(e), 'bad') } finally { setBusy('') } }
+  const set = (k, f) => (e) => setRows({ ...rows, [k]: { ...rows[k], [f]: e.target.value } })
+  return (
+    <Card flush title="Encabezado de los formatos" subtitle="Proceso, código, versión y fecha que aparecen en cada formato impreso (el logo es el de Configuración)" icon={<MdDescription style={{ color: 'var(--brand)' }} />}>
+      <div className="table-wrap"><table className="table">
+        <thead><tr><th>Formato</th><th>Proceso</th><th>Código</th><th>Versión</th><th>Fecha</th><th className="actions" /></tr></thead>
+        <tbody>{Object.entries(FORMAT_NAMES).map(([k, l]) => (
+          <tr key={k}>
+            <td style={{ whiteSpace: 'normal' }}><strong style={{ color: 'var(--ink)' }}>{l}</strong></td>
+            <td><input className="input" value={rows[k].process} onChange={set(k, 'process')} placeholder="Gestión de Salud" /></td>
+            <td><input className="input" value={rows[k].code} onChange={set(k, 'code')} placeholder="SAL - FO-019" style={{ width: 130 }} /></td>
+            <td><input className="input" value={rows[k].version} onChange={set(k, 'version')} placeholder="002" style={{ width: 70 }} /></td>
+            <td><input className="input" value={rows[k].versionDate} onChange={set(k, 'versionDate')} placeholder="Marzo 2026" style={{ width: 120 }} /></td>
+            <td className="actions"><button type="button" className="btn btn-outline btn-sm" disabled={busy === k} onClick={() => save(k)}>{busy === k ? <Spinner /> : <MdSave />} Guardar</button></td>
+          </tr>
+        ))}</tbody>
+      </table></div>
+      {toastNode}
+    </Card>
   )
 }
 
@@ -103,15 +139,19 @@ const ThConfig = () => {
           )}
         </Card>
         <Card flush title="Catálogo de requisitos" icon={<MdChecklist style={{ color: 'var(--brand)' }} />} actions={<button type="button" className="btn btn-outline btn-sm" onClick={() => setModal({ req: {} })}><MdAdd /> Requisito</button>}>
-          <ul className="list" style={{ padding: '4px 20px 8px' }}>{cat.requirements.map((r) => (
-            <li key={r.id} style={r.active ? undefined : { opacity: 0.55 }}>
-              <div className="grow"><strong>{r.name}</strong><span>{r.categoryLabel} · {r.expires ? `Vence${r.validityMonths ? ` cada ${r.validityMonths} meses` : ''}` : 'No vence'}{r.active ? '' : ' · Inactivo'}</span></div>
+          <ul className="list" style={{ padding: '4px 20px 8px' }}>{cat.requirements.map((r, i) => (
+            <React.Fragment key={r.id}>
+            {(i === 0 || cat.requirements[i - 1].category !== r.category) && <li className="th-list-sec">{r.categoryLabel}</li>}
+            <li style={r.active ? undefined : { opacity: 0.55 }}>
+              <div className="grow"><strong>{r.code ? `${r.code} ` : ''}{r.name}</strong><span>{[r.general ? 'Todo el personal' : 'Según cargo', r.expires ? `Vence${r.validityMonths ? ` cada ${r.validityMonths} meses` : ''}` : 'No vence', r.maxAgeDays ? `Máx. ${r.maxAgeDays} días al ingreso` : null, r.folder ? 'Estándar por profesional' : null, r.inListado ? 'En listado' : null, r.active ? null : 'Inactivo'].filter(Boolean).join(' · ')}</span></div>
               <button type="button" className="btn btn-ghost btn-icon" aria-label="Editar" onClick={() => setModal({ req: r })}><MdEdit /></button>
               <button type="button" className="btn btn-ghost btn-icon" aria-label="Eliminar" style={{ color: 'var(--bad)' }} onClick={() => setModal({ delReq: r })}><MdDelete /></button>
             </li>
+            </React.Fragment>
           ))}</ul>
         </Card>
       </div>
+      <div style={{ marginTop: 18 }}><FormatsCard formats={cat.formats} onSaved={() => reload('Encabezado guardado')} /></div>
       {modal?.pos && <PositionForm cat={cat} initial={modal.pos.id ? modal.pos : null} onClose={() => setModal(null)} onSaved={() => reload('Cargo guardado')} />}
       {modal?.req && <ReqForm cat={cat} initial={modal.req.id ? modal.req : null} onClose={() => setModal(null)} onSaved={() => reload('Requisito guardado')} />}
       {modal?.delPos && <Confirm title="Eliminar cargo" onClose={() => setModal(null)} onOk={() => del(`/estandares/th/cargos/${modal.delPos.id}`, 'Cargo eliminado')}>¿Eliminar el cargo <b>{modal.delPos.name}</b>?</Confirm>}

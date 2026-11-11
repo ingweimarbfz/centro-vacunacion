@@ -2,7 +2,8 @@ import React, { useEffect } from 'react'
 import { useSettings } from '../../context/SettingsContext'
 import { useAuth } from '../../context/AuthContext'
 import { SignBlock, useDocSignatures } from '../../components/signature'
-import { CONTRACT_STATUS, DOC_TYPE_LABELS, SEX, StatusBadge, fmt, printedAt } from './common'
+import { CONTRACT_STATUS, DOC_TYPE_LABELS, SEX, StatusBadge, fmt, printedAt, useCatalogs } from './common'
+import FormatHeader from './FormatHeader'
 import '../../components/cytology.css'
 
 const F = ({ label, value, wide }) => (
@@ -12,8 +13,9 @@ export const isSelf = (staff, user) => (staff.userId && staff.userId === user.id
 
 // Hoja de vida imprimible del profesional (estándar de talento humano). El logo es el que se carga en Configuración.
 const StaffSheet = ({ staff: s, onBack }) => {
-  const { logo, settings } = useSettings()
+  const { settings } = useSettings()
   const { user } = useAuth()
+  const cat = useCatalogs()
   const doc = useDocSignatures('th_hoja_vida', s.id)
   useEffect(() => { const p = document.title; document.title = `Hoja_de_vida_${s.document}`; return () => { document.title = p } }, [s.document])
   const c = s.compliance
@@ -24,23 +26,12 @@ const StaffSheet = ({ staff: s, onBack }) => {
         <button type="button" className="btn btn-primary" onClick={() => window.print()}>Imprimir / Guardar PDF</button>
       </div>
       <article className="cy-sheet ev-sheet">
-        <header className="cy-sheet-header">
-          <img src={logo} alt={settings.ipsName} className="cy-logo" />
-          <div className="cy-sheet-heading">
-            <p className="cy-kicker">{settings.shortName} · Estándar de talento humano</p>
-            <h2>Hoja de vida del profesional</h2>
-          </div>
-          <dl className="cy-meta">
-            <div><dt>Documento</dt><dd>{s.documentType} {s.document}</dd></div>
-            <div><dt>Sede</dt><dd>{s.siteName || '—'}</dd></div>
-            <div><dt>Cumplimiento</dt><dd><span className={`badge ${c.percent === 100 ? 'ok' : c.percent >= 70 ? 'warn' : 'bad'}`}>{c.percent}%</span></dd></div>
-          </dl>
-        </header>
+        <FormatHeader format={cat?.formats?.hoja_vida} title="Hoja de vida del profesional" extra={<span>{s.documentType} {s.document}</span>} />
 
         <div className="cy-patient-band ev-band">
           <div><span className="cy-field-label">Nombre</span><strong className="cy-patient-name">{s.fullName}</strong><span className="ev-sub">{s.profession || '—'}</span></div>
           <div><span className="cy-field-label">Cargo</span><strong>{s.positionName || 'Sin cargo'}</strong></div>
-          <div><span className="cy-field-label">Estado</span><strong>{s.active ? 'Activo' : 'Inactivo'}</strong></div>
+          <div><span className="cy-field-label">Estado · cumplimiento</span><strong>{s.statusLabel} · {c.percent}%</strong></div>
         </div>
 
         <section className="cy-section">
@@ -58,10 +49,17 @@ const StaffSheet = ({ staff: s, onBack }) => {
         </section>
 
         <section className="cy-section">
-          <h3 className="cy-section-title">Perfil profesional y seguridad social</h3>
+          <h3 className="cy-section-title">Vinculación, formación y habilitación legal</h3>
           <div className="cy-grid">
-            <F label="Tarjeta / registro profesional" value={s.professionalCard} />
+            <F label="Servicio asignado" value={s.assignedService} />
+            <F label="Especialidad" value={s.specialty} />
+            <F label="Fecha de ingreso" value={fmt(s.hireDate)} />
+            <F label="Nivel máximo de formación" value={s.educationLevel} />
+            <F label="Título obtenido" value={s.degreeTitle} />
+            <F label="Institución / año" value={[s.institution, s.graduationYear].filter(Boolean).join(' · ')} />
+            <F label="Nº tarjeta profesional" value={s.professionalCard} />
             <F label="ReTHUS" value={s.rethus} />
+            <F label="Verificación ReTHUS" value={fmt(s.rethusVerifiedAt)} />
             <F label="EPS" value={s.eps} />
             <F label="ARL" value={s.arl} />
             <F label="Fondo de pensiones" value={s.pensionFund} />
@@ -70,7 +68,17 @@ const StaffSheet = ({ staff: s, onBack }) => {
         </section>
 
         <section className="cy-section ev-table-section">
-          <h3 className="cy-section-title">Vinculación</h3>
+          <h3 className="cy-section-title">Estándar por cada profesional</h3>
+          <table className="ev-table">
+            <thead><tr><th>Documento</th><th>Estado</th><th>Vencimiento</th></tr></thead>
+            <tbody>{c.items.filter((i) => i.folder).map((i) => (
+              <tr key={i.requirementTypeId}><td><b>{i.name}</b></td><td><StatusBadge status={i.status} /></td><td>{i.expiryDate ? fmt(i.expiryDate) : '—'}</td></tr>
+            ))}</tbody>
+          </table>
+        </section>
+
+        <section className="cy-section ev-table-section">
+          <h3 className="cy-section-title">Contratos</h3>
           {s.contracts.length === 0 ? <p className="ev-empty">Sin contratos registrados.</p> : (
             <table className="ev-table">
               <thead><tr><th>Tipo</th><th>N°</th><th>Cargo / objeto</th><th>Inicio</th><th>Terminación</th><th>Estado</th></tr></thead>

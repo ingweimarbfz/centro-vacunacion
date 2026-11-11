@@ -35,7 +35,7 @@ const StaffPage = () => {
           <div className="input-icon"><MdSearch /><input className="input" value={q} onChange={(e) => setQ(e.target.value)} placeholder="Buscar por nombre, documento, cargo o profesión" /></div>
           <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap', alignItems: 'center' }}>
             <select className="input" style={{ width: 210 }} value={cargo} onChange={(e) => setCargo(e.target.value)} aria-label="Cargo"><option value="">Todos los cargos</option>{(cat?.positions || []).map((p) => <option key={p.id} value={p.id}>{p.name}</option>)}</select>
-            <select className="input" style={{ width: 150 }} value={estado} onChange={(e) => setEstado(e.target.value)} aria-label="Estado"><option value="activos">Activos</option><option value="inactivos">Inactivos</option><option value="">Todos</option></select>
+            <select className="input" style={{ width: 150 }} value={estado} onChange={(e) => setEstado(e.target.value)} aria-label="Estado"><option value="activos">Activos y por eventos</option><option value="activo">Activos</option><option value="por_eventos">Por eventos</option><option value="inactivos">Inactivos</option><option value="">Todos</option></select>
             <label className="switch"><input type="checkbox" checked={alerta} onChange={(e) => setAlerta(e.target.checked)} /> Solo con alertas</label>
           </div>
         </div>
@@ -49,9 +49,9 @@ const StaffPage = () => {
                 <tr key={r.id} className="th-row" onClick={() => navigate(`/estandares/talento-humano/personal/${r.id}`)}>
                   <td><div style={{ display: 'flex', gap: 10, alignItems: 'center' }}>
                     <span className="th-avatar sm">{r.photoUrl ? <img src={r.photoUrl} alt="" /> : <MdPerson />}</span>
-                    <div><strong style={{ color: 'var(--ink)' }}>{r.fullName}</strong>{!r.active && <span className="badge" style={{ marginLeft: 6 }}>Inactivo</span>}<div className="hint">{r.documentType} {r.document}{r.profession ? ` · ${r.profession}` : ''}</div></div>
+                    <div><strong style={{ color: 'var(--ink)' }}>{r.fullName}</strong>{r.status !== 'activo' && <span className="badge" style={{ marginLeft: 6 }}>{r.statusLabel}</span>}<div className="hint">{r.documentType} {r.document}{r.profession ? ` · ${r.profession}` : ''}</div></div>
                   </div></td>
-                  <td>{r.positionName || <span className="badge warn">Sin cargo</span>}</td>
+                  <td>{r.positionName || <span className="badge warn">Sin cargo</span>}{r.assignedService && <div className="hint">{r.assignedService}</div>}</td>
                   <td>{r.siteName}</td>
                   <td style={{ minWidth: 140 }}><Percent value={r.compliance.percent} /></td>
                   <td><StatusBadge status={r.contract?.status || 'sin_contrato'} map={CONTRACT_STATUS} days={r.contract?.daysLeft} /></td>
