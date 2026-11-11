@@ -1,0 +1,240 @@
+/* ===== Consulta y detalle de citologías ===== */
+:root {
+  --cy-red: var(--brand, rgb(227 6 19));
+  --cy-red-soft: var(--brand-50, #fdecec);
+  --cy-ink: #1d1d1f;
+  --cy-muted: #6b6b70;
+  --cy-line: #e4e4e7;
+  --cy-bg: #fafafa;
+  --cy-font: 'Lucida Sans', 'Lucida Sans Regular', 'Lucida Grande', 'Lucida Sans Unicode', Geneva, Verdana, sans-serif;
+}
+
+.cy-page, .cy-detail-page { font-family: var(--cy-font); color: var(--cy-ink); }
+
+/* Filtros */
+.cy-filters {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr)) auto;
+  gap: 1rem 1.25rem;
+  align-items: end;
+  padding: 1.5rem;
+  margin: 1.5rem 0;
+  border-radius: 10px;
+  box-shadow: 0 0 0 1px rgba(0, 0, 0, .1);
+  background: #fff;
+}
+.cy-filters label { display: flex; flex-direction: column; gap: .4rem; font-size: 13px; color: var(--cy-muted); }
+.cy-filters input {
+  font: inherit; font-size: 14px; color: var(--cy-ink);
+  border: none; border-bottom: 1.5px solid var(--cy-red);
+  padding: .45rem .1rem; background: transparent; outline: none;
+}
+.cy-filters input:focus { border-bottom-width: 2.5px; }
+.cy-filter-actions { display: flex; gap: .5rem; }
+
+/* Botones */
+.cy-btn {
+  font-family: var(--cy-font); font-size: .72rem; font-weight: 600; letter-spacing: .02em;
+  text-transform: uppercase; height: 36px; padding: 0 18px; border-radius: 8px; cursor: pointer;
+  border: 1.5px solid transparent; transition: background .15s, color .15s, border-color .15s; white-space: nowrap;
+}
+.cy-btn:disabled { opacity: .6; cursor: progress; }
+.cy-btn-primary { background: var(--cy-red); color: #fff; }
+.cy-btn-primary:hover { background: #b8050f; }
+.cy-btn-ghost { background: transparent; color: var(--cy-ink); border-color: var(--cy-line); }
+.cy-btn-ghost:hover { border-color: var(--cy-ink); }
+.cy-btn-outline { background: #fff; color: var(--cy-red); border-color: var(--cy-red); height: 32px; padding: 0 12px; }
+.cy-btn-outline:hover { background: var(--cy-red); color: #fff; }
+
+.cy-alert {
+  display: flex; align-items: center; gap: .5rem; padding: .8rem 1rem; margin-bottom: 1rem;
+  border-radius: 8px; background: var(--cy-red-soft); color: #9b0a12; font-size: 14px;
+}
+
+/* Resultados */
+.cy-count { font-size: 14px; color: var(--cy-muted); margin: 0 0 .75rem; }
+.cy-table-wrap { overflow-x: auto; border-radius: 10px; box-shadow: 0 0 0 1px rgba(0, 0, 0, .1); background: #fff; }
+.cy-table { width: 100%; border-collapse: collapse; font-size: 14px; }
+.cy-table th {
+  background: var(--cy-red); color: #fff; text-align: left; font-weight: 600; font-size: 13px;
+  padding: .75rem 1rem; white-space: nowrap;
+}
+.cy-table td { padding: .7rem 1rem; white-space: nowrap; border-top: 1px solid var(--cy-line); vertical-align: middle; }
+.cy-table tbody tr:nth-child(even) { background: var(--cy-bg); }
+.cy-table tbody tr:hover { background: var(--cy-red-soft); }
+.cy-table small { color: var(--cy-muted); font-size: 11px; }
+.cy-strong { font-weight: 600; white-space: normal !important; min-width: 160px; }
+
+/* ===== Hoja imprimible ===== */
+.cy-toolbar { display: flex; justify-content: space-between; gap: 1rem; margin: 1.5rem auto 1rem; max-width: 216mm; }
+
+.cy-sheet {
+  background: #fff; max-width: 216mm; margin: 0 auto 2rem; padding: 14mm 14mm 10mm;
+  box-shadow: 0 2px 16px rgba(0, 0, 0, .12); border-radius: 4px; box-sizing: border-box;
+  font-size: 12.5px; line-height: 1.4;
+}
+
+.cy-sheet-header {
+  display: grid; grid-template-columns: 52mm 1fr auto; gap: 6mm; align-items: center;
+  padding-bottom: 5mm; border-bottom: 3px solid var(--cy-red);
+}
+.cy-logo { width: 100%; height: auto; }
+.cy-kicker { margin: 0 0 2px; font-size: 10.5px; letter-spacing: .08em; text-transform: uppercase; color: var(--cy-red); font-weight: 600; }
+.cy-sheet-heading h2 { margin: 0; font-size: 17px; line-height: 1.25; }
+.cy-meta { margin: 0; display: grid; gap: 3px; min-width: 38mm; }
+.cy-meta div { display: flex; justify-content: space-between; gap: 10px; font-size: 11.5px; }
+.cy-meta dt { color: var(--cy-muted); }
+.cy-meta dd { margin: 0; font-weight: 700; }
+
+.cy-patient-band {
+  display: grid; grid-template-columns: 2fr 1fr 1fr; gap: 6mm; margin: 5mm 0 4mm;
+  padding: 4mm 5mm; background: var(--cy-red-soft); border-left: 4px solid var(--cy-red); border-radius: 4px;
+}
+.cy-patient-band > div { display: flex; flex-direction: column; gap: 2px; }
+.cy-patient-name { font-size: 15px; }
+
+.cy-section { margin-top: 3.5mm; break-inside: avoid; page-break-inside: avoid; }
+.cy-section-title {
+  margin: 0 0 2.5mm; padding-bottom: 1.5mm; font-size: 11px; letter-spacing: .08em; text-transform: uppercase;
+  color: var(--cy-red); border-bottom: 1px solid var(--cy-line);
+}
+.cy-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 2mm 5mm; }
+.cy-field { display: flex; flex-direction: column; gap: 1px; min-width: 0; }
+.cy-field-wide { grid-column: span 2; }
+.cy-field-label { font-size: 10px; color: var(--cy-muted); text-transform: uppercase; letter-spacing: .04em; }
+.cy-field-value { font-weight: 600; overflow-wrap: anywhere; }
+
+.cy-checks { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(4, 1fr); gap: 2mm 5mm; }
+.cy-checks li { display: flex; align-items: center; gap: 2mm; color: var(--cy-muted); justify-self: start; }
+.cy-checks li.is-on { color: var(--cy-ink); font-weight: 700; }
+.cy-box {
+  width: 4mm; height: 4mm; border: 1.2px solid #b5b5ba; border-radius: 1mm;
+  display: inline-flex; align-items: center; justify-content: center; font-size: 10px; line-height: 1;
+}
+.cy-checks li.is-on .cy-box { background: var(--cy-red); border-color: var(--cy-red); color: #fff; }
+
+.cy-notes { display: grid; grid-template-columns: 1fr 1fr; gap: 6mm; }
+.cy-notes p {
+  margin: 0; min-height: 11mm; padding: 2mm 3mm; border: 1px solid var(--cy-line); border-radius: 3px;
+  white-space: pre-wrap; overflow-wrap: anywhere;
+}
+
+.cy-signatures {
+  display: grid; grid-template-columns: 1fr 1fr auto; gap: 10mm; align-items: end;
+  margin-top: 9mm; break-inside: avoid; page-break-inside: avoid;
+}
+.cy-signatures > div { display: flex; flex-direction: column; gap: 1mm; }
+.cy-sign-line { display: block; border-top: 1px solid var(--cy-ink); margin-bottom: 1mm; }
+.cy-received { text-align: right; }
+
+.cy-sheet-footer {
+  display: flex; justify-content: space-between; gap: 1rem; margin-top: 5mm; padding-top: 2.5mm;
+  border-top: 1px solid var(--cy-line); font-size: 9.5px; color: var(--cy-muted);
+}
+
+@media screen and (max-width: 760px) {
+  .cy-filters { grid-template-columns: 1fr; }
+  .cy-sheet { padding: 6mm; }
+  .cy-sheet-header, .cy-patient-band, .cy-notes, .cy-signatures { grid-template-columns: 1fr; }
+  .cy-grid, .cy-checks { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+
+/* ===== Impresión: solo la hoja, tamaño carta ===== */
+@media print {
+  @page { size: letter; margin: 10mm; }
+  html, body { background: #fff !important; }
+  nav, .sidebar, .topbar, .backdrop, .toast, .no-print { display: none !important; }
+  .main { margin: 0 !important; }
+  .content, .content-general { padding: 0 !important; margin: 0 !important; width: 100% !important; max-width: none !important; }
+  .cy-sheet { box-shadow: none; border-radius: 0; margin: 0; max-width: none; padding: 0; }
+  .cy-sheet, .cy-sheet * { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+}
+
+/* ===== Registro de citología: validaciones y campos automáticos ===== */
+.rc-field { display: flex; flex-direction: column; gap: 3px; min-width: 0; }
+.rc-field > input, .rc-field > select { width: 100%; box-sizing: border-box; }
+.rc-invalid > input, .rc-invalid > select { border-bottom: 1.5px solid rgb(227 6 19) !important; background: #fff5f5; }
+.rc-error { color: rgb(190 5 16); font-size: 11px; font-family: var(--cy-font); }
+.rc-req { color: rgb(227 6 19); }
+.rc-readonly { background: #f4f4f5; color: #3f3f46; cursor: not-allowed; padding: 4px 6px; border-radius: 4px 4px 0 0; font-weight: 600; }
+
+/* ===== Reporte de evento (Socorro y Operaciones) ===== */
+.ev-formats { margin: 3px 0 0; font-size: 10px; color: var(--cy-muted); }
+.ev-band { grid-template-columns: 1.6fr 1.2fr 1.2fr !important; }
+.ev-sub { font-size: 10.5px; color: var(--cy-muted); }
+.ev-table-section { break-inside: auto; page-break-inside: auto; }
+.ev-table { width: 100%; border-collapse: collapse; font-size: 11px; }
+.ev-table th { text-align: left; font-size: 9.5px; text-transform: uppercase; letter-spacing: .04em; color: var(--cy-muted); font-weight: 600; padding: 5px 6px; border-bottom: 1.5px solid var(--cy-ink); }
+.ev-table td { padding: 5px 6px; border-bottom: 1px solid var(--cy-line); vertical-align: top; }
+.ev-table tr { break-inside: avoid; page-break-inside: avoid; }
+.ev-table .ev-sign { width: 26mm; }
+.ev-empty { margin: 0; color: var(--cy-muted); font-size: 11.5px; }
+.ev-complete { margin: 3mm 0 0; font-size: 11.5px; display: flex; align-items: center; gap: 8px; }
+.ev-complete span { border: 1.2px solid #b5b5ba; border-radius: 3px; padding: 1px 8px; font-weight: 700; color: var(--cy-muted); }
+.ev-complete span.on { background: var(--cy-red); border-color: var(--cy-red); color: #fff; }
+@media print { .ev-sheet .cy-section { break-inside: auto; } }
+.ev-table .badge { font-size: 9.5px; padding: 1px 7px; font-family: var(--cy-font); }
+@media print { .ev-table .badge, .ev-table .badge * { -webkit-print-color-adjust: exact; print-color-adjust: exact; } }
+.cy-section-title { break-after: avoid; page-break-after: avoid; }
+.cy-notes > div { break-inside: avoid; page-break-inside: avoid; }
+
+/* ===== Hoja de vida y reporte diario de vehículos ===== */
+.vs-photos { display: grid; grid-template-columns: repeat(4, 1fr); gap: 3mm; }
+.vs-photos figure { margin: 0; break-inside: avoid; }
+.vs-photos img { width: 100%; aspect-ratio: 4 / 3; object-fit: cover; border-radius: 2mm; border: 1px solid var(--cy-line); }
+.vs-photos figcaption { font-size: 9.5px; color: var(--cy-muted); margin-top: 1mm; text-transform: uppercase; letter-spacing: .04em; }
+.vs-parts { font-size: 10px; color: var(--cy-muted); margin-top: 1px; }
+.tr-km { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 4mm; margin-top: 2mm; }
+.tr-km > div { border: 1px solid var(--cy-line); border-radius: 2mm; padding: 3mm 4mm; }
+.tr-km > div.hl { border-color: var(--cy-red); background: var(--cy-red-soft); }
+.tr-km span { display: block; font-size: 9.5px; text-transform: uppercase; letter-spacing: .05em; color: var(--cy-muted); }
+.tr-km strong { font-size: 18px; font-variant-numeric: tabular-nums; }
+.tr-evidence { display: grid; grid-template-columns: 1fr 1fr; gap: 5mm; }
+.tr-evidence figure { margin: 0; break-inside: avoid; }
+.tr-evidence img { width: 100%; max-height: 70mm; object-fit: contain; border: 1px solid var(--cy-line); border-radius: 2mm; background: #fafafa; }
+.tr-evidence figcaption { font-size: 9.5px; text-transform: uppercase; letter-spacing: .05em; color: var(--cy-muted); margin-bottom: 1.5mm; }
+.eq-sheet-photo { grid-row: span 3; width: 100%; aspect-ratio: 1; object-fit: cover; border-radius: 2mm; border: 1px solid var(--cy-line); }
+.po-photos { display: flex; gap: 2mm; flex-wrap: wrap; margin-top: 1.5mm; }
+.po-photos img { width: 22mm; height: 22mm; object-fit: cover; border-radius: 1.5mm; border: 1px solid var(--cy-line); cursor: zoom-in; }
+.po-photos.big img { width: 38mm; height: 38mm; }
+.ev-table tr.po-bad td { background: #FEF2F2; }
+@media print { .ev-table tr.po-bad td { -webkit-print-color-adjust: exact; print-color-adjust: exact; } }
+
+/* ===== Reporte mensual de temperatura (carta horizontal) ===== */
+.tr-report .cy-sheet, .tr-report .cy-toolbar { max-width: 279mm; }
+.tr-report .tr-chart { overflow-x: auto; }
+.tr-report .tr-chart .recharts-wrapper { margin: 0 auto; }
+.tr-days-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 6mm; align-items: start; }
+.tr-days td, .tr-days th { padding: 2px 6px !important; font-size: 10px !important; }
+.tr-days .badge { font-size: 9.5px; padding: 0 6px; }
+@media screen and (max-width: 760px) { .tr-days-grid { grid-template-columns: 1fr; } }
+@media print {
+  .tr-report .cy-sheet { max-width: none; }
+  .tr-report .cy-section { break-inside: auto; }
+  .tr-days-grid { grid-template-columns: 1fr 1fr; }
+}
+
+/* ===== Firma digital ===== */
+.sig-block { display: flex; flex-direction: column; gap: 1mm; min-width: 0; }
+.sig-block .sig-img { height: 16mm; display: flex; align-items: flex-end; justify-content: center; }
+.sig-block .sig-img img { max-height: 16mm; max-width: 60mm; object-fit: contain; mix-blend-mode: multiply; }
+.sig-meta { font-size: 8.5px; color: #6B7280; display: inline-flex; align-items: center; gap: 4px; flex-wrap: wrap; }
+.sig-remove { border: 0; background: transparent; color: #B91C1C; cursor: pointer; padding: 0; display: inline-flex; font-size: 12px; }
+.sig-cell { display: flex; align-items: center; gap: 4px; min-height: 9mm; }
+.sig-cell img { max-height: 10mm; max-width: 36mm; object-fit: contain; mix-blend-mode: multiply; }
+.ev-table td.ev-sign { min-width: 34mm; }
+
+/* ===== Reporte de voluntarios ===== */
+.vr-page .cy-sheet, .vr-page .vr-filters { max-width: 260mm; }
+.vr-filters { margin: 1.5rem auto 1rem; padding: 16px 18px; }
+.vr-filters-head { display: flex; align-items: center; gap: 8px; margin-bottom: 10px; color: var(--ink, #111827); }
+.vr-filters-head svg { color: var(--brand); font-size: 20px; }
+.vr-charts { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 5mm; }
+.vr-chart { border: 1px solid #E5E7EB; border-radius: 8px; padding: 3mm 3mm 1mm; break-inside: avoid; }
+.vr-chart.wide { grid-column: 1 / -1; }
+.vr-chart h4 { margin: 0 0 2mm; font-size: 11px; text-transform: uppercase; letter-spacing: .05em; color: #4B5563; }
+@media screen and (max-width: 760px) { .vr-charts { grid-template-columns: 1fr; } }
+@media print {
+  .vr-page .cy-sheet { max-width: none; }
+  .vr-charts { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
