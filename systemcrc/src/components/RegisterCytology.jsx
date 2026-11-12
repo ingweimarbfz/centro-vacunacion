@@ -1,10 +1,12 @@
 import React from 'react'
+import InvoicePicker from './InvoicePicker'
 import { MdSave, MdCheckCircle, MdErrorOutline, MdPerson, MdPhone, MdFemale, MdVisibility, MdAssignmentInd, MdReceipt } from 'react-icons/md'
 import useRegisterCytology from '../hooks/useRegisterCytology'
-import { entidades, regimenes, tipoDocumento, solicitudServicio, ocupacion, estadoCivil } from '../utils/dataGeneral'
+import { regimenes, tipoDocumento, solicitudServicio, ocupacion, estadoCivil } from '../utils/dataGeneral'
 import { formatDate, formatMoney } from '../utils/format'
 import { PageHead, Card, Spinner } from './ui'
 import './cytology.css'
+import '../pages/facturacion/facturacion.css'
 
 const CERVIX = [
   ['sano', 'Sano'], ['normal', 'Normal'], ['cupula', 'Cúpula'], ['tomaVaginal', 'Toma vaginal'],
@@ -17,11 +19,11 @@ const icon = (I) => <I style={{ color: 'var(--brand)' }} />
 const RegisterCytology = () => {
   const {
     dataCytology: d, handleChange, handleOptionChange, InsertCytology,
-    messageSuccess, messageCancel, errors, empleados, defaults, edad, saving, discounts
+    messageSuccess, messageCancel, errors, empleados, defaults, edad, saving, entities, epsList,
+    billingOn, invoice, inv
   } = useRegisterCytology()
+  const eps = epsList.find((x) => String(x.id) === String(d.epsId))
   const base = Number(defaults.valor) || 0
-  const disc = d.applyDiscount ? discounts.find((x) => String(x.id) === String(d.discountId)) : null
-  const discAmount = disc ? Math.min(base, disc.type === 'porcentaje' ? Math.round(base * disc.value / 100) : disc.value) : 0
 
   // Campo de texto/fecha/número con etiqueta y error
   const F = ({ name, label, type = 'text', req, span, hint, ...rest }) => (
@@ -69,29 +71,23 @@ const RegisterCytology = () => {
       {messageCancel && <div className="alert bad" style={{ marginBottom: 18 }}><MdErrorOutline /><span>{messageCancel}</span></div>}
 
       <div className="stack">
-        <Card title="Datos del examen" subtitle="La fecha, la lámina y la factura se asignan automáticamente" icon={icon(MdReceipt)}>
+        {billingOn && <InvoicePicker inv={inv} serviceLabel="la citología" patientLabel="la paciente" error={errors.invoice} />}
+        <Card title="Datos del examen" subtitle="La fecha y la lámina se asignan automáticamente" icon={icon(MdReceipt)}>
           <div className="form-grid">
             <RO label="Fecha del examen" value={formatDate(d.fechaExamen)} hint="Fecha actual" />
             <RO label="N° lámina" value={defaults.siguienteLamina} hint="Se asigna al guardar" />
-            <RO label="Factura N°" value={defaults.siguienteFactura} hint="Se asigna al guardar" />
-            <RO label="Valor de la citología" value={defaults.valor !== '' ? formatMoney(base) : '—'} hint="Se configura en Citologías → Configuración" />
+            <RO label="Factura N°" value={invoice?.numFactura || (billingOn ? 'Elige la factura' : 'Por facturar')} hint={invoice ? 'Factura de la paciente' : 'Se toma de la factura'} />
+            <RO label="Valor de la citología" value={invoice ? formatMoney(inv.unitValue) : defaults.valor !== '' ? formatMoney(base) : '—'} hint={invoice ? 'Según la factura' : 'Según el tarifario'} />
             <div className="field">
-              <label className="switch" style={{ marginTop: 22 }}><input type="checkbox" name="applyDiscount" checked={d.applyDiscount} onChange={(e) => { handleOptionChange(e); if (!e.target.checked) handleChange({ target: { name: 'discountId', value: '' } }) }} disabled={!discounts.length} /> Aplicar descuento</label>
-              {!discounts.length && <span className="hint">No hay descuentos activos</span>}
+              <label htmlFor="entityId">Entidad</label>
+              <select id="entityId" name="entityId" value={d.entityId} onChange={handleChange}><option value="">Selecciona…</option>{entities.map((x) => <option key={x.id} value={x.id}>{x.name}</option>)}</select>
+              {!entities.length && <span className="hint">Créalas en Facturación → Proveedores y convenios</span>}
             </div>
-            {d.applyDiscount && (
-              <div className={`field${errors.discountId ? ' invalid' : ''}`}>
-                <label htmlFor="discountId">Descuento <span className="req">*</span></label>
-                <select id="discountId" name="discountId" value={d.discountId} onChange={handleChange}>
-                  <option value="">Selecciona…</option>
-                  {discounts.map((x) => <option key={x.id} value={x.id}>{x.name} · {x.type === 'porcentaje' ? `${x.value}%` : formatMoney(x.value)}</option>)}
-                </select>
-                {errors.discountId ? <span className="error">{errors.discountId}</span> : disc && <span className="hint">Descuento de {formatMoney(discAmount)}</span>}
-              </div>
-            )}
-            {disc && <RO label="Valor a pagar" value={formatMoney(base - discAmount)} hint={`${formatMoney(base)} − ${formatMoney(discAmount)}`} />}
-            {S({ name: 'entidad', label: 'Entidad', options: entidades, optKey: 'entidad' })}
-            {F({ name: 'eps', label: 'EPS' })}
+            <div className="field">
+              <label htmlFor="epsId">EPS</label>
+              <select id="epsId" name="epsId" value={d.epsId} onChange={handleChange} disabled={Boolean(invoice)}><option value="">Particular / sin EPS</option>{epsList.map((x) => <option key={x.id} value={x.id}>{x.name}{x.agreementActive ? ' · convenio' : ''}</option>)}</select>
+              {invoice ? <span className="hint">La de la factura {invoice.numFactura}</span> : eps && <span className="hint">{eps.agreementActive ? `Convenio vigente${eps.agreementNumber ? ` N° ${eps.agreementNumber}` : ''}` : 'Sin convenio vigente'}</span>}
+            </div>
             {S({ name: 'regimen', label: 'Régimen', options: regimenes, optKey: 'regimen' })}
           </div>
         </Card>
@@ -157,7 +153,6 @@ const RegisterCytology = () => {
 
         <Card title="Responsables" icon={icon(MdAssignmentInd)}>
           <div className="form-grid">
-            {F({ name: 'fechaRecibido', label: 'Fecha recibido', type: 'date' })}
             {S({ name: 'elabora', label: 'Elaboró historia', options: empleados.map((e) => e.fullName), req: true, placeholder: 'Selecciona un empleado' })}
             {S({ name: 'tomaMuestra', label: 'Tomó muestra', options: empleados.map((e) => e.fullName), req: true, placeholder: 'Selecciona un empleado' })}
           </div>

@@ -866,3 +866,35 @@ a.th-std:hover { box-shadow: var(--shadow-lg, 0 6px 18px rgba(0,0,0,.08)); }
 }
 @media screen and (max-width: 760px) { .gsearch { flex: 0 0 auto; } }
 @media screen and (min-width: 761px) and (max-width: 1024px) { .gsearch { flex: 0 1 260px; } }
+
+.bill-filter { display: flex; gap: 6px; align-items: center; flex-wrap: wrap; }
+.bill-filter .input { height: 34px; width: 150px; }
+
+/* Recordatorio de registro de temperatura (toast persistente) */
+.temp-reminder { position: fixed; right: 20px; bottom: 20px; z-index: 150; width: min(380px, calc(100vw - 32px)); display: flex; gap: 12px; align-items: flex-start; background: var(--surface, #fff); border: 1px solid var(--line); border-left: 4px solid var(--warn, #F59E0B); border-radius: 14px; padding: 14px 12px 14px 14px; box-shadow: 0 18px 40px rgba(15, 23, 42, .18); animation: tempRemIn .25s ease-out; }
+.temp-reminder-icon { width: 36px; height: 36px; border-radius: 10px; background: #FEF3C7; color: #B45309; display: inline-flex; align-items: center; justify-content: center; font-size: 20px; flex: 0 0 auto; }
+.temp-reminder-body { flex: 1; min-width: 0; display: grid; gap: 4px; font-size: 13.5px; color: var(--ink-2, var(--ink)); }
+.temp-reminder-body strong { color: var(--ink); font-size: 14px; }
+.temp-reminder-actions { display: flex; gap: 6px; margin-top: 6px; flex-wrap: wrap; }
+.temp-reminder-x { margin: -6px -4px 0 0; }
+@keyframes tempRemIn { from { transform: translateY(12px); opacity: 0; } to { transform: none; opacity: 1; } }
+@media (max-width: 640px) { .temp-reminder { right: 16px; left: 16px; bottom: 16px; width: auto; } }
+
+/* Pestañas internas de un módulo (p. ej. Estándares / Doc. Generales) */
+.module-tabs { display: flex; gap: 4px; margin: 4px 16px 6px; padding: 3px; border-radius: 10px; background: var(--surface-2, #F1F5F9); }
+.module-tabs button { flex: 1; border: 0; background: transparent; padding: 7px 6px; border-radius: 8px; font: 600 12px inherit; white-space: nowrap; font-family: inherit; color: var(--muted); cursor: pointer; }
+.module-tabs button.on { background: var(--surface, #fff); color: var(--brand); box-shadow: 0 1px 2px rgba(15, 23, 42, .1); }
+.sidebar-off .module-tabs { display: none; }
+
+/* Temperatura: selector de lecturas del día */
+.temp-slots { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; margin-bottom: 12px; }
+.temp-slot { position: relative; display: flex; align-items: center; gap: 8px; padding: 9px 10px; border: 1px solid var(--line); border-radius: 10px; background: var(--surface, #fff); font: inherit; text-align: left; color: var(--ink); cursor: pointer; }
+.temp-slot > svg:first-child { color: #F59E0B; font-size: 18px; flex: 0 0 auto; }
+.temp-slot span { display: grid; line-height: 1.25; }
+.temp-slot b { font-size: 13px; }
+.temp-slot small { color: var(--muted); font-size: 11.5px; }
+.temp-slot:hover:not(:disabled) { border-color: var(--brand); }
+.temp-slot.on { border-color: var(--brand); background: color-mix(in srgb, var(--brand) 9%, transparent); box-shadow: 0 0 0 1px var(--brand) inset; }
+.temp-slot.done { cursor: default; opacity: .7; background: color-mix(in srgb, var(--ok, #16A34A) 6%, transparent); }
+.temp-slot-ok { margin-left: auto; color: var(--ok, #16A34A); }
+.th-file.over { border-color: var(--brand); background: var(--brand-50); }

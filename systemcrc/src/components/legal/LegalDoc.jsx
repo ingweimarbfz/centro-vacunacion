@@ -1,5 +1,6 @@
 import React from 'react'
 import './legal.css'
+import mark from '../../assets/integraMark.svg'
 
 const TZ = 'America/Bogota'
 const fdate = (iso) => new Intl.DateTimeFormat('es-CO', { dateStyle: 'long', timeZone: TZ }).format(new Date(`${iso.slice(0, 10)}T12:00:00`))
@@ -27,7 +28,7 @@ const LegalDoc = ({ doc, toolbar, signatures = doc?.signatures || [] }) => {
       {toolbar && <div className="ldoc-toolbar no-print">{toolbar}</div>}
       <article className="ldoc">
         <header className="ldoc-head">
-          <span className="ldoc-mark">IIPS</span>
+          <img className="ldoc-mark" src={mark} alt="Integra IPS" />
           <div className="ldoc-brand"><b>{doc.brand}</b><span>Sistema de información para IPS</span></div>
           <div className="ldoc-meta">Código <b>{doc.code}</b><br />Versión <b>{doc.version}</b> · Vigente desde {fdate(doc.effectiveDate)}</div>
         </header>

@@ -57,6 +57,21 @@ import StdFolderPage from './pages/estandares/StdFolderPage'
 import StandardsDashboard from './pages/estandares/StandardsDashboard'
 import LegalGate, { LegalPage } from './components/legal/LegalGate'
 import AutoOrientation from './components/AutoOrientation'
+import { BillingPage, BillingSheet, BillingDashboardPage } from './pages/facturacion/BillingPage'
+import ProvidersPage from './pages/facturacion/ProvidersPage'
+import ServicesBillingPage from './pages/facturacion/ServicesBillingPage'
+import TariffPage from './pages/facturacion/TariffPage'
+import TaxSettingsPage from './pages/facturacion/TaxSettingsPage'
+import VaccinationDashboard from './pages/vacunacion/VaccinationDashboard'
+import RegisterVaccination from './pages/vacunacion/RegisterVaccination'
+import VaccinationRecords from './pages/vacunacion/VaccinationRecords'
+import VaccinationCard from './pages/vacunacion/VaccinationCard'
+import VaccinationFollowup from './pages/vacunacion/VaccinationFollowup'
+import VaccinesConfig from './pages/vacunacion/VaccinesConfig'
+import InvoicePage from './pages/facturacion/InvoicePage'
+import PublicDocument from './pages/PublicDocument'
+import DocGeneralesPage from './pages/calidad/DocGeneralesPage'
+import DocGeneralesDashboard from './pages/calidad/DocGeneralesDashboard'
 import StdChecklistSheet from './pages/estandares/StdChecklistSheet'
 import InventoryBridge from './pages/estandares/InventoryBridge'
 import EquipmentBridge from './pages/estandares/EquipmentBridge'
@@ -93,14 +108,32 @@ const App = () => (
         <AutoOrientation />
         <Routes>
           <Route path="/login" element={<LoginRoute />} />
+          <Route path="/p/:token" element={<PublicDocument />} />
           <Route element={<Protected><LegalGate><AppLayout /></LegalGate></Protected>}>
             <Route path="legal/:kind" element={<LegalPage />} />
             <Route index element={<Protected module="ips_dashboard" roles={ALL} service="any"><Dashboard /></Protected>} />
             <Route path="temperatura/reporte" element={<Protected module="temperatura" roles={STAFF} service="cadena_frio"><TemperatureReport /></Protected>} />
             <Route path="temperatura" element={<Protected module="temperatura" roles={STAFF} service="cadena_frio"><TemperaturePage /></Protected>} />
             <Route path="citologias/registrar" element={<Protected module="citologias" roles={STAFF} service="citologia"><RegisterCytology /></Protected>} />
-            <Route path="citologias/configuracion" element={<Protected roles={ADMIN} service="citologia"><ServiceConfigPage module="citologia" key="citologia" /></Protected>} />
+            <Route path="citologias/configuracion" element={<Navigate to="/citologias/registrar" replace />} />
             <Route path="temperatura/configuracion" element={<Protected roles={ADMIN} service="cadena_frio"><ServiceConfigPage module="cadena_frio" key="cadena_frio" /></Protected>} />
+            <Route path="facturacion" element={<Protected module="facturacion" roles={STAFF} service="any"><BillingDashboardPage /></Protected>} />
+            <Route path="facturacion/cuentas-cobro" element={<Protected module="facturacion" roles={STAFF} service="any"><BillingPage /></Protected>} />
+            <Route path="facturacion/cuentas-cobro/:id" element={<Protected module="facturacion" roles={STAFF} service="any"><BillingSheet /></Protected>} />
+            <Route path="facturacion/servicios" element={<Protected module="facturacion" roles={STAFF} service="any"><ServicesBillingPage /></Protected>} />
+            <Route path="vacunacion" element={<Protected module="vacunacion" roles={STAFF} service="cadena_frio"><VaccinationDashboard /></Protected>} />
+            <Route path="vacunacion/registrar" element={<Protected module="vacunacion" roles={STAFF} service="cadena_frio"><RegisterVaccination /></Protected>} />
+            <Route path="vacunacion/consultar" element={<Protected module="vacunacion" roles={STAFF} service="cadena_frio"><VaccinationRecords /></Protected>} />
+            <Route path="vacunacion/carne/:documento" element={<Protected module="vacunacion" roles={STAFF} service="cadena_frio"><VaccinationCard /></Protected>} />
+            <Route path="vacunacion/seguimiento" element={<Protected module="vacunacion" roles={STAFF} service="cadena_frio"><VaccinationFollowup /></Protected>} />
+            <Route path="vacunacion/biologicos" element={<Protected roles={ADMIN} service="cadena_frio"><VaccinesConfig /></Protected>} />
+            <Route path="facturacion/factura/:id" element={<Protected module="facturacion" roles={STAFF} service="any"><InvoicePage /></Protected>} />
+            <Route path="estandares/doc-generales" element={<Protected module="doc_generales" roles={STAFF}><DocGeneralesDashboard /></Protected>} />
+            <Route path="estandares/doc-generales/documentos" element={<Protected module="doc_generales" roles={STAFF}><DocGeneralesPage /></Protected>} />
+            <Route path="facturacion/impuestos" element={<Protected roles={ADMIN} service="any"><TaxSettingsPage /></Protected>} />
+            <Route path="facturacion/tarifario" element={<Protected roles={ADMIN} service="any"><TariffPage /></Protected>} />
+            <Route path="facturacion/proveedores" element={<Protected roles={ADMIN} service="any"><ProvidersPage /></Protected>} />
+            <Route path="citologias/cuentas-cobro" element={<Navigate to="/facturacion/cuentas-cobro" replace />} />
             <Route path="citologias/:id" element={<Protected module="citologias" roles={STAFF} service="citologia"><CytologyPage /></Protected>} />
             <Route path="citologias/consultar" element={<Protected module="citologias" roles={STAFF} service="citologia"><ConsultCytology /></Protected>} />
             <Route path="equipos" element={<Protected module="equipos" roles={STAFF} service="any"><EquipmentPage /></Protected>} />

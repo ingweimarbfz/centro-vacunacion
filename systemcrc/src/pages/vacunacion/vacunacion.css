@@ -1,0 +1,32 @@
+/* Servicio de vacunación */
+.vac-kpis { display: grid; gap: 14px; grid-template-columns: repeat(6, minmax(0, 1fr)); }
+.vac-kpis .kpi-value { white-space: nowrap; }
+@media (max-width: 1500px) { .vac-kpis { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
+@media (max-width: 640px) { .vac-kpis { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+.vac-split { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 10px; }
+.vac-split > div { flex: 1; min-width: 110px; border: 1px solid var(--line); border-radius: 10px; padding: 8px 10px; display: grid; }
+.vac-split b { font-size: 18px; color: var(--ink); }
+.vac-split span { font-size: 12px; color: var(--muted); }
+.vac-history { display: flex; flex-wrap: wrap; gap: 6px; }
+.vac-info { border: 1px solid var(--line); border-radius: 12px; padding: 10px 12px; display: grid; gap: 4px; font-size: 13px; background: var(--surface-2, #F8FAFC); }
+.vac-info b { color: var(--ink); }
+.vac-card-table td, .vac-card-table th { font-size: 12px; }
+
+.vac-sign { height: 30px; max-width: 110px; object-fit: contain; display: block; }
+.wa-preview { background: #E5DDD5; border-radius: 12px; padding: 14px; }
+.wa-bubble { background: #DCF8C6; border-radius: 10px 10px 2px 10px; padding: 10px 12px; max-width: 360px; margin-left: auto; white-space: pre-wrap; font-size: 13.5px; line-height: 1.45; color: #111; box-shadow: 0 1px 1px rgba(0,0,0,.12); overflow-wrap: anywhere; }
+.mail-preview { width: 100%; height: 520px; border: 1px solid var(--line); border-radius: 12px; background: #fff; }
+.rem-fields { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+.rem-toggles { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; }
+.rem-toggle { display: flex; align-items: center; gap: 12px; padding: 12px 14px; border: 1px solid var(--line); border-radius: 12px; cursor: pointer; background: var(--surface, #fff); transition: border-color .15s, background .15s; }
+.rem-toggle:hover { border-color: var(--brand); }
+.rem-toggle.on { border-color: color-mix(in srgb, var(--ok, #16A34A) 45%, transparent); background: color-mix(in srgb, var(--ok, #16A34A) 6%, transparent); }
+.rem-toggle input { position: absolute; opacity: 0; pointer-events: none; }
+.rem-toggle-ui { position: relative; width: 40px; height: 22px; border-radius: 999px; background: #CBD5E1; flex: 0 0 auto; transition: background .15s; }
+.rem-toggle-ui::after { content: ''; position: absolute; top: 3px; left: 3px; width: 16px; height: 16px; border-radius: 50%; background: #fff; box-shadow: 0 1px 2px rgba(0,0,0,.2); transition: transform .15s; }
+.rem-toggle.on .rem-toggle-ui { background: var(--ok, #16A34A); }
+.rem-toggle.on .rem-toggle-ui::after { transform: translateX(18px); }
+.rem-toggle input:focus-visible + .rem-toggle-ui { outline: 2px solid var(--brand); outline-offset: 2px; }
+.rem-toggle b { display: block; color: var(--ink); font-size: 14px; }
+.rem-toggle small { color: var(--muted); font-size: 12px; }
+@media (max-width: 760px) { .rem-fields, .rem-toggles { grid-template-columns: 1fr; } }

@@ -3,7 +3,8 @@ import MonthPicker, { shortMonth } from '../components/MonthPicker'
 import ExpiringSupplies from '../components/ExpiringSupplies'
 import PendingSignatures from '../components/PendingSignatures'
 import { Link } from 'react-router-dom'
-import { MdWarning, MdEventAvailable, MdAdd, MdErrorOutline } from 'react-icons/md'
+import { MdWarning, MdEventAvailable, MdAdd, MdErrorOutline, MdAcUnit } from 'react-icons/md'
+import { ProviderContact } from './ColdChainSuppliers'
 import api, { errorMessage } from '../api/client'
 import { useAuth } from '../context/AuthContext'
 import { useSettings } from '../context/SettingsContext'
@@ -47,6 +48,23 @@ const Dashboard = () => {
           <Link to="/temperatura" className="btn btn-primary"><MdAdd /> Registrar temperatura</Link>
         )}
       </PageHead>
+      {data && (data.coldChainAlerts || []).map((a) => (
+        <div key={a.siteId} className="alert bad cold-alert" style={{ marginBottom: 18 }}>
+          <MdAcUnit />
+          <div style={{ flex: 1, minWidth: 0 }}>
+            <strong>Temperatura por encima del límite{a.siteName ? ` · ${a.siteName}` : ''}: contacta al proveedor</strong>
+            <span>{a.message} Lectura del {a.reading.date} ({a.reading.shiftLabel || a.reading.time}).</span>
+            {a.providers.length ? (
+              <div className="cold-providers">{a.providers.map((p) => (
+                <div key={p.id} className="cold-provider">
+                  <b>{p.name}</b><span className="hint">{p.service}</span><span className="hint">Equipos: {p.equipment}</span>
+                  <ProviderContact p={p} />
+                </div>
+              ))}</div>
+            ) : <span style={{ display: 'block', marginTop: 6 }}>No hay proveedor asignado a los equipos de esta sede.{user.role === 'administrador' && <> <Link to="/temperatura/configuracion">Asígnalo en Cadena de frío → Configuración</Link>.</>}</span>}
+          </div>
+        </div>
+      ))}
       <div style={{ marginBottom: 18 }}><PendingSignatures /></div>
       <div style={{ marginBottom: 18 }}><ExpiringSupplies /></div>
 

@@ -96,7 +96,7 @@ const ConsultCytology = () => {
                       <td>{r.numDocumento}<div style={{ fontSize: 12, color: 'var(--muted)' }}>{r.tipoDocumento || ''}</div></td>
                       <td className="num">{r.edad ?? '—'}</td>
                       <td><span className="badge navy">{r.numLamina || '—'}</span></td>
-                      <td>{r.numFactura || '—'}</td>
+                      <td>{r.numFactura || <span className="hint">Por facturar</span>}</td>
                       <td>{r.entidad || '—'}<div style={{ fontSize: 12, color: 'var(--muted)' }}>{r.eps || ''}</div></td>
                       <td className="actions"><button type="button" className="btn btn-outline btn-sm" onClick={() => openDetail(r.id)}><MdVisibility /> Ver detalles</button></td>
                     </tr>

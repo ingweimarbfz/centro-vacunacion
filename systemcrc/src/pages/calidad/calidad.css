@@ -1,0 +1,34 @@
+/* Calidad IPS · Doc. Generales */
+.qd-layout { display: grid; grid-template-columns: minmax(260px, 320px) minmax(0, 1fr); gap: 18px; align-items: start; }
+.qd-tree { padding: 6px 10px 12px; }
+.qd-tree ul { list-style: none; margin: 0; padding: 0; }
+.qd-tree ul ul { padding-left: 16px; border-left: 1px dashed var(--line); margin-left: 12px; }
+.qd-node { display: flex; align-items: center; gap: 2px; border-radius: 8px; }
+.qd-node.on { background: color-mix(in srgb, var(--brand) 9%, transparent); }
+.qd-node.off { opacity: .55; }
+.qd-toggle { width: 24px; height: 24px; border: 0; background: transparent; color: var(--muted); display: inline-flex; align-items: center; justify-content: center; cursor: pointer; flex: 0 0 auto; }
+.qd-toggle:disabled { cursor: default; }
+.qd-name { flex: 1; min-width: 0; display: flex; align-items: center; gap: 6px; border: 0; background: transparent; padding: 6px 6px; text-align: left; font: inherit; font-size: 13.5px; color: var(--ink); cursor: pointer; }
+.qd-name svg { color: #F59E0B; flex: 0 0 auto; font-size: 18px; }
+.qd-name span { flex: 1; min-width: 0; overflow-wrap: anywhere; }
+.qd-name small { color: var(--muted); font-size: 11.5px; background: var(--surface-2, #F1F5F9); border-radius: 999px; padding: 1px 7px; }
+.qd-node.on .qd-name { color: var(--brand); font-weight: 600; }
+.qd-all { width: 100%; text-align: left; border: 0; background: transparent; padding: 8px 10px; border-radius: 8px; font: inherit; font-weight: 600; color: var(--ink); cursor: pointer; margin-bottom: 4px; }
+.qd-all.on { background: color-mix(in srgb, var(--brand) 9%, transparent); color: var(--brand); }
+.qd-crumbs { display: inline-flex; align-items: center; flex-wrap: wrap; gap: 2px; }
+.qd-crumbs button { border: 0; background: transparent; padding: 0; font: inherit; color: inherit; cursor: pointer; }
+.qd-crumbs button:last-child { color: var(--brand); }
+.qd-crumbs svg { color: var(--muted); }
+.qd-filters { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; padding: 10px 20px; border-bottom: 1px solid var(--line); }
+.qd-search { flex: 1; min-width: 200px; display: flex; align-items: center; gap: 6px; }
+.qd-search svg { color: var(--muted); }
+.qd-search .input { flex: 1; }
+.qd-subfolders { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 8px; padding: 12px 20px; border-bottom: 1px solid var(--line); }
+.qd-subfolder { display: flex; align-items: center; gap: 8px; padding: 10px 12px; border: 1px solid var(--line); border-radius: 10px; background: var(--surface, #fff); text-align: left; font: inherit; font-size: 13px; color: var(--ink); cursor: pointer; }
+.qd-subfolder:hover { border-color: var(--brand); }
+.qd-subfolder svg { color: #F59E0B; font-size: 20px; flex: 0 0 auto; }
+.qd-subfolder span { flex: 1; min-width: 0; }
+.qd-subfolder small { color: var(--muted); }
+@media (max-width: 960px) { .qd-layout { grid-template-columns: 1fr; } }
+.qd-dash-top { display: grid; grid-template-columns: minmax(0, 1.6fr) minmax(0, 1fr); gap: 18px; align-items: start; }
+@media (max-width: 1100px) { .qd-dash-top { grid-template-columns: 1fr; } }

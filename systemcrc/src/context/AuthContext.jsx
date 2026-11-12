@@ -16,6 +16,22 @@ export const AuthProvider = ({ children }) => {
       .finally(() => setLoading(false))
   }, [])
 
+  // Los permisos y el plan pueden cambiar mientras la sesión está abierta (módulos nuevos, plan mejorado):
+  // se vuelven a leer al regresar a la pestaña y cada 5 minutos, sin recargar la página.
+  useEffect(() => {
+    let last = Date.now()
+    const refresh = () => {
+      if (!tokenStore.get() || Date.now() - last < 60000) return
+      last = Date.now()
+      api.get('/auth/me').then(({ data }) => setUser((u) => (u ? data : u))).catch(() => {})
+    }
+    const onVisible = () => { if (document.visibilityState === 'visible') refresh() }
+    document.addEventListener('visibilitychange', onVisible)
+    window.addEventListener('focus', refresh)
+    const id = setInterval(refresh, 300000)
+    return () => { document.removeEventListener('visibilitychange', onVisible); window.removeEventListener('focus', refresh); clearInterval(id) }
+  }, [])
+
   const logout = useCallback(() => {
     tokenStore.clear()
     setSiteFilter(null)

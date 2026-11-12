@@ -239,7 +239,8 @@
 .pf-mock-person em { font-style: normal; font-weight: 700; font-size: 12px; text-align: right; }
 .pf-modules { padding: 10px 0 46px; }
 .pf-modules h3, .pf-shots h3 { font-size: 26px; color: #fff; margin-bottom: 18px; letter-spacing: -.01em; }
-.pf-mod-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px; }
+.pf-mod-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 16px; }
+@media (max-width: 1100px) { .pf-mod-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
 .pf-mod { border: 1px solid rgba(255,255,255,.1); background: rgba(255,255,255,.035); border-radius: 16px; padding: 20px; }
 .pf-mod span { width: 42px; height: 42px; border-radius: 12px; background: rgba(155,120,234,.22); color: #D7C6FF; display: inline-flex; align-items: center; justify-content: center; font-size: 22px; margin-bottom: 12px; }
 .pf-mod b { display: block; color: #fff; font-size: 16px; margin-bottom: 6px; }
@@ -254,3 +255,6 @@
   .pf-mock-kpis { grid-template-columns: repeat(2, 1fr); }
   .pf-mock-grid { grid-template-columns: 1fr; }
 }
+
+.pf img.pf-logo { width: 38px; height: 38px; padding: 0; background: none; box-shadow: 0 6px 16px rgba(124, 77, 219, .45); border-radius: 11px; }
+.pf-hero-logo { height: 54px; width: auto; display: block; margin-bottom: 18px; }

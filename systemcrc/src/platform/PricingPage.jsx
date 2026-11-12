@@ -1,16 +1,19 @@
 import React, { useEffect, useState } from 'react'
 import {
-  MdCheck, MdArrowForward, MdStarBorder, MdVolunteerActivism, MdRemove, MdLocalHospital, MdRule, MdInventory2, MdDraw, MdApartment,
+  MdCheck, MdArrowForward, MdStarBorder, MdVolunteerActivism, MdRemove, MdLocalHospital, MdRule, MdInventory2, MdDraw, MdApartment, MdReceiptLong, MdFolderShared,
   MdShield, MdCloudDone, MdPhoneIphone, MdNotificationsActive, MdThermostat, MdGroups, MdWarning, MdError, MdTrendingUp
 } from 'react-icons/md'
 import papi, { cop } from './api'
 import { Splash } from './ui'
 import './platform.css'
+import logoDark from '../assets/integraLogoDark.svg'
 
 const MODULES = [
-  [MdLocalHospital, 'Servicios de IPS', 'Citologías con impresión del formato, cadena de frío con registros de mañana y tarde, hoja de vida de equipos y traslado asistencial.'],
+  [MdLocalHospital, 'Servicios de IPS', 'Vacunación con carnet firmado y recordatorios de próxima dosis, citologías, cadena de frío con 4 lecturas diarias y alertas, hoja de vida de equipos y traslado asistencial.'],
+  [MdReceiptLong, 'Facturación y convenios', 'Servicios facturables con tarifario, impuestos colombianos, convenios con EPS y empresas, cuentas de cobro y envío de facturas por correo y WhatsApp.'],
   [MdRule, 'Estándares de habilitación', 'Talento humano, infraestructura, dotación, medicamentos, procesos prioritarios, historia clínica e interdependencia, con carpetas obligatorias y listas de chequeo.'],
-  [MdInventory2, 'Inventario y flota', 'Bodegas, lotes y fechas de vencimiento, entregas a servicios, vehículos, preoperacionales y reportes diarios.'],
+  [MdFolderShared, 'Calidad IPS', 'Documentos generales por ítem y carpetas, vigencias, y documentos en línea (misión, visión, políticas) escritos con editor de texto.'],
+  [MdInventory2, 'Inventario y flota', 'Bodegas, lotes y fechas de vencimiento, consumo desde vacunación, entregas a servicios, vehículos, preoperacionales y reportes diarios.'],
   [MdVolunteerActivism, 'Socorro y voluntariado', 'Eventos y emergencias, educación, horas y seguro de cada voluntario, y reportes por agrupación y sede.'],
   [MdDraw, 'Firmas digitales', 'Cada documento se firma con la firma digital de quien corresponde; los pendientes aparecen en su dashboard.'],
   [MdApartment, 'Multisede', 'Seccional, unidades y grupos con información separada por sede y una vista consolidada para la dirección.']
@@ -72,9 +75,10 @@ const Hero = () => (
   <>
     <section className="pf-hero">
       <div>
-        <div className="eyebrow">Integra IPS · Sistema de información para IPS</div>
+        <img src={logoDark} alt="Integra IPS" className="pf-hero-logo" />
+        <div className="eyebrow">Sistema de información para IPS</div>
         <h2>Toda la operación de tu IPS y la habilitación de tus servicios, en un solo lugar.</h2>
-        <p className="lead">Registra la atención, controla el inventario y la cadena de frío y mantén al día los estándares de habilitación. El sistema te avisa antes de que algo venza, genera los formatos en PDF con tu logo y deja cada documento firmado digitalmente.</p>
+        <p className="lead">Registra la atención y la vacunación, factura con convenios, controla el inventario y la cadena de frío y mantén al día los estándares de habilitación. El sistema te avisa antes de que algo venza, genera los formatos en PDF con tu logo y deja cada documento firmado digitalmente.</p>
         <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap' }}>
           <a className="pf-hero-cta" href="#planes">Ver planes <MdArrowForward /></a>
           <a className="pf-hero-ghost" href="mailto:?subject=Demostración%20Integra%20IPS">Solicitar una demostración</a>

@@ -1,20 +1,25 @@
 import React, { useEffect, useMemo, useState } from 'react'
 import MonthPicker from '../components/MonthPicker'
 import { useNavigate, useSearchParams } from 'react-router-dom'
-import { LineChart, Line, XAxis, YAxis, CartesianGrid, ReferenceLine, ReferenceArea, Legend } from 'recharts'
+import { LineChart, Line, XAxis, YAxis, CartesianGrid, ReferenceLine, ReferenceArea } from 'recharts'
 import { MdArrowBack, MdPrint, MdErrorOutline } from 'react-icons/md'
 import api, { errorMessage, getSiteFilter } from '../api/client'
 import { useAuth } from '../context/AuthContext'
 import { useSettings } from '../context/SettingsContext'
 import { Spinner } from '../components/ui'
 import '../components/cytology.css'
-import { TEMP_LINES } from './TemperaturePage'
+import { readingPoints, dayTick, READING_LINES, shiftDot, TempLegend } from '../components/tempChart'
 import { SignBlock, useDocSignatures } from '../components/signature'
 
 const currentMonth = () => new Intl.DateTimeFormat('en-CA', { timeZone: 'America/Bogota' }).format(new Date()).slice(0, 7)
 const monthLabel = (ym) => { const [y, m] = ym.split('-').map(Number); return new Intl.DateTimeFormat('es-CO', { month: 'long', year: 'numeric', timeZone: 'UTC' }).format(new Date(Date.UTC(y, m - 1, 15))) }
 const daysIn = (ym) => { const [y, m] = ym.split('-').map(Number); return new Date(Date.UTC(y, m, 0)).getUTCDate() }
 const f1 = (n) => (n == null ? '—' : `${n.toFixed(1)} °C`)
+// Cuatro lecturas al día: dos en la mañana y dos en la tarde.
+const SLOTS = [
+  { key: 'manana-1', shift: 'manana', slot: 1, label: 'Mañana · 1.ª' }, { key: 'manana-2', shift: 'manana', slot: 2, label: 'Mañana · 2.ª' },
+  { key: 'tarde-1', shift: 'tarde', slot: 1, label: 'Tarde · 1.ª' }, { key: 'tarde-2', shift: 'tarde', slot: 2, label: 'Tarde · 2.ª' }
+]
 
 // Reporte mensual del registro de temperatura (cadena de frío). Se imprime en carta horizontal.
 const TemperatureReport = () => {
@@ -71,18 +76,14 @@ const TemperatureReport = () => {
       missing: elapsed.filter((d) => !d.readings.length).map((d) => d.day),
       absMin: mins.length ? Math.min(...mins) : null, absMax: maxs.length ? Math.max(...maxs) : null,
       avgMin: avg(mins), avgMax: avg(maxs),
-      chart: byDay.map((d) => {
-        const am = d.readings.find((x) => x.shift === 'manana'); const pm = d.readings.find((x) => x.shift === 'tarde')
-        return { day: d.day, minAm: am?.tempMin ?? null, maxAm: am?.tempMax ?? null, minPm: pm?.tempMin ?? null, maxPm: pm?.tempMax ?? null }
-      }),
-      shiftsDone: rows.length, shiftsExpected: elapsed.length * 2
+      chart: readingPoints(rows),
+      shiftsDone: rows.length, shiftsExpected: elapsed.length * SLOTS.length
     }
   }, [rows, th, ym])
 
   if (error) return <div className="alert bad"><MdErrorOutline /><span>{error}</span></div>
   if (!stats) return <div className="splash"><Spinner /> Cargando…</div>
   const printedAt = new Intl.DateTimeFormat('es-CO', { dateStyle: 'long', timeStyle: 'short', timeZone: 'America/Bogota' }).format(new Date())
-  const half = Math.ceil(stats.byDay.length / 2)
   const Cell = ({ r }) => (r ? (
     <>
       <td>{r.time}</td>
@@ -93,14 +94,14 @@ const TemperatureReport = () => {
   const DayTable = ({ list }) => (
     <table className="ev-table tr-days">
       <thead>
-        <tr><th rowSpan={2}>Día</th><th colSpan={3} style={{ textAlign: 'center' }}>Mañana</th><th colSpan={3} style={{ textAlign: 'center' }}>Tarde</th></tr>
-        <tr><th>Hora</th><th>Mín.</th><th>Máx.</th><th>Hora</th><th>Mín.</th><th>Máx.</th></tr>
+        <tr><th rowSpan={2}>Día</th>{SLOTS.map((s) => <th key={s.key} colSpan={3} style={{ textAlign: 'center' }}>{s.label}</th>)}</tr>
+        <tr>{SLOTS.map((s) => <React.Fragment key={s.key}><th>Hora</th><th>Mín.</th><th>Máx.</th></React.Fragment>)}</tr>
       </thead>
       <tbody>{list.map((d) => {
-        const am = d.readings.find((r) => r.shift === 'manana'); const pm = d.readings.find((r) => r.shift === 'tarde')
+        const cells = SLOTS.map((s) => d.readings.find((r) => r.shift === s.shift && (r.slot || 1) === s.slot))
         return (
-          <tr key={d.day} className={(am && stats.out(am)) || (pm && stats.out(pm)) ? 'po-bad' : ''}>
-            <td><b>{String(d.day).padStart(2, '0')}</b></td><Cell r={am} /><Cell r={pm} />
+          <tr key={d.day} className={cells.some((r) => r && stats.out(r)) ? 'po-bad' : ''}>
+            <td><b>{String(d.day).padStart(2, '0')}</b></td>{cells.map((r, i) => <Cell key={SLOTS[i].key} r={r} />)}
           </tr>
         )
       })}</tbody>
@@ -126,7 +127,7 @@ const TemperatureReport = () => {
           </div>
           <dl className="cy-meta">
             <div><dt>Lecturas</dt><dd>{stats.readings}</dd></div>
-            <div><dt>Jornadas registradas</dt><dd>{stats.shiftsDone}/{stats.shiftsExpected}</dd></div>
+            <div><dt>Lecturas esperadas</dt><dd>{stats.shiftsDone}/{stats.shiftsExpected}</dd></div>
             <div><dt>Fuera de rango</dt><dd>{stats.outCount}</dd></div>
           </dl>
         </header>
@@ -141,29 +142,26 @@ const TemperatureReport = () => {
         </div>
 
         <section className="cy-section">
-          <h3 className="cy-section-title">Comportamiento diario: mínima y máxima de la mañana y de la tarde</h3>
+          <h3 className="cy-section-title">Comportamiento por lectura: mínima y máxima de las 4 lecturas de cada día</h3>
           <div className="tr-chart">
             <LineChart width={960} height={250} data={stats.chart} margin={{ top: 8, right: 16, left: -8, bottom: 0 }}>
               <CartesianGrid stroke="#EEF0F2" vertical={false} />
               <ReferenceArea y1={th.min} y2={th.max} fill="#DCFCE7" fillOpacity={0.5} />
-              <XAxis dataKey="day" tick={{ fontSize: 10.5, fill: '#4B5563' }} interval={0} tickLine={false} />
+              <XAxis dataKey="x" tick={{ fontSize: 10.5, fill: '#4B5563' }} interval={0} tickLine={false} tickFormatter={(v, i) => dayTick(stats.chart)(v, i).slice(0, 2)} />
               <YAxis tick={{ fontSize: 10.5, fill: '#4B5563' }} unit="°" tickLine={false} axisLine={false}
                 domain={[(d) => Math.floor(Math.min(d, th.min) - 2), (d) => Math.ceil(Math.max(d, th.max) + 2)]} />
               <ReferenceLine y={th.max} stroke="#DC2626" strokeDasharray="5 4" label={{ value: `Máx. ${th.max} °C`, position: 'insideTopRight', fontSize: 10, fill: '#B91C1C' }} />
               <ReferenceLine y={th.min} stroke="#2563EB" strokeDasharray="5 4" label={{ value: `Mín. ${th.min} °C`, position: 'insideBottomRight', fontSize: 10, fill: '#1D4ED8' }} />
-              <Legend wrapperStyle={{ fontSize: 11 }} />
-              {TEMP_LINES(settings).map((l) => <Line key={l.key} type="monotone" dataKey={l.key} name={l.name} stroke={l.color} strokeWidth={1.8} strokeDasharray={l.dash} dot={{ r: 2.2 }} connectNulls isAnimationActive={false} />)}
+              {READING_LINES(settings).map((l) => <Line key={l.key} type="monotone" dataKey={l.key} name={l.name} stroke={l.color} strokeWidth={1.4} dot={shiftDot(2.6)} isAnimationActive={false} />)}
             </LineChart>
+            <TempLegend lines={READING_LINES(settings)} small />
           </div>
-          <p className="ev-complete" style={{ fontSize: 10.5 }}>Líneas continuas: mañana · líneas punteadas: tarde.{stats.missing.length > 0 && <span style={{ color: '#92400E' }}> Días sin ningún registro: {stats.missing.join(', ')}.</span>}</p>
+          <p className="ev-complete" style={{ fontSize: 10.5 }}>Cada punto es una lectura en orden de hora: puntos naranja = mañana (1.ª y 2.ª), morados = tarde (1.ª y 2.ª).{stats.missing.length > 0 && <span style={{ color: '#92400E' }}> Días sin ningún registro: {stats.missing.join(', ')}.</span>}</p>
         </section>
 
         <section className="cy-section ev-table-section">
           <h3 className="cy-section-title">Lecturas del mes</h3>
-          <div className="tr-days-grid">
-            <DayTable list={stats.byDay.slice(0, half)} />
-            <DayTable list={stats.byDay.slice(half)} />
-          </div>
+          <DayTable list={stats.byDay} />
         </section>
 
         <section className="cy-signatures" style={{ gridTemplateColumns: '1fr 1fr' }}>

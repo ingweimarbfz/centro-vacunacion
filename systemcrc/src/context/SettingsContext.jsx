@@ -1,6 +1,6 @@
 import React, { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react'
 import api from '../api/client'
-import defaultLogo from '../assets/logoCRCSC.png'
+import defaultLogo from '../assets/integraLogo.svg'
 import { BRAND } from '../utils/brand'
 
 export const DEFAULT_SETTINGS = {

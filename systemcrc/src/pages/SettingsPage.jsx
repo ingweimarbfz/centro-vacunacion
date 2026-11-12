@@ -7,7 +7,7 @@ import { PageHead, Card, Spinner, useToast } from '../components/ui'
 import { UsersSignaturesCard } from './SignaturePage'
 import DiscountsCard from './DiscountsCard'
 import { resizeImage } from '../utils/image'
-import defaultLogo from '../assets/logoCRCSC.png'
+import defaultLogo from '../assets/integraLogo.svg'
 import defaultLoginImage from '../assets/loginHealth.svg'
 import { defaultLoginDescription, defaultLoginFooter } from '../components/Login'
 
@@ -174,9 +174,9 @@ const SettingsPage = () => {
               <img src={form.logoUrl || defaultLogo} alt="Logo actual" style={{ maxWidth: '100%', maxHeight: 90, objectFit: 'contain' }} />
             </div>
             <input ref={fileRef} type="file" accept="image/png,image/jpeg,image/webp,image/svg+xml" hidden onChange={(e) => uploadLogo(e.target.files[0])} />
-            <div style={{ display: 'flex', gap: 8, marginTop: 14 }}>
-              <button type="button" className="btn btn-outline" style={{ flex: 1 }} onClick={() => fileRef.current.click()} disabled={uploading}>{uploading ? <Spinner /> : <MdUpload />} Cargar logo</button>
-              {form.logoUrl && <button type="button" className="btn btn-ghost" onClick={resetLogo} disabled={uploading}><MdRestartAlt /> Original</button>}
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 8, marginTop: 14 }}>
+              <button type="button" className="btn btn-outline" style={{ width: '100%' }} onClick={() => fileRef.current.click()} disabled={uploading}>{uploading ? <Spinner /> : <MdUpload />} Cargar logo</button>
+              {form.logoUrl && <button type="button" className="btn btn-ghost" style={{ width: '100%', whiteSpace: 'normal' }} onClick={resetLogo} disabled={uploading}><MdRestartAlt /> Usar logo de Integra IPS</button>}
             </div>
           </Card>
 

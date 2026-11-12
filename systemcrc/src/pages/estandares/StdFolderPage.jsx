@@ -6,7 +6,8 @@ import {
 import api, { errorMessage } from '../../api/client'
 import { useAuth } from '../../context/AuthContext'
 import { PageHead, Card, Modal, Empty, Spinner, useToast } from '../../components/ui'
-import { DocForm, FileIcon, date } from './StdDocumentsPage'
+import { DocForm, FileIcon, Viewer, date } from './StdDocumentsPage'
+import '../../components/richtext/richtext.css'
 
 const STATUS = { cumple: ['Cumple', 'ok', MdCheckCircle], por_vencer: ['Por vencer', 'warn', MdWarning], vencido: ['Vencido', 'bad', MdCancel], faltante: ['Faltante', 'bad', MdCancel] }
 const today = () => new Intl.DateTimeFormat('en-CA', { timeZone: 'America/Bogota' }).format(new Date())
@@ -225,12 +226,15 @@ const StdFolderPage = ({ standard, title, subtitle, docsPath, basePath, followUp
                   </div>
                   {it.documents.length > 0 && (
                     <ul className="sd-folder-docs">{it.documents.map((d) => (
-                      <li key={d.id}><FileIcon ext={d.fileExt} /><a href={d.fileUrl} target="_blank" rel="noreferrer">{d.name}</a>
+                      <li key={d.id}><FileIcon ext={d.fileExt} />{d.isHtml ? <button type="button" className="link-btn" onClick={() => setModal({ view: d })}>{d.name}</button> : <a href={d.fileUrl} target="_blank" rel="noreferrer">{d.name}</a>}
                         <small>{d.siteName || 'General'}{d.validUntil ? ` · vigente hasta ${date(d.validUntil + 'T12:00:00')}` : ''}</small>
                         {d.validity && d.validity !== 'vigente' && <span className={`badge ${d.validity === 'vencido' ? 'bad' : 'warn'}`}>{d.validity === 'vencido' ? 'Vencido' : `${d.daysLeft} d`}</span>}</li>
                     ))}</ul>
                   )}
-                  <button type="button" className="btn btn-outline btn-sm" onClick={() => setModal({ upload: it.id })}><MdUploadFile /> {it.documents.length ? 'Cargar otro' : 'Cargar documento'}</button>
+                  <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
+                    <button type="button" className="btn btn-outline btn-sm" onClick={() => setModal({ upload: it.id })}><MdUploadFile /> {it.documents.length ? 'Cargar otro' : 'Cargar documento'}</button>
+                    <button type="button" className="btn btn-ghost btn-sm" onClick={() => setModal({ upload: it.id, html: true })}>Crear en línea</button>
+                  </div>
                 </div>
               )
             })}</div>
@@ -278,7 +282,8 @@ const StdFolderPage = ({ standard, title, subtitle, docsPath, basePath, followUp
       )}
 
       {modal?.follow && <FollowForm standard={standard} template={cat.followTemplate || []} onClose={() => setModal(null)} onSaved={(d) => navigate(`${basePath}/seguimiento/${d.id}`)} />}
-      {modal?.upload && <DocForm standard={standard} cat={cat} sites={sites} preset={modal.upload} onClose={() => setModal(null)} onSaved={(d) => { setModal(null); toast(`“${d.name}” cargado`); load() }} />}
+      {modal?.view && <Viewer doc={modal.view} onClose={() => setModal(null)} />}
+      {modal?.upload && <DocForm standard={standard} cat={cat} sites={sites} preset={modal.upload} html={modal.html} onClose={() => setModal(null)} onSaved={(d) => { setModal(null); toast(`“${d.name}” cargado`); load() }} />}
       {modal?.check && <CheckForm standard={standard} onClose={() => setModal(null)} onSaved={(d) => navigate(`${basePath}/verificacion/${d.id}`)} />}
       {modal?.config && <ConfigModal standard={standard} cat={cat} followUp={followUp} onClose={() => { setModal(null); load() }} onSaved={(f) => { if (f) toast('Encabezado guardado') }} />}
       {toastNode}

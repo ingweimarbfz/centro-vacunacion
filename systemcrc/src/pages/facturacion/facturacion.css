@@ -1,0 +1,32 @@
+/* Facturación general: proveedores, EPS y cuentas de cobro */
+.chips { display: flex; flex-wrap: wrap; gap: 6px; }
+.chip { border: 1px solid var(--line); background: var(--surface, #fff); color: var(--ink-2, var(--ink)); border-radius: 999px; padding: 5px 12px; font: 600 12.5px inherit; font-family: inherit; cursor: pointer; }
+.chip:hover { border-color: var(--brand); }
+.chip.on { background: var(--brand); border-color: var(--brand); color: #fff; }
+.provider-contact { display: grid; gap: 4px; font-size: 13px; }
+.provider-contact a { color: inherit; font-weight: 600; }
+.cold-alert { align-items: flex-start; }
+.cold-alert strong { display: block; }
+.cold-providers { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 300px), 1fr)); gap: 10px; margin-top: 10px; }
+.cold-provider { background: rgba(255, 255, 255, .7); border: 1px solid rgba(220, 38, 38, .25); border-radius: 10px; padding: 10px 12px; color: var(--ink); display: grid; gap: 4px; }
+.cold-provider b { font-size: 14px; }
+.cold-provider a { color: var(--bad); }
+.tariff-picker { border: 1px solid var(--line); border-radius: 12px; overflow: hidden; }
+.tariff-row { display: grid; grid-template-columns: 1fr auto auto; gap: 10px; align-items: center; padding: 8px 10px; border-top: 1px solid var(--line); }
+.tariff-row:first-child { border-top: 0; }
+.tariff-row.on { background: color-mix(in srgb, var(--brand) 6%, transparent); }
+.tariff-name { display: flex; gap: 8px; align-items: center; font-size: 13.5px; color: var(--ink); cursor: pointer; min-width: 0; }
+.tariff-name input { width: 16px; height: 16px; accent-color: var(--brand); flex: 0 0 auto; }
+.tariff-price { font-weight: 700; font-size: 13.5px; color: var(--ink); white-space: nowrap; }
+.tariff-qty { display: inline-flex; align-items: center; gap: 2px; }
+.tariff-qty span { min-width: 18px; text-align: center; font-weight: 700; }
+.invoice-total { border-radius: 12px; background: var(--surface-2, #F8FAFC); padding: 10px 14px; display: grid; gap: 4px; font-size: 13.5px; }
+.invoice-total div { display: flex; justify-content: space-between; gap: 10px; }
+.invoice-total .grand { border-top: 1px dashed var(--line); padding-top: 6px; margin-top: 2px; font-size: 15px; color: var(--ink); }
+@media (max-width: 520px) { .tariff-row { grid-template-columns: 1fr auto; } .tariff-qty { grid-column: 1 / -1; justify-self: end; } }
+.invoice-search { display: flex; gap: 8px; flex-wrap: wrap; }
+.invoice-search .input { flex: 1; min-width: 200px; }
+.invoice-picked { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)) auto; gap: 12px; align-items: center; padding: 12px 14px; border-radius: 12px; background: color-mix(in srgb, var(--ok, #16A34A) 8%, transparent); border: 1px solid color-mix(in srgb, var(--ok, #16A34A) 30%, transparent); }
+.invoice-picked > div { display: grid; gap: 2px; min-width: 0; }
+.invoice-picked strong { color: var(--ink); overflow-wrap: anywhere; }
+@media (max-width: 760px) { .invoice-picked { grid-template-columns: 1fr 1fr; } }

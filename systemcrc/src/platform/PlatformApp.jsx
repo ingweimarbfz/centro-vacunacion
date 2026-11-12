@@ -7,6 +7,7 @@ import { DashboardPage, PlansPage, FeaturesPage, OrgsPage, RequestsPage } from '
 import PricingPage from './PricingPage'
 import { ProviderPage, OrgLegalDoc } from './legalPages'
 import './platform.css'
+import mark from '../assets/integraMark.svg'
 
 const Ctx = createContext(null)
 export const usePUser = () => useContext(Ctx)
@@ -34,7 +35,7 @@ const Login = () => {
   return (
     <div className="pf pf-login">
       <div className="pf-login-art">
-        <div className="pf-brand"><span className="pf-logo"><MdLayers /></span><div><strong>Integra IPS · Plataforma</strong><small>Planes y suscripciones</small></div></div>
+        <div className="pf-brand"><img className="pf-logo" src={mark} alt="Integra IPS" /><div><strong>Integra IPS · Plataforma</strong><small>Planes y suscripciones</small></div></div>
         <div>
           <h2 className="serif">Configura tus planes, funcionalidades y clientes en un solo lugar.</h2>
           <p>Define qué incluye cada plan, sus precios mensuales y anuales, y qué módulos quedan disponibles en cada instalación del sistema.</p>
@@ -71,7 +72,7 @@ const Shell = () => {
   return (
     <div className="pf pf-shell">
       <aside className={`pf-side${open ? ' open' : ''}`}>
-        <div className="pf-brand"><span className="pf-logo"><MdLayers /></span><div><strong>Integra IPS</strong><small>Plataforma de planes</small></div></div>
+        <div className="pf-brand"><img className="pf-logo" src={mark} alt="Integra IPS" /><div><strong>Integra IPS</strong><small>Plataforma de planes</small></div></div>
         {NAV.map(([to, label, I, end]) => <NavLink key={to} to={to} end={end} className={({ isActive }) => `pf-nav${isActive ? ' active' : ''}`}><I /> {label}</NavLink>)}
         <div className="pf-sep">Vista pública</div>
         <a className="pf-nav" href="/plataforma/precios" target="_blank" rel="noreferrer"><MdStorefront /> Página de precios <MdOpenInNew style={{ marginLeft: 'auto', fontSize: 15 }} /></a>

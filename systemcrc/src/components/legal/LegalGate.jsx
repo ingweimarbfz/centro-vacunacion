@@ -7,6 +7,7 @@ import { SignatureEditor } from '../signature'
 import { BRAND } from '../../utils/brand'
 import LegalDoc from './LegalDoc'
 import './legal.css'
+import mark from '../../assets/integraMark.svg'
 
 const Spin = () => <span className="spinner" aria-hidden="true" />
 
@@ -42,7 +43,7 @@ const Activation = ({ status, reload }) => {
   return (
     <div className="lgate">
       <div className="lgate-card">
-        <div className="lgate-head"><span className="ldoc-mark">IIPS</span><div><h1>Activación del servicio</h1><p>{status.organization?.name} · Plan {status.organization?.planName || '—'}. Antes de usar {BRAND}, el representante legal (o su delegado) debe leer y firmar estos documentos.</p></div></div>
+        <div className="lgate-head"><img className="ldoc-mark" src={mark} alt="Integra IPS" /><div><h1>Activación del servicio</h1><p>{status.organization?.name} · Plan {status.organization?.planName || '—'}. Antes de usar {BRAND}, el representante legal (o su delegado) debe leer y firmar estos documentos.</p></div></div>
         <div className="lgate-body">
           <div className="lgate-info">El contrato se genera con los datos de tu plan (funcionalidades, valor, soporte y disponibilidad). El acuerdo de tratamiento de datos cumple la Ley 1581 de 2012, porque el sistema guarda datos de pacientes y del personal. Ambos se firman electrónicamente (Ley 527 de 1999) y quedan disponibles en PDF.</div>
           <div>

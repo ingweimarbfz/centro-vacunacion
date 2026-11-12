@@ -59,7 +59,7 @@ const CytologyDetail = ({ data: c, onBack }) => {
           <dl className="cy-meta">
             <div><dt>Fecha examen</dt><dd>{formatDate(c.fechaExamen)}</dd></div>
             <div><dt>N° lámina</dt><dd>{orDash(c.numLamina)}</dd></div>
-            <div><dt>Factura N°</dt><dd>{orDash(c.numFactura)}</dd></div>
+            <div><dt>Factura N°</dt><dd>{c.numFactura || 'Por facturar'}</dd></div>
           </dl>
         </header>
 

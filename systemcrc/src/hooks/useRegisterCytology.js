@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback } from 'react'
 import api, { errorMessage } from '../api/client'
+import useServiceInvoice from './useServiceInvoice'
 
 const PHONE_RE = /^[0-9]{10}$/
 const EMAIL_RE = /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i
@@ -14,7 +15,7 @@ const EMPTY = {
   sano: false, normal: false, cupula: false, tomaVaginal: false, endoCerrado: false, polipo: false,
   quistes: false, lecorrea: false, sangra: false, erosionado: false, sinEspecificar: false,
   fechaRecibido: '', elabora: '', tomaMuestra: '',
-  applyDiscount: false, discountId: ''
+  applyDiscount: false, discountId: '', entityId: '', epsId: '', paymentMode: 'contado'
 }
 
 const PHONE_FIELDS = ['celular', 'celularContacto']
@@ -47,18 +48,31 @@ const useRegisterCytology = () => {
   const [dataCytology, setDataCytology] = useState(EMPTY)
   const [defaults, setDefaults] = useState({ valor: '', fechaHoy: '', siguienteFactura: '', siguienteLamina: '' })
   const [empleados, setEmpleados] = useState([])
-  const [discounts, setDiscounts] = useState([])
+  const [entities, setEntities] = useState([])
+  const [epsList, setEpsList] = useState([])
   const [errors, setErrors] = useState({})
   const [saving, setSaving] = useState(false)
   const [messageSuccess, setMessageSuccess] = useState('')
   const [messageCancel, setMessageCancel] = useState('')
+  // Factura previa (Facturación → Servicios facturables): al elegirla se llenan la paciente (si la factura la tiene) y la EPS.
+  const onInvoice = useCallback((inv) => {
+    setErrors((prev) => ({ ...prev, invoice: undefined }))
+    setDataCytology((prev) => ({
+      ...prev,
+      ...(inv.docNumber ? { nombre: inv.names || prev.nombre, apellidos: inv.surnames || prev.apellidos, tipoDocumento: inv.docType || prev.tipoDocumento, numDocumento: inv.docNumber } : {}),
+      epsId: inv.epsId ? String(inv.epsId) : ''
+    }))
+  }, [])
+  const inv = useServiceInvoice('citologia', onInvoice)
+  const { billingOn, invoice } = inv
 
   const loadDefaults = useCallback(async () => {
     try {
       const { data } = await api.get('/citologias/datos-formulario')
       setDefaults({ valor: data.valor ?? '', fechaHoy: data.fechaHoy, siguienteFactura: data.siguienteFactura, siguienteLamina: data.siguienteLamina })
       setEmpleados(data.empleados)
-      api.get('/descuentos', { params: { activos: 1 } }).then(({ data: ds }) => setDiscounts(ds)).catch(() => setDiscounts([]))
+      api.get('/proveedores', { params: { categoria: 'toma_muestras,laboratorio' } }).then(({ data: es }) => setEntities(es.filter((x) => x.active))).catch(() => setEntities([]))
+      api.get('/eps').then(({ data: es }) => setEpsList(es.filter((x) => x.active))).catch(() => setEpsList([]))
       setDataCytology((prev) => ({
         ...prev,
         fechaExamen: prev.fechaExamen || data.fechaHoy,
@@ -91,7 +105,7 @@ const useRegisterCytology = () => {
     setMessageCancel('')
     setMessageSuccess('')
     const found = validate(dataCytology)
-    if (dataCytology.applyDiscount && !dataCytology.discountId) found.discountId = 'Selecciona el descuento'
+    if (billingOn && !invoice) found.invoice = 'Busca y elige la factura de la citología'
     setErrors(found)
     if (Object.keys(found).length) {
       setMessageCancel('Revisa los campos marcados en rojo.')
@@ -100,9 +114,11 @@ const useRegisterCytology = () => {
     }
     setSaving(true)
     try {
-      const { applyDiscount, discountId, ...rest } = dataCytology
-      const { data } = await api.post('/registrar-toma-de-muestras-citologicas', { ...rest, email: dataCytology.email.trim(), discountId: applyDiscount ? Number(discountId) : undefined })
-      setMessageSuccess(`Citología registrada: factura ${data.numFactura}, lámina ${data.numLamina}`)
+      // eslint-disable-next-line no-unused-vars
+      const { applyDiscount, discountId, entityId, epsId, paymentMode, ...rest } = dataCytology
+      const { data } = await api.post('/registrar-toma-de-muestras-citologicas', { ...rest, email: dataCytology.email.trim(), entityId: Number(entityId) || undefined, epsId: Number(epsId) || undefined, invoiceId: invoice?.id })
+      setMessageSuccess(data.numFactura ? `Citología registrada: factura ${data.numFactura}, lámina ${data.numLamina}` : `Citología registrada: lámina ${data.numLamina}. Queda por facturar.`)
+      inv.reset()
       setTimeout(() => setMessageSuccess(''), 8000)
       setDataCytology(EMPTY)
       setErrors({})
@@ -118,7 +134,8 @@ const useRegisterCytology = () => {
 
   return {
     dataCytology, selectedOptions: dataCytology, handleChange, handleOptionChange, InsertCytology,
-    messageSuccess, messageCancel, errors, empleados, defaults, edad, saving, discounts
+    messageSuccess, messageCancel, errors, empleados, defaults, edad, saving, entities, epsList,
+    billingOn, invoice, inv
   }
 }
 

@@ -1,7 +1,7 @@
 import {
   MdDashboard, MdThermostat, MdNoteAdd, MdManageSearch, MdPeople, MdSettings, MdPerson,
   MdEmergency, MdInventory2, MdBadge, MdLocalHospital, MdLocalShipping, MdDirectionsCar, MdAssignment, MdSpeed,
-  MdMedicalServices, MdAccountTree, MdVolunteerActivism, MdFactCheck, MdSchool, MdWarehouse, MdCategory, MdSwapHoriz, MdHealing, MdAirportShuttle, MdDraw, MdTune, MdInsights, MdGroups, MdRule, MdMenuBook, MdFolderShared, MdMedication
+  MdMedicalServices, MdAccountTree, MdVolunteerActivism, MdFactCheck, MdSchool, MdWarehouse, MdCategory, MdSwapHoriz, MdHealing, MdAirportShuttle, MdDraw, MdTune, MdInsights, MdGroups, MdRule, MdMenuBook, MdFolderShared, MdMedication, MdReceiptLong, MdStorefront, MdPriceChange, MdAccountBalance, MdVaccines, MdEventRepeat
 } from 'react-icons/md'
 
 export const ROLE_LABELS = {
@@ -45,11 +45,11 @@ export const siteHas = (user, service) => {
 // ---------------------------------------------------------------- Módulos por usuario
 // El administrador puede mostrar u ocultar módulos a cada usuario (Usuarios → Módulos). El administrador ve todo.
 export const USER_MODULES = {
-  ips: [['ips_dashboard', 'Dashboard de IPS'], ['citologias', 'Citologías'], ['traslado', 'Traslado asistencial (ambulancias)'], ['temperatura', 'Registro de temperatura'], ['equipos', 'Hoja de vida de equipos']],
+  ips: [['ips_dashboard', 'Dashboard de IPS'], ['citologias', 'Citologías'], ['vacunacion', 'Vacunación (registro, carnet, seguimiento y ESAVI)'], ['facturacion', 'Facturación, EPS y cuentas de cobro'], ['traslado', 'Traslado asistencial (ambulancias)'], ['temperatura', 'Registro de temperatura'], ['equipos', 'Hoja de vida de equipos']],
   socorro: [['og_dashboard', 'Dashboard de Operaciones Generales'], ['socorro', 'Socorro (eventos y emergencias)'], ['educacion', 'Educación'], ['personas', 'Personas / voluntarios'], ['reporte_voluntarios', 'Reporte de voluntarios'], ['inventario', 'Inventario y bodegas'], ['flota', 'Flota vehicular'], ['voluntario', 'Panel de voluntario']],
-  estandares: [['talento_humano', 'Talento humano (hojas de vida, contratos y chequeo)'], ['procesos_prioritarios', 'Procesos prioritarios (documentos)'], ['interdependencia', 'Interdependencia (carpeta y documentos)'], ['medicamentos', 'Medicamentos, dispositivos e insumos (documentos)'], ['infraestructura', 'Infraestructura (carpeta, seguimiento y documentos)'], ['historia_clinica', 'Historia clínica y registros (carpeta y documentos)']]
+  estandares: [['talento_humano', 'Talento humano (hojas de vida, contratos y chequeo)'], ['procesos_prioritarios', 'Procesos prioritarios (documentos)'], ['interdependencia', 'Interdependencia (carpeta y documentos)'], ['medicamentos', 'Medicamentos, dispositivos e insumos (documentos)'], ['infraestructura', 'Infraestructura (carpeta, seguimiento y documentos)'], ['historia_clinica', 'Historia clínica y registros (carpeta y documentos)'], ['doc_generales', 'Doc. Generales (documentos de calidad por ítem y carpeta)']]
 }
-export const USER_MODULE_GROUPS = { ips: 'IPS', socorro: 'Operaciones Generales', estandares: 'Estándares transversales' }
+export const USER_MODULE_GROUPS = { ips: 'IPS', socorro: 'Operaciones Generales', estandares: 'Calidad IPS y Estándares' }
 // El plan contratado limita los módulos de todos (también del administrador).
 export const inPlan = (user, m) => !user?.plan?.modules || user.plan.modules.includes(m)
 export const hasModule = (user, mod) => {
@@ -74,7 +74,7 @@ export const canSee = (user, { roles, module, grantable = true, service } = {}) 
 export const MODULES = [
   { id: 'ips', label: 'IPS', fullLabel: 'Servicios de IPS', icon: MdLocalHospital, home: '/', visible: (u) => ownItems('ips', u).length > 0 },
   { id: 'socorro', label: 'Operaciones Generales', fullLabel: 'Operaciones Generales: Socorro y Educación', icon: MdEmergency, home: '/socorro', visible: (u) => ownItems('socorro', u).length > 0 },
-  { id: 'estandares', label: 'Estándares', fullLabel: 'Estándares transversales de habilitación', icon: MdRule, home: '/estandares', visible: (u) => ownItems('estandares', u).length > 0 }
+  { id: 'estandares', label: 'Calidad IPS y Estándares', fullLabel: 'Calidad IPS y Estándares', tabs: [{ id: 'estandares', label: 'Estándares' }, { id: 'docs', label: 'Doc. Generales', prefix: '/estandares/doc-generales' }], icon: MdRule, home: '/estandares', visible: (u) => ownItems('estandares', u).length > 0 }
 ]
 export const modulesForUser = (user) => MODULES.filter((m) => m.visible(user))
 
@@ -114,8 +114,28 @@ const NAV = {
       title: 'Citologías',
       items: [
         { to: '/citologias/registrar', label: 'Registrar citología', icon: MdNoteAdd, roles: STAFF, service: 'citologia', module: 'citologias' },
-        { to: '/citologias/consultar', label: 'Consultar citologías', icon: MdManageSearch, roles: STAFF, service: 'citologia', module: 'citologias' },
-        { to: '/citologias/configuracion', label: 'Configuración', icon: MdTune, roles: ADMIN, service: 'citologia' }
+        { to: '/citologias/consultar', label: 'Consultar citologías', icon: MdManageSearch, roles: STAFF, service: 'citologia', module: 'citologias' }
+      ]
+    },
+    {
+      title: 'Vacunación',
+      items: [
+        { to: '/vacunacion', label: 'Dashboard de vacunación', icon: MdInsights, roles: STAFF, end: true, service: 'cadena_frio', module: 'vacunacion' },
+        { to: '/vacunacion/registrar', label: 'Registrar vacunación', icon: MdVaccines, roles: STAFF, service: 'cadena_frio', module: 'vacunacion' },
+        { to: '/vacunacion/consultar', label: 'Consultar, carnet y ESAVI', icon: MdManageSearch, roles: STAFF, service: 'cadena_frio', module: 'vacunacion' },
+        { to: '/vacunacion/seguimiento', label: 'Seguimiento de dosis', icon: MdEventRepeat, roles: STAFF, service: 'cadena_frio', module: 'vacunacion' },
+        { to: '/vacunacion/biologicos', label: 'Biológicos', icon: MdTune, roles: ADMIN, service: 'cadena_frio' }
+      ]
+    },
+    {
+      title: 'Facturación y convenios',
+      items: [
+        { to: '/facturacion', label: 'Dashboard de facturación', icon: MdInsights, roles: STAFF, end: true, service: 'any', module: 'facturacion' },
+        { to: '/facturacion/servicios', label: 'Servicios facturables', icon: MdMedicalServices, roles: STAFF, service: 'any', module: 'facturacion' },
+        { to: '/facturacion/cuentas-cobro', label: 'Cuentas de cobro', icon: MdReceiptLong, roles: STAFF, service: 'any', module: 'facturacion' },
+        { to: '/facturacion/tarifario', label: 'Tarifario', icon: MdPriceChange, roles: ADMIN, service: 'any' },
+        { to: '/facturacion/impuestos', label: 'Impuestos y numeración', icon: MdAccountBalance, roles: ADMIN, service: 'any' },
+        { to: '/facturacion/proveedores', label: 'Proveedores y convenios', icon: MdStorefront, roles: ADMIN, service: 'any' }
       ]
     },
     { title: 'Traslado asistencial', items: [{ to: '/traslado-asistencial', label: 'Ambulancias', icon: MdAirportShuttle, roles: ['administrador', 'conductor'], service: 'ambulancias', module: 'traslado', grantable: false }] },
@@ -156,8 +176,9 @@ const NAV = {
   ],
   // Estándares transversales (Resolución 3100 de 2019). Cada estándar se suma como una sección.
   estandares: [
-    { title: 'General', items: [{ to: '/estandares', label: 'Dashboard', icon: MdDashboard, roles: STAFF, end: true, module: ['talento_humano', 'procesos_prioritarios', 'interdependencia', 'medicamentos', 'infraestructura', 'historia_clinica'] }] },
+    { tab: 'estandares', title: 'General', items: [{ to: '/estandares', label: 'Dashboard', icon: MdDashboard, roles: STAFF, end: true, module: ['talento_humano', 'procesos_prioritarios', 'interdependencia', 'medicamentos', 'infraestructura', 'historia_clinica'] }] },
     {
+      tab: 'estandares',
       title: '1. Talento humano',
       items: [
         { to: '/estandares/talento-humano', label: 'Dashboard', icon: MdDashboard, roles: STAFF, end: true, module: 'talento_humano' },
@@ -168,16 +189,18 @@ const NAV = {
       ]
     },
     {
+      tab: 'estandares',
       title: '2. Infraestructura',
       items: [
         { to: '/estandares/infraestructura', label: 'Carpeta y seguimiento', icon: MdFactCheck, roles: STAFF, module: 'infraestructura', end: true },
         { to: '/estandares/infraestructura/documentos', label: 'Documentos', icon: MdFolderShared, roles: STAFF, module: 'infraestructura' }
       ]
     },
-    { title: '3. Dotación', items: [{ to: '/equipos', label: 'Hoja de vida de equipos (IPS)', icon: MdMedicalServices, roles: STAFF, service: 'any', module: 'equipos' }] },
-    { title: '4. Medicamentos y dispositivos', items: [{ to: '/estandares/medicamentos', label: 'Documentos e inventario', icon: MdMedication, roles: STAFF, module: 'medicamentos' }] },
-    { title: '5. Procesos prioritarios', items: [{ to: '/estandares/procesos-prioritarios', label: 'Documentos y formatos', icon: MdAccountTree, roles: STAFF, module: 'procesos_prioritarios' }] },
+    { tab: 'estandares', title: '3. Dotación', items: [{ to: '/equipos', label: 'Hoja de vida de equipos (IPS)', icon: MdMedicalServices, roles: STAFF, service: 'any', module: 'equipos' }] },
+    { tab: 'estandares', title: '4. Medicamentos y dispositivos', items: [{ to: '/estandares/medicamentos', label: 'Documentos e inventario', icon: MdMedication, roles: STAFF, module: 'medicamentos' }] },
+    { tab: 'estandares', title: '5. Procesos prioritarios', items: [{ to: '/estandares/procesos-prioritarios', label: 'Documentos y formatos', icon: MdAccountTree, roles: STAFF, module: 'procesos_prioritarios' }] },
     {
+      tab: 'estandares',
       title: '6. Historia clínica y registros',
       items: [
         { to: '/estandares/historia-clinica', label: 'Carpeta obligatoria', icon: MdFactCheck, roles: STAFF, module: 'historia_clinica', end: true },
@@ -185,12 +208,17 @@ const NAV = {
       ]
     },
     {
+      tab: 'estandares',
       title: '7. Interdependencia',
       items: [
         { to: '/estandares/interdependencia', label: 'Carpeta obligatoria', icon: MdFactCheck, roles: STAFF, module: 'interdependencia', end: true },
         { to: '/estandares/interdependencia/documentos', label: 'Documentos', icon: MdFolderShared, roles: STAFF, module: 'interdependencia' }
       ]
     },
+    { tab: 'docs', title: 'Doc. Generales', items: [
+      { to: '/estandares/doc-generales', label: 'Dashboard', icon: MdDashboard, roles: STAFF, end: true, module: 'doc_generales' },
+      { to: '/estandares/doc-generales/documentos', label: 'Documentos y carpetas', icon: MdFolderShared, roles: STAFF, module: 'doc_generales' }
+    ] },
     ...SHARED
   ]
 }
@@ -202,8 +230,15 @@ export const ROUTE_ROLES = { ADMIN, STAFF, ALL, EVERYONE, EVENTS, FLEET_VIEW, FL
 export const FLEET_ICON = MdLocalShipping
 export const INVENTORY_ICON = MdInventory2
 
-export const navForUser = (user, moduleId = 'ips') =>
+// Pestaña interna del módulo (p. ej. Calidad IPS y Estándares → Estándares / Doc. Generales).
+export const moduleTabFor = (moduleId, pathname) => {
+  const tabs = MODULES.find((m) => m.id === moduleId)?.tabs
+  if (!tabs) return null
+  return (tabs.find((t) => t.prefix && pathname.startsWith(t.prefix)) || tabs.find((t) => !t.prefix) || tabs[0]).id
+}
+export const navForUser = (user, moduleId = 'ips', tab = null) =>
   navSectionsFor(moduleId)
+    .filter((s) => !tab || !s.tab || s.tab === tab)
     .map((s) => ({ ...s, items: s.items.filter((i) => canSee(user, i)) }))
     .filter((s) => s.items.length)
 // Primera página del módulo que el usuario puede ver (para el selector de módulos).

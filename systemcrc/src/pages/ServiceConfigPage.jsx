@@ -2,9 +2,11 @@ import React, { useEffect, useState } from 'react'
 import { MdSave, MdErrorOutline, MdTune } from 'react-icons/md'
 import api, { errorMessage } from '../api/client'
 import { PageHead, Card, Spinner, useToast } from '../components/ui'
+import ColdChainSuppliers from './ColdChainSuppliers'
+import ColdChainReminderSettings from './ColdChainReminderSettings'
 
 const TITLES = {
-  citologia: ['Configuración de citologías', 'Valor de la citología que se carga por defecto en cada registro'],
+  citologia: ['Configuración de citologías', 'El valor de la citología está en Facturación → Tarifario'],
   cadena_frio: ['Configuración de cadena de frío', 'Rango de temperatura permitido para las neveras; fuera de él se genera alerta']
 }
 
@@ -31,7 +33,7 @@ const ServiceConfigPage = ({ module }) => {
     <>
       <PageHead title={title} subtitle={subtitle} />
       {!service && !error && <div className="splash" style={{ minHeight: 200 }}><Spinner /></div>}
-      {service && (
+      {service && service.settingsSchema.length > 0 && (
         <form onSubmit={save} noValidate style={{ maxWidth: 640 }}>
           <Card title={service.name} icon={<MdTune style={{ color: 'var(--brand)' }} />}>
             <div className="form-grid" style={{ gridTemplateColumns: `repeat(${Math.min(service.settingsSchema.length, 2)}, minmax(0, 1fr))` }}>
@@ -46,6 +48,8 @@ const ServiceConfigPage = ({ module }) => {
         </form>
       )}
       {error && <div className="alert bad" style={{ marginTop: 16, maxWidth: 640 }}><MdErrorOutline /><span>{error}</span></div>}
+      {module === 'cadena_frio' && <ColdChainReminderSettings />}
+      {module === 'cadena_frio' && <ColdChainSuppliers />}
       {toastNode}
     </>
   )

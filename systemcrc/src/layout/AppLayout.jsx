@@ -3,10 +3,11 @@ import { NavLink, Outlet, useLocation, useNavigate } from 'react-router-dom'
 import { MdMenu, MdLogout, MdPerson, MdKeyboardArrowDown, MdPlace } from 'react-icons/md'
 import { useAuth } from '../context/AuthContext'
 import { useSettings } from '../context/SettingsContext'
-import { navForUser, navSectionsFor, ROLE_LABELS, MODULES, moduleFromPath, modulesForUser, moduleHome, SITE_TYPES } from '../utils/permissions'
+import { navForUser, navSectionsFor, ROLE_LABELS, MODULES, moduleFromPath, modulesForUser, moduleHome, moduleTabFor, canSee, SITE_TYPES } from '../utils/permissions'
 import api, { getSiteFilter, setSiteFilter } from '../api/client'
 import { Avatar } from '../components/ui'
 import GlobalSearch from '../components/GlobalSearch'
+import TemperatureReminder from '../components/TemperatureReminder'
 import { UpgradeButton } from '../components/UpgradePlan'
 
 const titleFor = (pathname, moduleId) => {
@@ -117,7 +118,11 @@ const AppLayout = () => {
     return own.includes(saved) ? saved : own[0] || 'ips'
   })
   useEffect(() => { if (!shared) { const m = moduleFromPath(pathname); setModuleId(m); rememberModule(m) } }, [pathname, shared])
-  const sections = navForUser(user, moduleId)
+  // Pestañas internas del módulo (Calidad IPS y Estándares → Estándares / Doc. Generales).
+  const tab = moduleTabFor(moduleId, pathname)
+  const navigate = useNavigate()
+  const tabsVisible = (MODULES.find((m) => m.id === moduleId)?.tabs || []).map((t) => ({ ...t, first: navSectionsFor(moduleId).filter((s) => s.tab === t.id).flatMap((s) => s.items).find((i) => canSee(user, i)) })).filter((t) => t.first)
+  const sections = navForUser(user, moduleId, tabsVisible.length > 1 ? tab : null)
   const admin = user.role === 'administrador'
   const [site, setSite] = useState(() => (admin ? getSiteFilter() : null))
   const changeSite = (id) => { setSiteFilter(id); setSite(id) }
@@ -148,6 +153,11 @@ const AppLayout = () => {
           <ModuleSwitch current={moduleId} user={user} />
           <span className="module-name">{currentModule.fullLabel}</span>
         </div>
+        {tabsVisible.length > 1 && (
+          <div className="module-tabs" role="tablist" aria-label="Sección del módulo">
+            {tabsVisible.map((t) => <button key={t.id} type="button" role="tab" aria-selected={tab === t.id} className={tab === t.id ? 'on' : ''} onClick={() => navigate(t.first.to)}>{t.label}</button>)}
+          </div>
+        )}
         <nav className="sidebar-nav" aria-label="Menú principal">
           {sections.map((s) => (
             <div className="nav-section" key={s.title}>
@@ -190,6 +200,7 @@ const AppLayout = () => {
         <main className="content">
           {/* Al cambiar de sede se recargan los datos de la página actual. */}
           <Outlet key={site || 'all'} />
+          <TemperatureReminder key={`rem-${site || 'all'}`} />
         </main>
       </div>
     </div>

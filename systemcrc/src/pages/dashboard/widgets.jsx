@@ -11,6 +11,7 @@ import {
 import { Card, Empty } from '../../components/ui'
 import { formatDate, formatMoney } from '../../utils/format'
 import { ROLE_LABELS, ROLE_DESCRIPTIONS } from '../../utils/permissions'
+import { readingPoints, dayTick, ReadingTip, shiftDot, SHIFT_COLORS } from '../../components/tempChart'
 
 const ADMIN = ['administrador']
 const STAFF = ['administrador', 'empleado']
@@ -24,8 +25,9 @@ const byDay = (series) => {
   for (const r of series) {
     const d = days[r.isoDate] || (days[r.isoDate] = { isoDate: r.isoDate, label: r.isoDate.slice(8, 10), date: r.date })
     const k = r.shift === 'tarde' ? 'Pm' : 'Am'
-    d[`min${k}`] = r.tempMin; d[`max${k}`] = r.tempMax
-    d[`alert${k}`] = r.alertHigh || r.alertLow
+    d[`min${k}`] = d[`min${k}`] == null ? r.tempMin : Math.min(d[`min${k}`], r.tempMin)
+    d[`max${k}`] = d[`max${k}`] == null ? r.tempMax : Math.max(d[`max${k}`], r.tempMax)
+    d[`alert${k}`] = d[`alert${k}`] || r.alertHigh || r.alertLow
   }
   return Object.keys(days).sort().map((k) => days[k])
 }
@@ -100,23 +102,22 @@ const KpiRow = ({ data, role }) => {
 const TempMonth = ({ data, colors }) => {
   const { series } = data.temperature
   const { min, max } = data.thresholds
+  const points = readingPoints(series)
   return (
-    <Card title="Temperatura del mes" subtitle="Mínima y máxima de la mañana (continuas) y de la tarde (punteadas) frente al rango permitido"
-      actions={<div className="legend"><span><i style={{ background: colors.primary }} />Máx. mañana</span><span><i style={{ background: colors.secondary }} />Mín. mañana</span><span><i style={{ background: '#F59E0B' }} />Máx. tarde</span><span><i style={{ background: '#0EA5E9' }} />Mín. tarde</span></div>}>
+    <Card title="Temperatura del mes" subtitle="Cada punto es una lectura (4 al día) con su mínima y máxima, frente al rango permitido"
+      actions={<div className="legend"><span><i style={{ background: colors.primary }} />Máxima</span><span><i style={{ background: colors.secondary }} />Mínima</span><span><i style={{ background: SHIFT_COLORS.manana, borderRadius: '50%' }} />Mañana</span><span><i style={{ background: SHIFT_COLORS.tarde, borderRadius: '50%' }} />Tarde</span></div>}>
       {series.length === 0 ? <Empty icon={<MdThermostat />}>No hay temperaturas registradas en este mes.</Empty> : (
         <ResponsiveContainer width="100%" height={280}>
-          <LineChart data={byDay(series)} margin={{ top: 10, right: 12, left: -18, bottom: 0 }}>
+          <LineChart data={points} margin={{ top: 10, right: 12, left: -18, bottom: 0 }}>
             <CartesianGrid stroke="#EEF0F2" vertical={false} />
             <ReferenceArea y1={min} y2={max} fill="#DCFCE7" fillOpacity={0.45} />
-            <XAxis dataKey="label" tick={axis} tickLine={false} axisLine={false} interval="preserveStartEnd" minTickGap={14} />
+            <XAxis dataKey="x" tick={axis} tickLine={false} axisLine={false} interval={0} tickFormatter={(v, i) => dayTick(points)(v, i).slice(0, 2)} />
             <YAxis tick={axis} tickLine={false} axisLine={false} domain={[(dMin) => Math.floor(Math.min(dMin, min) - 2), (dMax) => Math.ceil(Math.max(dMax, max) + 2)]} unit="°" />
-            <Tooltip content={<DayTip />} />
+            <Tooltip content={<ReadingTip />} />
             <ReferenceLine y={max} stroke="#DC2626" strokeDasharray="5 4" label={{ value: `Máx ${max}°`, position: 'insideTopRight', fontSize: 11, fill: '#DC2626' }} />
             <ReferenceLine y={min} stroke="#2563EB" strokeDasharray="5 4" label={{ value: `Mín ${min}°`, position: 'insideBottomRight', fontSize: 11, fill: '#2563EB' }} />
-            <Line type="monotone" dataKey="maxAm" name="Máx. mañana" stroke={colors.primary} strokeWidth={2.2} connectNulls dot={{ r: 3, fill: '#fff', strokeWidth: 2 }} />
-            <Line type="monotone" dataKey="minAm" name="Mín. mañana" stroke={colors.secondary} strokeWidth={2.2} connectNulls dot={{ r: 3, fill: '#fff', strokeWidth: 2 }} />
-            <Line type="monotone" dataKey="maxPm" name="Máx. tarde" stroke="#F59E0B" strokeWidth={2.2} strokeDasharray="6 3" connectNulls dot={{ r: 3, fill: '#fff', strokeWidth: 2 }} />
-            <Line type="monotone" dataKey="minPm" name="Mín. tarde" stroke="#0EA5E9" strokeWidth={2.2} strokeDasharray="6 3" connectNulls dot={{ r: 3, fill: '#fff', strokeWidth: 2 }} />
+            <Line type="monotone" dataKey="tempMax" name="Máxima" stroke={colors.primary} strokeWidth={2} dot={shiftDot(3)} activeDot={{ r: 5 }} />
+            <Line type="monotone" dataKey="tempMin" name="Mínima" stroke={colors.secondary} strokeWidth={2} dot={shiftDot(3)} activeDot={{ r: 5 }} />
           </LineChart>
         </ResponsiveContainer>
       )}
@@ -160,7 +161,7 @@ const MaxBars = ({ data, colors }) => {
   const { max } = data.thresholds
   return (
     <Card title="Temperatura máxima por día" subtitle="Mañana y tarde · las barras en rojo superaron el límite máximo"
-      actions={<div className="legend"><span><i style={{ background: colors.secondary }} />Mañana</span><span><i style={{ background: '#F59E0B' }} />Tarde</span></div>}>
+      actions={<div className="legend"><span><i style={{ background: SHIFT_COLORS.manana }} />Mañana</span><span><i style={{ background: SHIFT_COLORS.tarde }} />Tarde</span></div>}>
       {series.length === 0 ? <Empty icon={<MdThermostat />}>Sin datos.</Empty> : (
         <ResponsiveContainer width="100%" height={240}>
           <BarChart data={byDay(series)} margin={{ top: 10, right: 8, left: -18, bottom: 0 }}>
@@ -170,10 +171,10 @@ const MaxBars = ({ data, colors }) => {
             <Tooltip content={<DayTip />} cursor={{ fill: '#F3F4F6' }} />
             <ReferenceLine y={max} stroke="#DC2626" strokeDasharray="5 4" />
             <Bar dataKey="maxAm" name="Máx. mañana" radius={[5, 5, 0, 0]} maxBarSize={14}>
-              {byDay(series).map((d) => <Cell key={d.isoDate} fill={d.maxAm > max ? '#DC2626' : colors.secondary} />)}
+              {byDay(series).map((d) => <Cell key={d.isoDate} fill={d.maxAm > max ? '#DC2626' : SHIFT_COLORS.manana} />)}
             </Bar>
             <Bar dataKey="maxPm" name="Máx. tarde" radius={[5, 5, 0, 0]} maxBarSize={14}>
-              {byDay(series).map((d) => <Cell key={d.isoDate} fill={d.maxPm > max ? '#DC2626' : '#F59E0B'} />)}
+              {byDay(series).map((d) => <Cell key={d.isoDate} fill={d.maxPm > max ? '#DC2626' : SHIFT_COLORS.tarde} />)}
             </Bar>
           </BarChart>
         </ResponsiveContainer>

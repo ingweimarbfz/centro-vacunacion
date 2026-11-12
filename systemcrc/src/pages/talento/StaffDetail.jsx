@@ -1,4 +1,5 @@
-import React, { useCallback, useEffect, useRef, useState } from 'react'
+import React, { useCallback, useEffect, useState } from 'react'
+import FileDrop from '../../components/FileDrop'
 import { Link, useNavigate, useParams } from 'react-router-dom'
 import {
   MdArrowBack, MdEdit, MdDelete, MdPrint, MdAdd, MdErrorOutline, MdSave, MdUploadFile, MdPictureAsPdf, MdVerified, MdWarning,
@@ -20,7 +21,6 @@ const DocForm = ({ staff, initial, preset, onClose, onSaved }) => {
     : { requirementTypeId: preset ? String(preset) : '', name: '', category: 'educacion', issuer: '', issueDate: '', expires: false, expiryDate: '', hours: '', notes: '' })
   const [file, setFile] = useState(null)
   const [error, setError] = useState(''); const [saving, setSaving] = useState(false)
-  const fileRef = useRef(null)
   const req = cat?.requirements.find((r) => String(r.id) === f.requirementTypeId)
   // Al elegir un requisito se toman su categoría y si vence.
   useEffect(() => { if (req && !editing) setF((x) => ({ ...x, category: req.category, expires: req.expires })) }, [req, editing])
@@ -62,10 +62,7 @@ const DocForm = ({ staff, initial, preset, onClose, onSaved }) => {
             {autoExpiry && <span className="hint">Vacío = {req.validityMonths} meses desde la expedición</span>}</div>}
         </div>
         <div className="field"><label>Certificado (PDF) {!editing && <span className="req">*</span>}</label>
-          <div className="th-file" onClick={() => fileRef.current.click()} role="button" tabIndex={0}>
-            <MdUploadFile /><span>{file ? `${file.name} · ${(file.size / 1024 / 1024).toFixed(1)} MB` : editing ? 'Reemplazar el archivo (opcional)' : 'Selecciona el PDF del certificado (máx. 10 MB)'}</span>
-          </div>
-          <input ref={fileRef} type="file" accept="application/pdf,image/png,image/jpeg" hidden onChange={(e) => pick(e.target.files[0])} />
+          <FileDrop file={file} onPick={pick} accept="application/pdf,image/png,image/jpeg" current={editing ? (initial?.fileName || 'archivo cargado') : null} placeholder="Arrastra el archivo o haz clic: PDF o imagen del certificado (máx. 10 MB)" />
         </div>
         <div className="field"><label>Observaciones</label><input value={f.notes} onChange={set('notes')} /></div>
         {error && <div className="alert bad"><MdErrorOutline /><span>{error}</span></div>}
@@ -84,7 +81,6 @@ const ContractForm = ({ staff, initial, onClose, onSaved }) => {
     : { contractType: 'termino_fijo', number: '', startDate: today(), endDate: '', weeklyHours: '', positionName: staff.positionName || '', notes: '' })
   const [file, setFile] = useState(null)
   const [error, setError] = useState(''); const [saving, setSaving] = useState(false)
-  const fileRef = useRef(null)
   const set = (k) => (e) => setF({ ...f, [k]: e.target.value })
   const submit = async () => {
     setError('')
@@ -111,8 +107,8 @@ const ContractForm = ({ staff, initial, onClose, onSaved }) => {
           <div className="field span-all"><label>Observaciones</label><input value={f.notes} onChange={set('notes')} /></div>
         </div>
         <div className="field"><label>Contrato firmado (PDF, opcional)</label>
-          <div className="th-file" onClick={() => fileRef.current.click()} role="button" tabIndex={0}><MdUploadFile /><span>{file ? file.name : initial?.fileUrl ? 'Reemplazar el archivo' : 'Selecciona el PDF del contrato'}</span></div>
-          <input ref={fileRef} type="file" accept="application/pdf" hidden onChange={(e) => { const x = e.target.files[0]; const err = checkFile(x, { images: false }); if (err) setError(err); else { setError(''); setFile(x) } }} />
+          <FileDrop file={file} accept="application/pdf" current={initial?.fileUrl ? (initial.fileName || 'contrato cargado') : null} placeholder="Arrastra el PDF del contrato o haz clic (máx. 10 MB)"
+            onPick={(x) => { const err = checkFile(x, { images: false }); if (err) setError(err); else { setError(''); setFile(x) } }} />
         </div>
         {error && <div className="alert bad"><MdErrorOutline /><span>{error}</span></div>}
       </div>
