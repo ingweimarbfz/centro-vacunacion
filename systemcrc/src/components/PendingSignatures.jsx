@@ -9,13 +9,14 @@ const fmt = (iso) => (iso ? new Intl.DateTimeFormat('es-CO', { timeZone: TZ, day
 const TYPE_TONE = { citologia: 'brand', evento: 'warn', reporte_vehiculo: 'navy', preoperacional: 'info' }
 
 // Documentos pendientes por firmar del usuario: previsualizar, firmar uno o firmar todos.
-const PendingSignatures = () => {
+// types: limita a ciertos documentos (p. ej. los de estándares transversales).
+const PendingSignatures = ({ types } = {}) => {
   const [toast, toastNode] = useToast()
   const [data, setData] = useState(null)
   const [busy, setBusy] = useState('')
   const [all, setAll] = useState(false)
   const [confirm, setConfirm] = useState(false)
-  const load = useCallback(() => api.get('/firmas/pendientes', { params: { sede: undefined } }).then(({ data: d }) => setData(d)).catch(() => setData({ total: 0, items: [] })), [])
+  const load = useCallback(() => api.get('/firmas/pendientes', { params: { sede: undefined } }).then(({ data: d }) => setData(types ? { ...d, items: d.items.filter((i) => types.includes(i.docType)), total: d.items.filter((i) => types.includes(i.docType)).length } : d)).catch(() => setData({ total: 0, items: [] })), [types])
   useEffect(() => { load() }, [load])
   if (!data || data.total === 0) return null
   const key = (it) => `${it.docType}|${it.docKey}|${it.slot}`
@@ -26,7 +27,7 @@ const PendingSignatures = () => {
   const signAll = async () => {
     setConfirm(false); setBusy('all')
     try {
-      const { data: r } = await api.post('/firmas/lote', {})
+      const { data: r } = await api.post('/firmas/lote', types ? { items: data.items } : {})
       toast(r.errors.length ? `${r.signed} firmados · ${r.errors.length} con error` : `${r.signed} documentos firmados`, r.errors.length ? 'bad' : 'ok'); load()
     } catch (e) { toast(errorMessage(e), 'bad') } finally { setBusy('') }
   }

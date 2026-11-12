@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react'
+import MonthPicker, { shortMonth } from '../../components/MonthPicker'
 import PendingSignatures from '../../components/PendingSignatures'
 import { Link } from 'react-router-dom'
 import { ResponsiveContainer, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend } from 'recharts'
@@ -14,7 +15,7 @@ import { fmtDateTime, duration } from '../socorro/common'
 
 const axis = { fontSize: 11, fill: '#6B7280' }
 const currentMonth = () => new Intl.DateTimeFormat('en-CA', { timeZone: 'America/Bogota' }).format(new Date()).slice(0, 7)
-const monthLabel = (ym) => { const [y, m] = ym.split('-').map(Number); return new Intl.DateTimeFormat('es-CO', { month: 'long', year: 'numeric', timeZone: 'UTC' }).format(new Date(Date.UTC(y, m - 1, 15))) }
+const monthLabel = (ym) => shortMonth(ym)
 const shortMoney = (n) => (n >= 1e6 ? `$${(n / 1e6).toFixed(1)}M` : n >= 1e3 ? `$${Math.round(n / 1e3)}k` : `$${n}`)
 
 const Kpi = ({ label, value, icon, tone = '', foot }) => (
@@ -48,7 +49,7 @@ const FleetDashboard = () => {
   return (
     <>
       <PageHead title={driver ? `Hola, ${user.name.split(' ')[0]}` : 'Flota vehicular'} subtitle={`Resumen de ${monthLabel(month)}: kilometraje, combustible, mantenimiento y alertas.`}>
-        <input type="month" className="input" style={{ width: 180 }} value={month} max={currentMonth()} onChange={(e) => e.target.value && setMonth(e.target.value)} aria-label="Mes" />
+        <MonthPicker value={month} max={currentMonth()} onChange={setMonth} />
         {driver && <Link to="/socorro/vehiculos/reportes" className="btn btn-primary"><MdAdd /> Reporte diario</Link>}
       </PageHead>
       <div style={{ marginBottom: 18 }}><PendingSignatures /></div>

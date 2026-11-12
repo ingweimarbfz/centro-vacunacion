@@ -1,13 +1,17 @@
 import React, { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react'
 import api from '../api/client'
 import defaultLogo from '../assets/logoCRCSC.png'
+import { BRAND } from '../utils/brand'
 
 export const DEFAULT_SETTINGS = {
-  ipsName: 'Cruz Roja Colombiana · Seccional Cesar',
-  shortName: 'SystemCRC',
+  ipsName: 'Mi IPS',
+  shortName: 'Mi IPS',
   primaryColor: '#E30613',
   secondaryColor: '#1F2A44',
-  logoUrl: null
+  logoUrl: null,
+  loginImageUrl: null,
+  loginDescription: null,
+  loginFooter: null
 }
 
 const SettingsContext = createContext(null)
@@ -34,7 +38,7 @@ export const SettingsProvider = ({ children }) => {
   useEffect(() => { refresh() }, [refresh])
   useEffect(() => {
     applyTheme(settings)
-    document.title = settings.shortName
+    document.title = `${BRAND} · ${settings.shortName}`
   }, [settings])
 
   const value = useMemo(() => ({

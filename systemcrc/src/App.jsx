@@ -52,6 +52,14 @@ import ChecklistSheet from './pages/talento/ChecklistSheet'
 import ThListado from './pages/talento/ThListado'
 import ThGuide from './pages/talento/ThGuide'
 import ThConfig from './pages/talento/ThConfig'
+import StdDocumentsPage from './pages/estandares/StdDocumentsPage'
+import StdFolderPage from './pages/estandares/StdFolderPage'
+import StandardsDashboard from './pages/estandares/StandardsDashboard'
+import LegalGate, { LegalPage } from './components/legal/LegalGate'
+import AutoOrientation from './components/AutoOrientation'
+import StdChecklistSheet from './pages/estandares/StdChecklistSheet'
+import InventoryBridge from './pages/estandares/InventoryBridge'
+import EquipmentBridge from './pages/estandares/EquipmentBridge'
 
 // Protege rutas por sesión y por rol. Si el rol no tiene acceso, vuelve al dashboard.
 const Protected = ({ roles, service, module, grantable, children }) => {
@@ -82,9 +90,11 @@ const App = () => (
   <SettingsProvider>
     <AuthProvider>
       <BrowserRouter>
+        <AutoOrientation />
         <Routes>
           <Route path="/login" element={<LoginRoute />} />
-          <Route element={<Protected><AppLayout /></Protected>}>
+          <Route element={<Protected><LegalGate><AppLayout /></LegalGate></Protected>}>
+            <Route path="legal/:kind" element={<LegalPage />} />
             <Route index element={<Protected module="ips_dashboard" roles={ALL} service="any"><Dashboard /></Protected>} />
             <Route path="temperatura/reporte" element={<Protected module="temperatura" roles={STAFF} service="cadena_frio"><TemperatureReport /></Protected>} />
             <Route path="temperatura" element={<Protected module="temperatura" roles={STAFF} service="cadena_frio"><TemperaturePage /></Protected>} />
@@ -124,7 +134,20 @@ const App = () => (
             <Route path="socorro/inventario/movimientos" element={<Protected module="inventario" roles={STAFF}><MovementsPage /></Protected>} />
             <Route path="socorro/inventario/productos" element={<Protected module="inventario" roles={STAFF}><ProductsPage /></Protected>} />
             <Route path="socorro/inventario/reporte" element={<Protected module="inventario" roles={STAFF}><InventorySheet /></Protected>} />
-            <Route path="estandares" element={<Protected module="talento_humano" roles={STAFF}><StandardsHome /></Protected>} />
+            <Route path="estandares" element={<Protected module={['talento_humano', 'procesos_prioritarios', 'interdependencia', 'medicamentos', 'infraestructura', 'historia_clinica']} roles={STAFF}><StandardsDashboard /></Protected>} />
+            <Route path="estandares/listado" element={<Protected module={['talento_humano', 'procesos_prioritarios', 'interdependencia', 'medicamentos', 'infraestructura', 'historia_clinica']} roles={STAFF}><StandardsHome /></Protected>} />
+            <Route path="estandares/interdependencia" element={<Protected module="interdependencia" roles={STAFF}><StdFolderPage standard="interdependencia" key="int-folder" title="Interdependencia de servicios" subtitle="Estándar transversal 7 · carpeta obligatoria, convenios, contratos y verificación" docsPath="/estandares/interdependencia/documentos" basePath="/estandares/interdependencia" /></Protected>} />
+            <Route path="estandares/interdependencia/documentos" element={<Protected module="interdependencia" roles={STAFF}><StdDocumentsPage standard="interdependencia" key="interdependencia" title="Interdependencia · documentos" subtitle="Convenios, contratos, directorio, procedimientos y demás soportes (PDF, imágenes, Word y Excel)" /></Protected>} />
+            <Route path="estandares/interdependencia/verificacion/:id" element={<Protected module="interdependencia" roles={STAFF}><StdChecklistSheet standard="interdependencia" basePath="/estandares/interdependencia" title="Lista de chequeo · Documentos obligatorios de interdependencia de servicios" /></Protected>} />
+            <Route path="estandares/infraestructura" element={<Protected module="infraestructura" roles={STAFF}><StdFolderPage standard="infraestructura" key="inf-folder" title="Infraestructura" subtitle="Estándar transversal 2 · carpeta obligatoria, actividades de seguimiento y equipos" docsPath="/estandares/infraestructura/documentos" basePath="/estandares/infraestructura" followUp bridge={<EquipmentBridge />} /></Protected>} />
+            <Route path="estandares/infraestructura/documentos" element={<Protected module="infraestructura" roles={STAFF}><StdDocumentsPage standard="infraestructura" key="infraestructura" title="Infraestructura · documentos" subtitle="Planos, certificados, licencias, mantenimiento locativo, actas y evidencias (PDF, imágenes, Word y Excel)" /></Protected>} />
+            <Route path="estandares/infraestructura/verificacion/:id" element={<Protected module="infraestructura" roles={STAFF}><StdChecklistSheet standard="infraestructura" basePath="/estandares/infraestructura" title="Lista de chequeo · Documentos obligatorios de infraestructura" /></Protected>} />
+            <Route path="estandares/infraestructura/seguimiento/:id" element={<Protected module="infraestructura" roles={STAFF}><StdChecklistSheet standard="infraestructura" basePath="/estandares/infraestructura" followTitle="Actividad de seguimiento · Infraestructura" /></Protected>} />
+            <Route path="estandares/historia-clinica" element={<Protected module="historia_clinica" roles={STAFF}><StdFolderPage standard="historia_clinica" key="hc-folder" title="Historia clínica y registros" subtitle="Estándar transversal 6 · carpeta obligatoria, documentos y verificación" docsPath="/estandares/historia-clinica/documentos" basePath="/estandares/historia-clinica" /></Protected>} />
+            <Route path="estandares/historia-clinica/documentos" element={<Protected module="historia_clinica" roles={STAFF}><StdDocumentsPage standard="historia_clinica" key="historia_clinica" title="Historia clínica · documentos" subtitle="Manual, formatos por servicio, procedimientos, consentimientos, auditorías y actas (PDF, imágenes, Word y Excel)" /></Protected>} />
+            <Route path="estandares/historia-clinica/verificacion/:id" element={<Protected module="historia_clinica" roles={STAFF}><StdChecklistSheet standard="historia_clinica" basePath="/estandares/historia-clinica" title="Lista de chequeo · Documentos obligatorios de historia clínica y registros" /></Protected>} />
+            <Route path="estandares/medicamentos" element={<Protected module="medicamentos" roles={STAFF}><StdDocumentsPage standard="medicamentos" key="medicamentos" title="Medicamentos, dispositivos médicos e insumos" subtitle="Estándar transversal 4 · documentos del estándar y control del inventario en Operaciones Generales"><InventoryBridge /></StdDocumentsPage></Protected>} />
+            <Route path="estandares/procesos-prioritarios" element={<Protected module="procesos_prioritarios" roles={STAFF}><StdDocumentsPage standard="procesos_prioritarios" key="procesos_prioritarios" title="Procesos prioritarios" subtitle="Estándar transversal 5 · guías, protocolos, procedimientos, formatos e imágenes de la IPS" /></Protected>} />
             <Route path="estandares/talento-humano" element={<Protected module="talento_humano" roles={STAFF}><ThDashboard /></Protected>} />
             <Route path="estandares/talento-humano/personal" element={<Protected module="talento_humano" roles={STAFF}><StaffPage /></Protected>} />
             <Route path="estandares/talento-humano/personal/:id" element={<Protected module="talento_humano" roles={STAFF}><StaffDetail /></Protected>} />

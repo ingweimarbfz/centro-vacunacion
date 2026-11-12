@@ -1,4 +1,5 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react'
+import MonthPicker from '../components/MonthPicker'
 import { ResponsiveContainer, LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ReferenceLine, ReferenceArea, Legend } from 'recharts'
 import { Link } from 'react-router-dom'
 import { MdSave, MdThermostat, MdSearch, MdWarning, MdErrorOutline, MdPrint, MdEdit, MdDelete, MdWbSunny, MdWbTwilight, MdCheckCircle } from 'react-icons/md'
@@ -121,7 +122,7 @@ const TemperaturePage = () => {
   return (
     <>
       <PageHead title="Temperatura" subtitle="Registro diario y seguimiento de la cadena de frío">
-        <input type="month" className="input" style={{ width: 170 }} value={reportMonth} max={today().slice(0, 7)} onChange={(e) => e.target.value && setReportMonth(e.target.value)} aria-label="Mes del reporte" />
+        <MonthPicker value={reportMonth} max={today().slice(0, 7)} onChange={setReportMonth} ariaLabel="Mes del reporte" />
         <Link to={`/temperatura/reporte?mes=${reportMonth}`} className="btn btn-primary"><MdPrint /> Reporte mensual PDF</Link>
       </PageHead>
 

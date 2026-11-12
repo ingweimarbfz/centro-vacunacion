@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react'
+import MonthPicker, { shortMonth } from '../../components/MonthPicker'
 import { Link } from 'react-router-dom'
 import { ResponsiveContainer, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend } from 'recharts'
 import {
@@ -13,7 +14,7 @@ import { PRIORITIES } from './transfer'
 
 const axis = { fontSize: 11, fill: '#6B7280' }
 const currentMonth = () => new Intl.DateTimeFormat('en-CA', { timeZone: 'America/Bogota' }).format(new Date()).slice(0, 7)
-const monthLabel = (ym) => { const [y, m] = ym.split('-').map(Number); return new Intl.DateTimeFormat('es-CO', { month: 'long', year: 'numeric', timeZone: 'UTC' }).format(new Date(Date.UTC(y, m - 1, 15))) }
+const monthLabel = (ym) => shortMonth(ym)
 const Kpi = ({ label, value, icon, tone = '', foot }) => (
   <div className="card kpi">
     <div className="kpi-top"><span className="kpi-label">{label}</span><span className={`kpi-icon ${tone}`}>{icon}</span></div>
@@ -48,7 +49,7 @@ const AmbulanceDashboard = () => {
   return (
     <>
       <PageHead title={driver ? 'Mi ambulancia' : 'Traslado asistencial'} subtitle={`${driver ? 'Ambulancia asignada' : 'Ambulancias TAB y TAM'} · ${monthLabel(month)}: traslados de pacientes, kilometraje, preoperacional y alertas.`}>
-        <input type="month" className="input" style={{ width: 180 }} value={month} max={currentMonth()} onChange={(e) => e.target.value && setMonth(e.target.value)} aria-label="Mes" />
+        <MonthPicker value={month} max={currentMonth()} onChange={setMonth} />
       </PageHead>
       {error && <div className="alert bad" style={{ marginBottom: 18 }}><MdErrorOutline /><span>{error}</span></div>}
       {!d && !error && <div className="splash" style={{ minHeight: 300 }}><Spinner /> Cargando…</div>}

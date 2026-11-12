@@ -28,7 +28,7 @@ const DiscountForm = ({ initial, onClose, onSaved }) => {
     <Modal title={editing ? 'Editar descuento' : 'Nuevo descuento'} size="sm" onClose={onClose}
       footer={<><button type="button" className="btn btn-outline" onClick={onClose}>Cancelar</button><button type="submit" form="disc-form" className="btn btn-primary" disabled={saving}>{saving ? <Spinner /> : null} {editing ? 'Guardar' : 'Crear'}</button></>}>
       <form id="disc-form" onSubmit={submit} noValidate className="stack" style={{ gap: 14 }}>
-        <div className="field"><label>Nombre <span className="req">*</span></label><input value={f.name} onChange={set('name')} placeholder="Ej: Voluntario CRC" autoFocus /></div>
+        <div className="field"><label>Nombre <span className="req">*</span></label><input value={f.name} onChange={set('name')} placeholder="Ej: Voluntario" autoFocus /></div>
         <div className="grid grid-2" style={{ gap: 12 }}>
           <div className="field"><label>Tipo</label><select value={f.type} onChange={set('type')}><option value="porcentaje">Porcentaje (%)</option><option value="valor">Valor fijo ($)</option></select></div>
           <div className="field"><label>Valor <span className="req">*</span></label><input type="number" min="0" step={f.type === 'porcentaje' ? 1 : 500} value={f.value} onChange={set('value')} placeholder={f.type === 'porcentaje' ? 'Ej: 20' : 'Ej: 5000'} /></div>

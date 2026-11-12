@@ -6,6 +6,8 @@ import { useSettings } from '../context/SettingsContext'
 import { navForUser, navSectionsFor, ROLE_LABELS, MODULES, moduleFromPath, modulesForUser, moduleHome, SITE_TYPES } from '../utils/permissions'
 import api, { getSiteFilter, setSiteFilter } from '../api/client'
 import { Avatar } from '../components/ui'
+import GlobalSearch from '../components/GlobalSearch'
+import { UpgradeButton } from '../components/UpgradePlan'
 
 const titleFor = (pathname, moduleId) => {
   for (const s of navSectionsFor(moduleId)) {
@@ -36,8 +38,12 @@ const ModuleSwitch = ({ current, user }) => {
   )
 }
 
-const todayRaw = new Intl.DateTimeFormat('es-CO', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric', timeZone: 'America/Bogota' }).format(new Date())
-const todayLabel = todayRaw.charAt(0).toUpperCase() + todayRaw.slice(1)
+// Fecha corta: "Mié, 11 Nov 2026" (mes con tres letras).
+const todayLabel = (() => {
+  const parts = Object.fromEntries(new Intl.DateTimeFormat('es-CO', { weekday: 'short', day: 'numeric', month: 'short', year: 'numeric', timeZone: 'America/Bogota' }).formatToParts(new Date()).map((p) => [p.type, p.value]))
+  const cap = (x) => x.replace('.', '').charAt(0).toUpperCase() + x.replace('.', '').slice(1, 3)
+  return `${cap(parts.weekday)}, ${parts.day} ${cap(parts.month)} ${parts.year}`
+})()
 
 // Selector de sede del administrador: "Todas las sedes" o un municipio en particular.
 const SiteSelector = ({ value, onChange }) => {
@@ -95,8 +101,14 @@ const AppLayout = () => {
   const { settings, logo } = useSettings()
   const { pathname } = useLocation()
   const [open, setOpen] = useState(false)
+  // En escritorio el botón de menú contrae o expande el menú lateral (se recuerda); en celular abre el menú.
+  const [collapsed, setCollapsed] = useState(() => { try { return localStorage.getItem('cv_sidebar') === 'off' } catch { return false } })
+  const toggleMenu = () => {
+    if (window.matchMedia('(max-width: 1024px)').matches) { setOpen(true); return }
+    setCollapsed((c) => { try { localStorage.setItem('cv_sidebar', c ? 'on' : 'off') } catch { /* sin almacenamiento */ } return !c })
+  }
   // Perfil, usuarios y configuración son compartidos: conservan el módulo en el que se estaba.
-  const shared = ['/perfil', '/firma', '/usuarios', '/configuracion'].some((p) => pathname.startsWith(p))
+  const shared = ['/perfil', '/firma', '/usuarios', '/configuracion', '/legal'].some((p) => pathname.startsWith(p))
   const [moduleId, setModuleId] = useState(() => {
     if (!shared) return moduleFromPath(pathname)
     const own = modulesForUser(user).map((m) => m.id)
@@ -122,10 +134,15 @@ const AppLayout = () => {
   useEffect(() => setOpen(false), [pathname])
 
   return (
-    <div className="app">
+    <div className={`app${collapsed ? ' sidebar-off' : ''}`}>
       <aside className={`sidebar${open ? ' open' : ''}`}>
         <div className="sidebar-brand">
           <img src={logo} alt={settings.ipsName} />
+        </div>
+        <div className="sidebar-site">
+          {admin
+            ? <SiteSelector value={site} onChange={changeSite} />
+            : user.site && <span className="site-chip" title={SITE_TYPES[user.site.type]}><MdPlace /> {user.site.name}</span>}
         </div>
         <div className="module-wrap">
           <ModuleSwitch current={moduleId} user={user} />
@@ -154,21 +171,20 @@ const AppLayout = () => {
               <MdLogout />
             </button>
           </div>
+          <UpgradeButton />
         </div>
       </aside>
       <div className={`backdrop${open ? ' show' : ''}`} onClick={() => setOpen(false)} />
 
       <div className="main">
         <header className="topbar">
-          <button type="button" className="btn btn-ghost btn-icon menu-toggle" onClick={() => setOpen(true)} aria-label="Abrir menú"><MdMenu /></button>
+          <button type="button" className="btn btn-ghost btn-icon menu-toggle" onClick={toggleMenu} aria-label={collapsed ? 'Mostrar menú' : 'Menú'} title={collapsed ? 'Mostrar menú lateral' : 'Ocultar menú lateral'}><MdMenu /></button>
           <div className="topbar-title">
             <small>{currentModule.fullLabel}{section ? ` · ${section}` : ''}</small>
             <strong>{title || settings.shortName}</strong>
           </div>
-          {admin
-            ? <SiteSelector value={site} onChange={changeSite} />
-            : user.site && <span className="site-chip hide-sm" title={SITE_TYPES[user.site.type]}><MdPlace /> {user.site.name}</span>}
-          <span className="hide-md" style={{ color: 'var(--muted)', fontSize: 13 }}>{todayLabel}</span>
+          <GlobalSearch />
+          <span className="topbar-date hide-md">{todayLabel}</span>
           <UserMenu />
         </header>
         <main className="content">

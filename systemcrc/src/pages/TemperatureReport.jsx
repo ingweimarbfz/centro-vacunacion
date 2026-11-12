@@ -1,4 +1,5 @@
 import React, { useEffect, useMemo, useState } from 'react'
+import MonthPicker from '../components/MonthPicker'
 import { useNavigate, useSearchParams } from 'react-router-dom'
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, ReferenceLine, ReferenceArea, Legend } from 'recharts'
 import { MdArrowBack, MdPrint, MdErrorOutline } from 'react-icons/md'
@@ -111,7 +112,7 @@ const TemperatureReport = () => {
       <div className="cy-toolbar no-print">
         <button type="button" className="btn btn-outline" onClick={() => navigate('/temperatura')}><MdArrowBack /> Temperatura</button>
         <div style={{ display: 'flex', gap: 8 }}>
-          <input type="month" className="input" value={ym} max={currentMonth()} onChange={(e) => e.target.value && setParams({ mes: e.target.value })} aria-label="Mes" style={{ width: 170 }} />
+          <MonthPicker value={ym} max={currentMonth()} onChange={(v) => setParams({ mes: v })} />
           <button type="button" className="btn btn-primary" onClick={() => window.print()}><MdPrint /> Imprimir / Guardar PDF</button>
         </div>
       </div>

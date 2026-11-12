@@ -1,6 +1,6 @@
-import { Link } from 'react-router-dom'
 import React, { useEffect, useRef, useState } from 'react'
-import { MdSave, MdUpload, MdRestartAlt, MdPalette, MdThermostat, MdBusiness, MdErrorOutline, MdImage } from 'react-icons/md'
+import { MdSave, MdUpload, MdRestartAlt, MdPalette, MdBusiness, MdErrorOutline, MdImage, MdLogin, MdGavel } from 'react-icons/md'
+import { Link } from 'react-router-dom'
 import api, { errorMessage } from '../api/client'
 import { useSettings, applyTheme, DEFAULT_SETTINGS } from '../context/SettingsContext'
 import { PageHead, Card, Spinner, useToast } from '../components/ui'
@@ -8,6 +8,8 @@ import { UsersSignaturesCard } from './SignaturePage'
 import DiscountsCard from './DiscountsCard'
 import { resizeImage } from '../utils/image'
 import defaultLogo from '../assets/logoCRCSC.png'
+import defaultLoginImage from '../assets/loginHealth.svg'
+import { defaultLoginDescription, defaultLoginFooter } from '../components/Login'
 
 const PRESETS = [
   ['Cruz Roja', '#E30613', '#1F2A44'],
@@ -35,6 +37,7 @@ const SettingsPage = () => {
   const [saving, setSaving] = useState(false)
   const [uploading, setUploading] = useState(false)
   const fileRef = useRef(null)
+  const loginRef = useRef(null)
 
   useEffect(() => {
     api.get('/configuracion').then(({ data }) => setForm(data)).catch((e) => setError(errorMessage(e)))
@@ -46,7 +49,7 @@ const SettingsPage = () => {
 
   const set = (k) => (v) => setForm((f) => ({ ...f, [k]: v?.target ? v.target.value : v }))
 
-  const publish = (data) => setGlobal((g) => ({ ...g, ipsName: data.ipsName, shortName: data.shortName, primaryColor: data.primaryColor, secondaryColor: data.secondaryColor, logoUrl: data.logoUrl }))
+  const publish = (data) => setGlobal((g) => ({ ...g, ipsName: data.ipsName, shortName: data.shortName, primaryColor: data.primaryColor, secondaryColor: data.secondaryColor, logoUrl: data.logoUrl, loginImageUrl: data.loginImageUrl, loginDescription: data.loginDescription, loginFooter: data.loginFooter }))
 
   const save = async (e) => {
     e.preventDefault()
@@ -81,6 +84,21 @@ const SettingsPage = () => {
     }
   }
 
+  const uploadLoginImage = async (file) => {
+    if (!file) return
+    setUploading(true)
+    try {
+      const image = await resizeImage(file, { max: 1600, type: 'image/jpeg', quality: 0.82 })
+      const { data } = await api.post('/configuracion/login-imagen', { image })
+      setForm((f) => ({ ...f, loginImageUrl: data.loginImageUrl })); publish(data)
+      toast('Imagen del login actualizada')
+    } catch (err) { toast(errorMessage(err), 'bad') } finally { setUploading(false); if (loginRef.current) loginRef.current.value = '' }
+  }
+  const resetLoginImage = async () => {
+    setUploading(true)
+    try { const { data } = await api.delete('/configuracion/login-imagen'); setForm((f) => ({ ...f, loginImageUrl: null })); publish(data); toast('Se restauró la imagen por defecto') } catch (err) { toast(errorMessage(err), 'bad') } finally { setUploading(false) }
+  }
+
   const resetLogo = async () => {
     setUploading(true)
     try {
@@ -109,7 +127,7 @@ const SettingsPage = () => {
           <Card title="Datos de la IPS" icon={<MdBusiness style={{ color: 'var(--brand)' }} />}>
             <div className="form-grid">
               <div className="field span-2"><label>Nombre de la institución</label><input value={form.ipsName} onChange={set('ipsName')} maxLength={90} /></div>
-              <div className="field"><label>Nombre corto</label><input value={form.shortName} onChange={set('shortName')} maxLength={40} /><span className="hint">Se muestra en el login y en la pestaña del navegador.</span></div>
+              <div className="field"><label>Nombre corto</label><input value={form.shortName} onChange={set('shortName')} maxLength={40} /><span className="hint">Se usa en los formatos impresos y en la pestaña del navegador.</span></div>
             </div>
           </Card>
 
@@ -131,8 +149,22 @@ const SettingsPage = () => {
             </div>
           </Card>
 
-          <Card title="Configuración de los servicios" icon={<MdThermostat style={{ color: 'var(--brand)' }} />}>
-            <p style={{ margin: 0, color: 'var(--ink-2)' }}>El valor de la citología y el rango de temperatura se configuran en el menú de cada servicio: <Link to="/citologias/configuracion">Citologías → Configuración</Link> y <Link to="/temperatura/configuracion">Cadena de frío → Configuración</Link>.</p>
+          <Card title="Pantalla de inicio de sesión" subtitle="Imagen de fondo, descripción y pie de página del login" icon={<MdLogin style={{ color: 'var(--brand)' }} />}>
+            <div className="login-cfg">
+              <div className="login-cfg-img" style={{ backgroundImage: `url(${form.loginImageUrl || defaultLoginImage})` }}>
+                <span>{form.loginImageUrl ? 'Imagen propia' : 'Imagen por defecto'}</span>
+              </div>
+              <div className="stack" style={{ gap: 8, flex: 1 }}>
+                <input ref={loginRef} type="file" accept="image/png,image/jpeg,image/webp" hidden onChange={(e) => uploadLoginImage(e.target.files[0])} />
+                <button type="button" className="btn btn-outline" onClick={() => loginRef.current.click()} disabled={uploading}>{uploading ? <Spinner /> : <MdUpload />} Cargar imagen de fondo</button>
+                {form.loginImageUrl && <button type="button" className="btn btn-ghost" onClick={resetLoginImage} disabled={uploading}><MdRestartAlt /> Usar la imagen por defecto</button>}
+                <span className="hint">JPG o PNG horizontal; se ajusta a 1600 px. Se muestra con el color secundario encima.</span>
+              </div>
+            </div>
+            <div className="form-grid" style={{ marginTop: 14 }}>
+              <div className="field span-all"><label>Descripción</label><textarea value={form.loginDescription || ''} onChange={set('loginDescription')} maxLength={600} style={{ minHeight: 80 }} placeholder={defaultLoginDescription(form.ipsName)} /><span className="hint">Vacío = texto por defecto.</span></div>
+              <div className="field span-all"><label>Pie de página</label><input value={form.loginFooter || ''} onChange={set('loginFooter')} maxLength={200} placeholder={defaultLoginFooter()} /></div>
+            </div>
           </Card>
         </div>
 
@@ -167,6 +199,15 @@ const SettingsPage = () => {
     </form>
     <div id="descuentos" style={{ marginTop: 18 }}><DiscountsCard /></div>
     <div id="firmas" style={{ marginTop: 18 }}><UsersSignaturesCard /></div>
+    <div id="legal" style={{ marginTop: 18 }}>
+      <Card title="Documentos legales" subtitle="Contrato del servicio, acuerdo de tratamiento de datos y términos de uso (Integra IPS)" icon={<MdGavel style={{ color: 'var(--brand)' }} />}>
+        <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+          <Link className="btn btn-outline" to="/legal/contrato"><MdGavel /> Contrato de servicio</Link>
+          <Link className="btn btn-outline" to="/legal/datos"><MdGavel /> Acuerdo de tratamiento de datos</Link>
+          <Link className="btn btn-outline" to="/legal/terminos"><MdGavel /> Términos y condiciones</Link>
+        </div>
+      </Card>
+    </div>
     </>
   )
 }

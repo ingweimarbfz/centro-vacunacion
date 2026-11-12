@@ -1,11 +1,15 @@
 import React, { useState } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
-import { MdPerson, MdLock, MdVisibility, MdVisibilityOff, MdErrorOutline, MdLocalHospital, MdEmergency, MdVolunteerActivism, MdInsights } from 'react-icons/md'
+import { MdPerson, MdLock, MdVisibility, MdVisibilityOff, MdErrorOutline, MdLocalHospital, MdRule, MdInventory2, MdInsights } from 'react-icons/md'
 import { useAuth } from '../context/AuthContext'
 import { useSettings } from '../context/SettingsContext'
 import { errorMessage } from '../api/client'
 import { Spinner } from './ui'
-import imageLogin from '../assets/imageLogin.jpg'
+import defaultImage from '../assets/loginHealth.svg'
+import { BRAND, BRAND_TAGLINE } from '../utils/brand'
+
+export const defaultLoginDescription = (ipsName) => `Plataforma de ${ipsName} que integra los servicios de salud, la habilitación y la operación de todas sus sedes, con información en tiempo real para decidir mejor.`
+export const defaultLoginFooter = () => `© ${new Date().getFullYear()} ${BRAND} · ${BRAND_TAGLINE} · Información protegida (Ley 1581 de 2012)`
 
 const Login = () => {
   const { login } = useAuth()
@@ -40,29 +44,26 @@ const Login = () => {
 
   return (
     <div className="login">
-      <section className="login-hero" style={{ '--hero-img': `url(${imageLogin})` }}>
-        <span className="login-tag">Sistema de información institucional</span>
+      <section className="login-hero" style={{ '--hero-img': `url(${settings.loginImageUrl || defaultImage})` }}>
+        <span className="login-tag">{BRAND_TAGLINE}</span>
         <div>
-          <h2>{settings.shortName}</h2>
-          <p>
-            Plataforma de la {settings.ipsName} que integra la operación de la seccional, sus unidades municipales y grupos de apoyo:
-            los servicios de salud de la IPS y la gestión de socorro, voluntariado y operaciones, con información en tiempo real para decidir mejor.
-          </p>
+          <h2>{BRAND}</h2>
+          <p>{settings.loginDescription || defaultLoginDescription(settings.ipsName)}</p>
           <div className="login-points">
-            <div><MdLocalHospital /><span><b>IPS</b> · vacunación y cadena de frío, citologías y hoja de vida de equipos biomédicos.</span></div>
-            <div><MdEmergency /><span><b>Socorro y operaciones</b> · eventos y emergencias, personal, inventario de insumos y flota vehicular.</span></div>
-            <div><MdVolunteerActivism /><span><b>Voluntariado</b> · horas de servicio, seguro y estado de cada voluntario.</span></div>
-            <div><MdInsights /><span><b>Dashboards por sede</b> · indicadores, alertas y reportes en PDF.</span></div>
+            <div><MdLocalHospital /><span><b>Servicios de salud</b> · citologías, cadena de frío, hoja de vida de equipos y traslado asistencial.</span></div>
+            <div><MdRule /><span><b>Habilitación</b> · estándares transversales con carpetas obligatorias, listas de chequeo y alertas de vencimiento.</span></div>
+            <div><MdInventory2 /><span><b>Operación</b> · inventario, bodegas y flota vehicular por sede.</span></div>
+            <div><MdInsights /><span><b>Dashboards</b> · indicadores, alertas, formatos en PDF y firmas digitales.</span></div>
           </div>
         </div>
-        <div className="login-foot">Humanidad · Imparcialidad · Neutralidad · Independencia · Voluntariado · Unidad · Universalidad</div>
+        <div className="login-foot">{settings.loginFooter || defaultLoginFooter()}</div>
       </section>
 
       <section className="login-panel">
         <form className="login-card" onSubmit={handleSubmit} noValidate>
           <div className="login-brand"><img src={logo} alt={settings.ipsName} /></div>
           <h1>Iniciar sesión</h1>
-          <p>Ingresa a {settings.shortName} con el usuario que te asignó el administrador.</p>
+          <p>Ingresa a {BRAND} con el usuario que te asignó el administrador.</p>
 
           <div className="field">
             <label htmlFor="userName">Usuario</label>

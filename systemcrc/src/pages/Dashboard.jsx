@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react'
+import MonthPicker, { shortMonth } from '../components/MonthPicker'
 import ExpiringSupplies from '../components/ExpiringSupplies'
 import PendingSignatures from '../components/PendingSignatures'
 import { Link } from 'react-router-dom'
@@ -12,10 +13,7 @@ import { WIDGETS } from './dashboard/widgets'
 import SitesSummary from '../components/SitesSummary'
 import { getSiteFilter } from '../api/client'
 
-const monthLabel = (ym) => {
-  const [y, m] = ym.split('-').map(Number)
-  return new Intl.DateTimeFormat('es-CO', { month: 'long', year: 'numeric', timeZone: 'UTC' }).format(new Date(Date.UTC(y, m - 1, 15)))
-}
+const monthLabel = (ym) => shortMonth(ym)
 const currentMonth = () => new Intl.DateTimeFormat('en-CA', { timeZone: 'America/Bogota' }).format(new Date()).slice(0, 7)
 
 const Dashboard = () => {
@@ -44,8 +42,7 @@ const Dashboard = () => {
   return (
     <>
       <PageHead title={`Hola, ${firstName}`} subtitle={`Este es el resumen de ${monthLabel(month)}.`}>
-        <input type="month" className="input" style={{ width: 180 }} value={month} max={currentMonth()}
-          onChange={(e) => e.target.value && setMonth(e.target.value)} aria-label="Mes del resumen" />
+        <MonthPicker value={month} max={currentMonth()} onChange={setMonth} ariaLabel="Mes del resumen" />
         {can.registerData(user.role) && (
           <Link to="/temperatura" className="btn btn-primary"><MdAdd /> Registrar temperatura</Link>
         )}

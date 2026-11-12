@@ -1,6 +1,6 @@
 import React, { useEffect, useMemo, useState } from 'react'
 import { MdPersonAdd, MdSearch, MdEdit, MdDelete, MdBadge, MdErrorOutline } from 'react-icons/md'
-import { Link } from 'react-router-dom'
+import { Link, useSearchParams } from 'react-router-dom'
 import api, { errorMessage, getSiteFilter } from '../../api/client'
 import { useAuth } from '../../context/AuthContext'
 import { can } from '../../utils/permissions'
@@ -71,7 +71,8 @@ const PeoplePage = () => {
   const [toast, toastNode] = useToast()
   const [rows, setRows] = useState(null)
   const [error, setError] = useState('')
-  const [q, setQ] = useState('')
+  const [params] = useSearchParams()
+  const [q, setQ] = useState(params.get('q') || '')
   const [onlyMissing, setOnlyMissing] = useState(() => new URLSearchParams(window.location.search).get('incompletos') === '1')
   const [editing, setEditing] = useState(null)
   const [deleting, setDeleting] = useState(null)

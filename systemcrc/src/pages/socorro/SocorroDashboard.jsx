@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react'
+import MonthPicker, { shortMonth } from '../../components/MonthPicker'
 import ExpiringSupplies from '../../components/ExpiringSupplies'
 import PendingSignatures from '../../components/PendingSignatures'
 import { Link } from 'react-router-dom'
@@ -17,7 +18,7 @@ import { getSiteFilter } from '../../api/client'
 
 const axis = { fontSize: 11, fill: '#6B7280' }
 const currentMonth = () => new Intl.DateTimeFormat('en-CA', { timeZone: 'America/Bogota' }).format(new Date()).slice(0, 7)
-const monthLabel = (ym) => { const [y, m] = ym.split('-').map(Number); return new Intl.DateTimeFormat('es-CO', { month: 'long', year: 'numeric', timeZone: 'UTC' }).format(new Date(Date.UTC(y, m - 1, 15))) }
+const monthLabel = (ym) => shortMonth(ym)
 
 const Kpi = ({ label, value, unit, icon, tone = '', foot }) => (
   <div className="card kpi">
@@ -49,7 +50,7 @@ const SocorroDashboard = () => {
   return (
     <>
       <PageHead title="Operaciones Generales" subtitle={`Resumen de ${monthLabel(month)}: Socorro, Educación, personal e inventario de la bodega.`}>
-        <input type="month" className="input" style={{ width: 180 }} value={month} max={currentMonth()} onChange={(e) => e.target.value && setMonth(e.target.value)} aria-label="Mes" />
+        <MonthPicker value={month} max={currentMonth()} onChange={setMonth} />
         {staff && <Link to="/socorro/educacion" className="btn btn-outline"><MdAdd /> Actividad de educación</Link>}
         {staff && <Link to="/socorro/eventos" className="btn btn-primary"><MdAdd /> Nuevo evento</Link>}
       </PageHead>

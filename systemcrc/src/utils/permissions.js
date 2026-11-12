@@ -1,7 +1,7 @@
 import {
   MdDashboard, MdThermostat, MdNoteAdd, MdManageSearch, MdPeople, MdSettings, MdPerson,
   MdEmergency, MdInventory2, MdBadge, MdLocalHospital, MdLocalShipping, MdDirectionsCar, MdAssignment, MdSpeed,
-  MdMedicalServices, MdAccountTree, MdVolunteerActivism, MdFactCheck, MdSchool, MdWarehouse, MdCategory, MdSwapHoriz, MdHealing, MdAirportShuttle, MdDraw, MdTune, MdInsights, MdGroups, MdRule, MdMenuBook, MdFolderShared
+  MdMedicalServices, MdAccountTree, MdVolunteerActivism, MdFactCheck, MdSchool, MdWarehouse, MdCategory, MdSwapHoriz, MdHealing, MdAirportShuttle, MdDraw, MdTune, MdInsights, MdGroups, MdRule, MdMenuBook, MdFolderShared, MdMedication
 } from 'react-icons/md'
 
 export const ROLE_LABELS = {
@@ -47,14 +47,19 @@ export const siteHas = (user, service) => {
 export const USER_MODULES = {
   ips: [['ips_dashboard', 'Dashboard de IPS'], ['citologias', 'Citologías'], ['traslado', 'Traslado asistencial (ambulancias)'], ['temperatura', 'Registro de temperatura'], ['equipos', 'Hoja de vida de equipos']],
   socorro: [['og_dashboard', 'Dashboard de Operaciones Generales'], ['socorro', 'Socorro (eventos y emergencias)'], ['educacion', 'Educación'], ['personas', 'Personas / voluntarios'], ['reporte_voluntarios', 'Reporte de voluntarios'], ['inventario', 'Inventario y bodegas'], ['flota', 'Flota vehicular'], ['voluntario', 'Panel de voluntario']],
-  estandares: [['talento_humano', 'Talento humano (hojas de vida, contratos y chequeo)']]
+  estandares: [['talento_humano', 'Talento humano (hojas de vida, contratos y chequeo)'], ['procesos_prioritarios', 'Procesos prioritarios (documentos)'], ['interdependencia', 'Interdependencia (carpeta y documentos)'], ['medicamentos', 'Medicamentos, dispositivos e insumos (documentos)'], ['infraestructura', 'Infraestructura (carpeta, seguimiento y documentos)'], ['historia_clinica', 'Historia clínica y registros (carpeta y documentos)']]
 }
 export const USER_MODULE_GROUPS = { ips: 'IPS', socorro: 'Operaciones Generales', estandares: 'Estándares transversales' }
+// El plan contratado limita los módulos de todos (también del administrador).
+export const inPlan = (user, m) => !user?.plan?.modules || user.plan.modules.includes(m)
 export const hasModule = (user, mod) => {
   if (!user) return false
-  if (user.role === 'administrador' || !mod) return true
+  if (!mod) return true
+  const list = (Array.isArray(mod) ? mod : [mod]).filter((m) => inPlan(user, m))
+  if (!list.length) return false
+  if (user.role === 'administrador') return true
   const own = user.modules || []
-  return (Array.isArray(mod) ? mod : [mod]).some((m) => own.includes(m))
+  return list.some((m) => own.includes(m))
 }
 // ¿Puede ver una ruta o ítem del menú? roles del ítem + módulo habilitado + servicio de la sede.
 // grantable: si el usuario tiene el módulo, lo ve aunque su rol no esté en roles.
@@ -151,15 +156,39 @@ const NAV = {
   ],
   // Estándares transversales (Resolución 3100 de 2019). Cada estándar se suma como una sección.
   estandares: [
-    { title: 'General', items: [{ to: '/estandares', label: 'Estándares transversales', icon: MdRule, roles: STAFF, end: true, module: 'talento_humano' }] },
+    { title: 'General', items: [{ to: '/estandares', label: 'Dashboard', icon: MdDashboard, roles: STAFF, end: true, module: ['talento_humano', 'procesos_prioritarios', 'interdependencia', 'medicamentos', 'infraestructura', 'historia_clinica'] }] },
     {
       title: '1. Talento humano',
       items: [
         { to: '/estandares/talento-humano', label: 'Dashboard', icon: MdDashboard, roles: STAFF, end: true, module: 'talento_humano' },
         { to: '/estandares/talento-humano/personal', label: 'Hojas de vida', icon: MdFolderShared, roles: STAFF, module: 'talento_humano' },
         { to: '/estandares/talento-humano/listado', label: 'Listado de talento humano', icon: MdGroups, roles: STAFF, module: 'talento_humano' },
-        { to: '/estandares/talento-humano/instructivo', label: 'Instructivo', icon: MdMenuBook, roles: STAFF, module: 'talento_humano' },
+        { to: '/estandares/talento-humano/instructivo', label: 'Instructivo y formatos', icon: MdMenuBook, roles: STAFF, module: 'talento_humano' },
         { to: '/estandares/talento-humano/configuracion', label: 'Cargos y requisitos', icon: MdTune, roles: ADMIN }
+      ]
+    },
+    {
+      title: '2. Infraestructura',
+      items: [
+        { to: '/estandares/infraestructura', label: 'Carpeta y seguimiento', icon: MdFactCheck, roles: STAFF, module: 'infraestructura', end: true },
+        { to: '/estandares/infraestructura/documentos', label: 'Documentos', icon: MdFolderShared, roles: STAFF, module: 'infraestructura' }
+      ]
+    },
+    { title: '3. Dotación', items: [{ to: '/equipos', label: 'Hoja de vida de equipos (IPS)', icon: MdMedicalServices, roles: STAFF, service: 'any', module: 'equipos' }] },
+    { title: '4. Medicamentos y dispositivos', items: [{ to: '/estandares/medicamentos', label: 'Documentos e inventario', icon: MdMedication, roles: STAFF, module: 'medicamentos' }] },
+    { title: '5. Procesos prioritarios', items: [{ to: '/estandares/procesos-prioritarios', label: 'Documentos y formatos', icon: MdAccountTree, roles: STAFF, module: 'procesos_prioritarios' }] },
+    {
+      title: '6. Historia clínica y registros',
+      items: [
+        { to: '/estandares/historia-clinica', label: 'Carpeta obligatoria', icon: MdFactCheck, roles: STAFF, module: 'historia_clinica', end: true },
+        { to: '/estandares/historia-clinica/documentos', label: 'Documentos', icon: MdFolderShared, roles: STAFF, module: 'historia_clinica' }
+      ]
+    },
+    {
+      title: '7. Interdependencia',
+      items: [
+        { to: '/estandares/interdependencia', label: 'Carpeta obligatoria', icon: MdFactCheck, roles: STAFF, module: 'interdependencia', end: true },
+        { to: '/estandares/interdependencia/documentos', label: 'Documentos', icon: MdFolderShared, roles: STAFF, module: 'interdependencia' }
       ]
     },
     ...SHARED

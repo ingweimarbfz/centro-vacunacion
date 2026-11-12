@@ -2,7 +2,7 @@ import React, { useEffect, useMemo, useState } from 'react'
 import { MdPersonAdd, MdSearch, MdEdit, MdDelete, MdPeople, MdErrorOutline, MdViewModule, MdRestartAlt } from 'react-icons/md'
 import api, { errorMessage, getSiteFilter } from '../api/client'
 import { useAuth } from '../context/AuthContext'
-import { ROLE_LABELS, ROLE_DESCRIPTIONS, SITE_TYPES, USER_MODULES, USER_MODULE_GROUPS } from '../utils/permissions'
+import { ROLE_LABELS, ROLE_DESCRIPTIONS, SITE_TYPES, USER_MODULES, USER_MODULE_GROUPS, inPlan } from '../utils/permissions'
 import { PageHead, Card, Modal, Avatar, Empty, Spinner, useToast } from '../components/ui'
 
 const ROLE_TONE = { administrador: 'brand', empleado: 'navy', voluntario: 'ok', conductor: 'info' }
@@ -10,6 +10,7 @@ const EMPTY = { identification: '', name: '', lastName: '', nameUser: '', email:
 
 // Módulos que el usuario ve: los de su rol o una selección personalizada.
 const ModulesField = ({ role, value, byRole, onChange }) => {
+  const { user: me } = useAuth()
   if (role === 'administrador') return <div className="alert info" style={{ margin: 0 }}><MdViewModule /><span>El administrador ve todos los módulos.</span></div>
   const defaults = byRole?.[role] || []
   const custom = Array.isArray(value)
@@ -28,7 +29,7 @@ const ModulesField = ({ role, value, byRole, onChange }) => {
         <div key={group}>
           <span className="label">{USER_MODULE_GROUPS[group]}</span>
           <div className="rc-checks" style={{ marginTop: 6 }}>
-            {items.filter(([k]) => (k !== 'traslado' || role === 'conductor') && (k !== 'voluntario' || role === 'voluntario')).map(([k, l]) => (
+            {items.filter(([k]) => inPlan(me, k) && (k !== 'traslado' || role === 'conductor') && (k !== 'voluntario' || role === 'voluntario')).map(([k, l]) => (
               <label key={k} className={`rc-check${current.includes(k) ? ' on' : ''}`}><input type="checkbox" checked={current.includes(k)} onChange={() => toggle(k)} /> {l}</label>
             ))}
           </div>
@@ -103,7 +104,7 @@ const UserForm = ({ initial, sites, byRole, onClose, onSaved }) => {
             <label className="switch"><input type="checkbox" checked={form.active} onChange={set('active')} /> {form.active ? 'Usuario activo' : 'Usuario inactivo'}</label>
           </div>
           <div className="field span-all">
-            <label className="switch"><input type="checkbox" checked={Boolean(form.remunerado)} onChange={set('remunerado')} /> Personal remunerado (empleado de la CRC)</label>
+            <label className="switch"><input type="checkbox" checked={Boolean(form.remunerado)} onChange={set('remunerado')} /> Personal remunerado (empleado)</label>
             <span className="hint">El personal remunerado no suma horas de voluntariado cuando participa en eventos o servicios, aunque también esté registrado como voluntario.</span>
           </div>
           <div className="field span-all"><label>Módulos que puede ver</label>
