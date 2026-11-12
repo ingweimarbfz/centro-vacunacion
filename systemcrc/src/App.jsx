@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { lazy, Suspense } from 'react'
 import { BrowserRouter, Navigate, Route, Routes, useLocation } from 'react-router-dom'
 import './styles/ui.css'
 import { AuthProvider, useAuth } from './context/AuthContext'
@@ -7,74 +7,78 @@ import { ROUTE_ROLES, homeFor, canSee, moduleFromPath } from './utils/permission
 import { Spinner } from './components/ui'
 import AppLayout from './layout/AppLayout'
 import Login from './components/Login'
-import Dashboard from './pages/Dashboard'
-import TemperaturePage from './pages/TemperaturePage'
-import TemperatureReport from './pages/TemperatureReport'
-import RegisterCytology from './components/RegisterCytology'
-import ConsultCytology from './components/ConsultCytology'
-import UsersPage from './pages/UsersPage'
-import SettingsPage from './pages/SettingsPage'
-import ProfilePage from './pages/ProfilePage'
-import SocorroDashboard from './pages/socorro/SocorroDashboard'
-import EventsPage from './pages/socorro/EventsPage'
-import EventDetail from './pages/socorro/EventDetail'
-import PeoplePage from './pages/socorro/PeoplePage'
-import InventoryDashboard from './pages/inventario/InventoryDashboard'
-import StockPage from './pages/inventario/StockPage'
-import MovementsPage from './pages/inventario/MovementsPage'
-import ProductsPage from './pages/inventario/ProductsPage'
-import InventorySheet from './pages/inventario/InventorySheet'
-import IpsServicesPage from './pages/IpsServicesPage'
-import WarehousesPage from './pages/inventario/WarehousesPage'
-import { MySignaturePage } from './pages/SignaturePage'
-import CytologyPage from './pages/CytologyPage'
-import ServiceConfigPage from './pages/ServiceConfigPage'
-import VolunteerReport from './pages/socorro/VolunteerReport'
-import AmbulanceDashboard from './pages/vehiculos/AmbulanceDashboard'
 import { MODULE_KEY } from './layout/AppLayout'
-import FleetDashboard from './pages/vehiculos/FleetDashboard'
-import VehiclesPage from './pages/vehiculos/VehiclesPage'
-import VehicleDetail from './pages/vehiculos/VehicleDetail'
-import TripsPage from './pages/vehiculos/TripsPage'
-import TripDetail from './pages/vehiculos/TripDetail'
-import InspectionsPage from './pages/vehiculos/InspectionsPage'
-import InspectionForm from './pages/vehiculos/InspectionForm'
-import InspectionDetail from './pages/vehiculos/InspectionDetail'
-import EquipmentPage from './pages/equipos/EquipmentPage'
-import EquipmentDetail from './pages/equipos/EquipmentDetail'
-import SitesPage from './pages/SitesPage'
-import VolunteerPanel from './pages/socorro/VolunteerPanel'
-import StandardsHome from './pages/talento/StandardsHome'
-import ThDashboard from './pages/talento/ThDashboard'
-import StaffPage from './pages/talento/StaffPage'
-import StaffDetail from './pages/talento/StaffDetail'
-import ChecklistSheet from './pages/talento/ChecklistSheet'
-import ThListado from './pages/talento/ThListado'
-import ThGuide from './pages/talento/ThGuide'
-import ThConfig from './pages/talento/ThConfig'
-import StdDocumentsPage from './pages/estandares/StdDocumentsPage'
-import StdFolderPage from './pages/estandares/StdFolderPage'
-import StandardsDashboard from './pages/estandares/StandardsDashboard'
 import LegalGate, { LegalPage } from './components/legal/LegalGate'
 import AutoOrientation from './components/AutoOrientation'
-import { BillingPage, BillingSheet, BillingDashboardPage } from './pages/facturacion/BillingPage'
-import ProvidersPage from './pages/facturacion/ProvidersPage'
-import ServicesBillingPage from './pages/facturacion/ServicesBillingPage'
-import TariffPage from './pages/facturacion/TariffPage'
-import TaxSettingsPage from './pages/facturacion/TaxSettingsPage'
-import VaccinationDashboard from './pages/vacunacion/VaccinationDashboard'
-import RegisterVaccination from './pages/vacunacion/RegisterVaccination'
-import VaccinationRecords from './pages/vacunacion/VaccinationRecords'
-import VaccinationCard from './pages/vacunacion/VaccinationCard'
-import VaccinationFollowup from './pages/vacunacion/VaccinationFollowup'
-import VaccinesConfig from './pages/vacunacion/VaccinesConfig'
-import InvoicePage from './pages/facturacion/InvoicePage'
-import PublicDocument from './pages/PublicDocument'
-import DocGeneralesPage from './pages/calidad/DocGeneralesPage'
-import DocGeneralesDashboard from './pages/calidad/DocGeneralesDashboard'
-import StdChecklistSheet from './pages/estandares/StdChecklistSheet'
-import InventoryBridge from './pages/estandares/InventoryBridge'
-import EquipmentBridge from './pages/estandares/EquipmentBridge'
+
+// Cada pantalla se descarga solo cuando se abre (carga inicial más liviana).
+const Dashboard = lazy(() => import('./pages/Dashboard'))
+const TemperaturePage = lazy(() => import('./pages/TemperaturePage'))
+const TemperatureReport = lazy(() => import('./pages/TemperatureReport'))
+const RegisterCytology = lazy(() => import('./components/RegisterCytology'))
+const ConsultCytology = lazy(() => import('./components/ConsultCytology'))
+const UsersPage = lazy(() => import('./pages/UsersPage'))
+const SettingsPage = lazy(() => import('./pages/SettingsPage'))
+const ProfilePage = lazy(() => import('./pages/ProfilePage'))
+const SocorroDashboard = lazy(() => import('./pages/socorro/SocorroDashboard'))
+const EventsPage = lazy(() => import('./pages/socorro/EventsPage'))
+const EventDetail = lazy(() => import('./pages/socorro/EventDetail'))
+const PeoplePage = lazy(() => import('./pages/socorro/PeoplePage'))
+const InventoryDashboard = lazy(() => import('./pages/inventario/InventoryDashboard'))
+const StockPage = lazy(() => import('./pages/inventario/StockPage'))
+const MovementsPage = lazy(() => import('./pages/inventario/MovementsPage'))
+const ProductsPage = lazy(() => import('./pages/inventario/ProductsPage'))
+const InventorySheet = lazy(() => import('./pages/inventario/InventorySheet'))
+const IpsServicesPage = lazy(() => import('./pages/IpsServicesPage'))
+const WarehousesPage = lazy(() => import('./pages/inventario/WarehousesPage'))
+const MySignaturePage = lazy(() => import('./pages/SignaturePage').then((m) => ({ default: m.MySignaturePage })))
+const CytologyPage = lazy(() => import('./pages/CytologyPage'))
+const ServiceConfigPage = lazy(() => import('./pages/ServiceConfigPage'))
+const VolunteerReport = lazy(() => import('./pages/socorro/VolunteerReport'))
+const AmbulanceDashboard = lazy(() => import('./pages/vehiculos/AmbulanceDashboard'))
+const FleetDashboard = lazy(() => import('./pages/vehiculos/FleetDashboard'))
+const VehiclesPage = lazy(() => import('./pages/vehiculos/VehiclesPage'))
+const VehicleDetail = lazy(() => import('./pages/vehiculos/VehicleDetail'))
+const TripsPage = lazy(() => import('./pages/vehiculos/TripsPage'))
+const TripDetail = lazy(() => import('./pages/vehiculos/TripDetail'))
+const InspectionsPage = lazy(() => import('./pages/vehiculos/InspectionsPage'))
+const InspectionForm = lazy(() => import('./pages/vehiculos/InspectionForm'))
+const InspectionDetail = lazy(() => import('./pages/vehiculos/InspectionDetail'))
+const EquipmentPage = lazy(() => import('./pages/equipos/EquipmentPage'))
+const EquipmentDetail = lazy(() => import('./pages/equipos/EquipmentDetail'))
+const SitesPage = lazy(() => import('./pages/SitesPage'))
+const VolunteerPanel = lazy(() => import('./pages/socorro/VolunteerPanel'))
+const StandardsHome = lazy(() => import('./pages/talento/StandardsHome'))
+const ThDashboard = lazy(() => import('./pages/talento/ThDashboard'))
+const StaffPage = lazy(() => import('./pages/talento/StaffPage'))
+const StaffDetail = lazy(() => import('./pages/talento/StaffDetail'))
+const ChecklistSheet = lazy(() => import('./pages/talento/ChecklistSheet'))
+const ThListado = lazy(() => import('./pages/talento/ThListado'))
+const ThGuide = lazy(() => import('./pages/talento/ThGuide'))
+const ThConfig = lazy(() => import('./pages/talento/ThConfig'))
+const StdDocumentsPage = lazy(() => import('./pages/estandares/StdDocumentsPage'))
+const StdFolderPage = lazy(() => import('./pages/estandares/StdFolderPage'))
+const StandardsDashboard = lazy(() => import('./pages/estandares/StandardsDashboard'))
+const BillingPage = lazy(() => import('./pages/facturacion/BillingPage').then((m) => ({ default: m.BillingPage })))
+const BillingSheet = lazy(() => import('./pages/facturacion/BillingPage').then((m) => ({ default: m.BillingSheet })))
+const BillingDashboardPage = lazy(() => import('./pages/facturacion/BillingPage').then((m) => ({ default: m.BillingDashboardPage })))
+const ProvidersPage = lazy(() => import('./pages/facturacion/ProvidersPage'))
+const ServicesBillingPage = lazy(() => import('./pages/facturacion/ServicesBillingPage'))
+const TariffPage = lazy(() => import('./pages/facturacion/TariffPage'))
+const TaxSettingsPage = lazy(() => import('./pages/facturacion/TaxSettingsPage'))
+const VaccinationDashboard = lazy(() => import('./pages/vacunacion/VaccinationDashboard'))
+const RegisterVaccination = lazy(() => import('./pages/vacunacion/RegisterVaccination'))
+const VaccinationRecords = lazy(() => import('./pages/vacunacion/VaccinationRecords'))
+const VaccinationCard = lazy(() => import('./pages/vacunacion/VaccinationCard'))
+const VaccinationFollowup = lazy(() => import('./pages/vacunacion/VaccinationFollowup'))
+const VaccinesConfig = lazy(() => import('./pages/vacunacion/VaccinesConfig'))
+const InvoicePage = lazy(() => import('./pages/facturacion/InvoicePage'))
+const PublicDocument = lazy(() => import('./pages/PublicDocument'))
+const DocGeneralesPage = lazy(() => import('./pages/calidad/DocGeneralesPage'))
+const DocGeneralesDashboard = lazy(() => import('./pages/calidad/DocGeneralesDashboard'))
+const StdChecklistSheet = lazy(() => import('./pages/estandares/StdChecklistSheet'))
+const InventoryBridge = lazy(() => import('./pages/estandares/InventoryBridge'))
+const EquipmentBridge = lazy(() => import('./pages/estandares/EquipmentBridge'))
 
 // Protege rutas por sesión y por rol. Si el rol no tiene acceso, vuelve al dashboard.
 const Protected = ({ roles, service, module, grantable, children }) => {
@@ -106,6 +110,7 @@ const App = () => (
     <AuthProvider>
       <BrowserRouter>
         <AutoOrientation />
+        <Suspense fallback={<div className="splash"><Spinner /></div>}>
         <Routes>
           <Route path="/login" element={<LoginRoute />} />
           <Route path="/p/:token" element={<PublicDocument />} />
@@ -191,6 +196,7 @@ const App = () => (
           </Route>
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
+        </Suspense>
       </BrowserRouter>
     </AuthProvider>
   </SettingsProvider>

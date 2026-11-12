@@ -5,6 +5,8 @@ import api, { errorMessage, getSiteFilter } from '../../api/client'
 import { useAuth } from '../../context/AuthContext'
 import { PageHead, Card, Empty, Spinner } from '../../components/ui'
 import { fmtDateTime } from '../socorro/common'
+import usePagedList from '../../hooks/usePagedList'
+import LoadMore from '../../components/LoadMore'
 import { CATEGORY_ORDER, CATEGORY_PLURAL, CategoryBadge, MOVE_TONE, useCatalogs, qty } from './common'
 
 const MovementsPage = () => {
@@ -14,15 +16,15 @@ const MovementsPage = () => {
   const [params] = useSearchParams()
   const [warehouses, setWarehouses] = useState([])
   const [f, setF] = useState({ bodega: '', tipo: '', categoria: '', desde: '', hasta: '', item: params.get('item') || '' })
-  const [rows, setRows] = useState(null)
+  const list = usePagedList('/inventario/movimientos', 100); const rows = list.rows; const setRows = list.setRows
   const [error, setError] = useState('')
 
   const load = useCallback(async (x) => {
     setError(''); setRows(null)
     try {
-      const { data } = await api.get('/inventario/movimientos', { params: { bodega: x.bodega || undefined, tipo: x.tipo || undefined, categoria: x.categoria || undefined, desde: x.desde || undefined, hasta: x.hasta || undefined, item: x.item || undefined, limite: 500 } })
-      setRows(data)
+      await list.load({ bodega: x.bodega || undefined, tipo: x.tipo || undefined, categoria: x.categoria || undefined, desde: x.desde || undefined, hasta: x.hasta || undefined, item: x.item || undefined })
     } catch (e) { setError(errorMessage(e)) }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
   // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => { load(f) }, [load])
@@ -49,7 +51,7 @@ const MovementsPage = () => {
         </form>
       </Card>
       {error && <div className="alert bad" style={{ marginTop: 16 }}><MdErrorOutline /><span>{error}</span></div>}
-      <Card flush className="cy-results-card" title="Movimientos" subtitle={rows ? `${rows.length} registros${f.item && rows[0] ? ` · ${rows[0].item.name}${rows[0].item.lot ? ` lote ${rows[0].item.lot}` : ''}` : ''}` : ''}>
+      <Card flush className="cy-results-card" title="Movimientos" subtitle={rows ? `${list.total} registros${f.item && rows[0] ? ` · ${rows[0].item.name}${rows[0].item.lot ? ` lote ${rows[0].item.lot}` : ''}` : ''}` : ''}>
         {!rows ? <div className="splash" style={{ minHeight: 200 }}><Spinner /></div> : rows.length === 0 ? <Empty icon={<MdSwapHoriz />}>Sin movimientos con esos filtros.</Empty> : (
           <div className="table-wrap" style={{ marginTop: 12 }}>
             <table className="table">
@@ -74,6 +76,7 @@ const MovementsPage = () => {
             </table>
           </div>
         )}
+        {rows && <LoadMore shown={rows.length} total={list.total} hasMore={list.hasMore} loading={list.loadingMore} onMore={() => list.more().catch((e) => setError(errorMessage(e)))} />}
       </Card>
     </>
   )

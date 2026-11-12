@@ -3,6 +3,8 @@ import { Link, useNavigate } from 'react-router-dom'
 import { MdAdd, MdSearch, MdEmergency, MdSchool, MdErrorOutline, MdArrowForward, MdPlace, MdPeople, MdAccessTime } from 'react-icons/md'
 import api, { errorMessage } from '../../api/client'
 import { PageHead, Card, Modal, Empty, Spinner } from '../../components/ui'
+import usePagedList from '../../hooks/usePagedList'
+import LoadMore from '../../components/LoadMore'
 import { PersonLookup, StatusBadge, fmtDateTime, duration } from './common'
 
 export const AREA_INFO = {
@@ -54,7 +56,7 @@ const NewEventModal = ({ onClose, area }) => {
 const EventsPage = ({ area = 'socorro' }) => {
   const info = AREA_INFO[area]
   const [filters, setFilters] = useState({ q: '', estado: '', desde: '', hasta: '' })
-  const [rows, setRows] = useState(null)
+  const list = usePagedList('/socorro/eventos'); const rows = list.rows
   const [error, setError] = useState('')
   const [creating, setCreating] = useState(false)
 
@@ -62,11 +64,11 @@ const EventsPage = ({ area = 'socorro' }) => {
     setError('')
     try {
       const params = Object.fromEntries(Object.entries(f).filter(([, v]) => v))
-      const { data } = await api.get('/socorro/eventos', { params: { ...params, area } })
-      setRows(data)
+      await list.load({ ...params, area })
     } catch (e) {
       setError(errorMessage(e))
     }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [area])
 
   useEffect(() => { load({}) }, [load])
@@ -97,7 +99,7 @@ const EventsPage = ({ area = 'socorro' }) => {
 
       {error && <div className="alert bad" style={{ marginTop: 18 }}><MdErrorOutline /><span>{error}</span></div>}
 
-      <Card flush className="cy-results-card" title={info.title} subtitle={rows ? `${rows.length} ${info.noun} · ${open} en curso` : ''}>
+      <Card flush className="cy-results-card" title={info.title} subtitle={rows ? `${list.total} ${info.noun} · ${open} en curso` : ''}>
         {!rows ? <div className="splash" style={{ minHeight: 200 }}><Spinner /></div> : rows.length === 0 ? <Empty icon={area === 'educacion' ? <MdSchool /> : <MdEmergency />}>No hay {info.noun} con esos filtros.</Empty> : (
           <div className="table-wrap" style={{ marginTop: 12 }}>
             <table className="table">
@@ -122,6 +124,7 @@ const EventsPage = ({ area = 'socorro' }) => {
             </table>
           </div>
         )}
+        {rows && <LoadMore shown={rows.length} total={list.total} hasMore={list.hasMore} loading={list.loadingMore} onMore={() => list.more().catch((e) => setError(errorMessage(e)))} />}
       </Card>
       {creating && <NewEventModal area={area} onClose={() => setCreating(false)} />}
     </>

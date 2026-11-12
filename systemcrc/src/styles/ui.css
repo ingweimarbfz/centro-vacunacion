@@ -898,3 +898,5 @@ a.th-std:hover { box-shadow: var(--shadow-lg, 0 6px 18px rgba(0,0,0,.08)); }
 .temp-slot.done { cursor: default; opacity: .7; background: color-mix(in srgb, var(--ok, #16A34A) 6%, transparent); }
 .temp-slot-ok { margin-left: auto; color: var(--ok, #16A34A); }
 .th-file.over { border-color: var(--brand); background: var(--brand-50); }
+.load-more { display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; padding: 12px 20px; border-top: 1px solid var(--line); color: var(--muted); font-size: 13px; }
+.load-more b { color: var(--ink); }

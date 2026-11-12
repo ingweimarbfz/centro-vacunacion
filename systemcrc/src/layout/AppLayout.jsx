@@ -1,11 +1,11 @@
-import React, { useEffect, useRef, useState } from 'react'
+import React, { Suspense, useEffect, useRef, useState } from 'react'
 import { NavLink, Outlet, useLocation, useNavigate } from 'react-router-dom'
 import { MdMenu, MdLogout, MdPerson, MdKeyboardArrowDown, MdPlace } from 'react-icons/md'
 import { useAuth } from '../context/AuthContext'
 import { useSettings } from '../context/SettingsContext'
 import { navForUser, navSectionsFor, ROLE_LABELS, MODULES, moduleFromPath, modulesForUser, moduleHome, moduleTabFor, canSee, SITE_TYPES } from '../utils/permissions'
 import api, { getSiteFilter, setSiteFilter } from '../api/client'
-import { Avatar } from '../components/ui'
+import { Avatar, Spinner } from '../components/ui'
 import GlobalSearch from '../components/GlobalSearch'
 import TemperatureReminder from '../components/TemperatureReminder'
 import { UpgradeButton } from '../components/UpgradePlan'
@@ -199,7 +199,7 @@ const AppLayout = () => {
         </header>
         <main className="content">
           {/* Al cambiar de sede se recargan los datos de la página actual. */}
-          <Outlet key={site || 'all'} />
+          <Suspense fallback={<div className="splash" style={{ minHeight: 240 }}><Spinner /></div>}><Outlet key={site || 'all'} /></Suspense>
           <TemperatureReminder key={`rem-${site || 'all'}`} />
         </main>
       </div>
