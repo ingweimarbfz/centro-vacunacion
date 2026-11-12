@@ -5,6 +5,8 @@ import api, { errorMessage } from '../../api/client'
 import { PageHead, Card, Modal, Empty, Spinner, useToast } from '../../components/ui'
 import ShareDialog from '../../components/share/ShareDialog'
 import './vacunacion.css'
+import usePagedList from '../../hooks/usePagedList'
+import LoadMore from '../../components/LoadMore'
 
 const today = () => new Intl.DateTimeFormat('en-CA', { timeZone: 'America/Bogota' }).format(new Date())
 const fmt = (iso) => (iso ? iso.slice(0, 10).split('-').reverse().join('/') : '—')
@@ -44,12 +46,14 @@ const VaccinationRecords = () => {
   const [toast, toastNode] = useToast()
   const [tab, setTab] = useState(params.get('tab') || 'registros')
   const [f, setF] = useState({ desde: `${today().slice(0, 8)}01`, hasta: today(), documento: '', biologico: '' })
-  const [rows, setRows] = useState(null); const [esavi, setEsavi] = useState(null); const [vials, setVials] = useState(null); const [vaccines, setVaccines] = useState([])
+  const list = usePagedList('/vacunacion/registros'); const rows = list.rows
+  const [esavi, setEsavi] = useState(null); const [vials, setVials] = useState(null); const [vaccines, setVaccines] = useState([])
   const [modal, setModal] = useState(null); const [share, setShare] = useState(null)
   const load = useCallback(() => Promise.all([
-    api.get('/vacunacion/registros', { params: f }).then(({ data }) => setRows(data)),
+    list.load(f),
     api.get('/vacunacion/esavi').then(({ data }) => setEsavi(data)),
     api.get('/vacunacion/frascos').then(({ data }) => setVials(data))
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   ]).catch((e) => toast(errorMessage(e), 'bad')), [f, toast])
   // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => { load(); api.get('/vacunacion/biologicos').then(({ data }) => setVaccines(data)).catch(() => {}) }, [])
@@ -73,7 +77,7 @@ const VaccinationRecords = () => {
         <button type="button" className={tab === 'frascos' ? 'on' : ''} onClick={() => setTab('frascos')}>Frascos abiertos</button>
       </div>
       {tab === 'registros' && (
-        <Card flush title={rows ? `${rows.length} dosis` : 'Dosis'}
+        <Card flush title={rows ? `${list.total} dosis` : 'Dosis'}
           actions={<form className="bill-filter" onSubmit={(e) => { e.preventDefault(); load() }}>
             <input className="input" placeholder="Documento" value={f.documento} onChange={(e) => setF({ ...f, documento: e.target.value })} style={{ width: 140 }} aria-label="Documento" />
             <select className="input" value={f.biologico} onChange={(e) => setF({ ...f, biologico: e.target.value })} aria-label="Biológico"><option value="">Todos los biológicos</option>{vaccines.map((v) => <option key={v.id} value={v.id}>{v.name}</option>)}</select>
@@ -101,6 +105,7 @@ const VaccinationRecords = () => {
               ))}</tbody>
             </table></div>
           )}
+          {rows && <LoadMore shown={rows.length} total={list.total} hasMore={list.hasMore} loading={list.loadingMore} onMore={() => list.more().catch((e) => toast(errorMessage(e), 'bad'))} />}
         </Card>
       )}
       {tab === 'esavi' && (

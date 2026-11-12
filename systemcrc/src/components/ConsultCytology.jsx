@@ -5,12 +5,15 @@ import { PageHead, Card, Empty, Spinner, initials } from './ui'
 import CytologyDetail from './CytologyDetail'
 import { formatDate } from '../utils/format'
 import './cytology.css'
+import usePagedList from '../hooks/usePagedList'
+import LoadMore from './LoadMore'
 
 const EMPTY_FILTERS = { desde: '', hasta: '', documento: '' }
 
 const ConsultCytology = () => {
   const [filters, setFilters] = useState(EMPTY_FILTERS)
-  const [results, setResults] = useState(null)
+  const list = usePagedList('/consultar-citologias')
+  const results = list.rows; const setResults = list.setRows
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
   const [detail, setDetail] = useState(null)
@@ -31,8 +34,7 @@ const ConsultCytology = () => {
     setLoading(true)
     try {
       const params = Object.fromEntries(Object.entries(filters).filter(([, v]) => v.trim() !== ''))
-      const { data } = await api.get('/consultar-citologias', { params })
-      setResults(data)
+      await list.load(params)
     } catch (err) {
       setError(errorMessage(err, 'No se pudo consultar.'))
     } finally {
@@ -81,7 +83,7 @@ const ConsultCytology = () => {
 
       {results && (
         <Card flush className="cy-results-card" title="Resultados"
-          subtitle={results.length === 0 ? 'No se encontraron citologías con esos filtros.' : `${results.length} resultado${results.length === 1 ? '' : 's'}${results.length === 200 ? ' (los 200 más recientes; acota la búsqueda)' : ''}`}>
+          subtitle={results.length === 0 ? 'No se encontraron citologías con esos filtros.' : `${list.total} resultado${list.total === 1 ? '' : 's'}`}>
           {results.length === 0 ? <Empty icon={<MdBiotech />}>Prueba con otro rango de fechas o documento.</Empty> : (
             <div className="table-wrap" style={{ marginTop: 12 }}>
               <table className="table">
@@ -105,6 +107,7 @@ const ConsultCytology = () => {
               </table>
             </div>
           )}
+          <LoadMore shown={results.length} total={list.total} hasMore={list.hasMore} loading={list.loadingMore} onMore={() => list.more().catch((e) => setError(errorMessage(e)))} />
         </Card>
       )}
     </>
