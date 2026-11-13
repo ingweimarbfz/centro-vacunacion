@@ -9,6 +9,7 @@ import { Avatar, Spinner } from '../components/ui'
 import GlobalSearch from '../components/GlobalSearch'
 import TemperatureReminder from '../components/TemperatureReminder'
 import { UpgradeButton } from '../components/UpgradePlan'
+import { IntegraSignature } from '../components/IntegraLogo'
 
 const NAV_OPEN_KEY = 'cv:nav-open'
 const titleFor = (pathname, moduleId) => {
@@ -205,7 +206,8 @@ const AppLayout = () => {
               <MdLogout />
             </button>
           </div>
-          <UpgradeButton />
+          <UpgradeButton compact />
+          <IntegraSignature />
         </div>
       </aside>
       <div className={`backdrop${open ? ' show' : ''}`} onClick={() => setOpen(false)} />

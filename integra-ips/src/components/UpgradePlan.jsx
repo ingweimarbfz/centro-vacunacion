@@ -64,15 +64,23 @@ const UpgradeModal = ({ onClose }) => {
 }
 
 // Botón del menú lateral (debajo del usuario).
-export const UpgradeButton = () => {
+export const UpgradeButton = ({ compact = false }) => {
   const { user } = useAuth()
   const [open, setOpen] = useState(false)
   if (!user.plan) return null
   return (
     <>
-      <button type="button" className="upg-btn" onClick={() => setOpen(true)}>
-        <MdWorkspacePremium /><span><b>Plan {user.plan.name}</b><small>{user.role === 'administrador' ? 'Mejorar plan' : 'Ver planes'}</small></span>
-      </button>
+      {compact
+        ? (
+          <button type="button" className="upg-pill" onClick={() => setOpen(true)} title={user.role === 'administrador' ? 'Mejorar plan' : 'Ver planes'}>
+            <MdWorkspacePremium /><b>Plan {user.plan.name}</b><span>· {user.role === 'administrador' ? 'Mejorar plan' : 'Ver planes'}</span>
+          </button>
+          )
+        : (
+          <button type="button" className="upg-btn" onClick={() => setOpen(true)}>
+            <MdWorkspacePremium /><span><b>Plan {user.plan.name}</b><small>{user.role === 'administrador' ? 'Mejorar plan' : 'Ver planes'}</small></span>
+          </button>
+          )}
       {open && <UpgradeModal onClose={() => setOpen(false)} />}
     </>
   )
