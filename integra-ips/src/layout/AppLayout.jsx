@@ -1,6 +1,6 @@
 import React, { Suspense, useEffect, useRef, useState } from 'react'
-import { NavLink, Outlet, useLocation, useNavigate } from 'react-router-dom'
-import { MdMenu, MdLogout, MdPerson, MdKeyboardArrowDown, MdPlace } from 'react-icons/md'
+import { Link, NavLink, Outlet, useLocation, useNavigate } from 'react-router-dom'
+import { MdMenu, MdChevronRight, MdLogout, MdPerson, MdKeyboardArrowDown, MdPlace } from 'react-icons/md'
 import { useAuth } from '../context/AuthContext'
 import { useSettings } from '../context/SettingsContext'
 import { navForUser, navSectionsFor, ROLE_LABELS, MODULES, moduleFromPath, modulesForUser, moduleHome, moduleTabFor, canSee, SITE_TYPES } from '../utils/permissions'
@@ -136,6 +136,12 @@ const AppLayout = () => {
     return () => window.removeEventListener('cv:set-site', onSet)
   }, [admin])
   const { section, title } = titleFor(pathname, moduleId)
+  // Primera página de la sección actual, para el enlace de la miga de pan.
+  const sectionHome = sections.find((s) => s.title === section)?.items[0]?.to
+  // Selector de sede: en escritorio va en la barra superior; en celular y tableta, en el menú lateral.
+  const siteControl = admin
+    ? <SiteSelector value={site} onChange={changeSite} />
+    : user.site && <span className="site-chip" title={SITE_TYPES[user.site.type]}><MdPlace /> {user.site.name}</span>
   const currentModule = MODULES.find((m) => m.id === moduleId)
 
   useEffect(() => setOpen(false), [pathname])
@@ -158,9 +164,7 @@ const AppLayout = () => {
           <img src={logo} alt={settings.ipsName} />
         </div>
         <div className="sidebar-site">
-          {admin
-            ? <SiteSelector value={site} onChange={changeSite} />
-            : user.site && <span className="site-chip" title={SITE_TYPES[user.site.type]}><MdPlace /> {user.site.name}</span>}
+          {siteControl}
         </div>
         <div className="module-wrap">
           <ModuleSwitch current={moduleId} user={user} />
@@ -213,16 +217,32 @@ const AppLayout = () => {
       <div className={`backdrop${open ? ' show' : ''}`} onClick={() => setOpen(false)} />
 
       <div className="main">
-        <header className="topbar">
-          <button type="button" className="btn btn-ghost btn-icon menu-toggle" onClick={toggleMenu} aria-label={collapsed ? 'Mostrar menú' : 'Menú'} title={collapsed ? 'Mostrar menú lateral' : 'Ocultar menú lateral'}><MdMenu /></button>
-          <div className="topbar-title">
-            <small>{currentModule.fullLabel}{section ? ` · ${section}` : ''}</small>
-            <strong>{title || settings.shortName}</strong>
-          </div>
-          <GlobalSearch />
-          <span className="topbar-date hide-md">{todayLabel}</span>
-          <UserMenu />
-        </header>
+        <div className="topbar-wrap">
+          <header className="topbar">
+            <button type="button" className="btn btn-ghost btn-icon menu-toggle" onClick={toggleMenu} aria-label={collapsed ? 'Mostrar menú' : 'Menú'} title={collapsed ? 'Mostrar menú lateral' : 'Ocultar menú lateral'}><MdMenu /></button>
+            <div className="topbar-title">
+              <small>{currentModule.fullLabel}{section ? ` · ${section}` : ''}</small>
+              <strong>{title || settings.shortName}</strong>
+            </div>
+            <GlobalSearch />
+            <span className="topbar-spacer" />
+            <span className="topbar-date hide-md">{todayLabel}</span>
+            <div className="topbar-site">{siteControl}</div>
+            <UserMenu />
+          </header>
+          {/* Escritorio: dónde está el usuario, en una franja fija bajo la barra superior. */}
+          <nav className="topbar-crumbs" aria-label="Miga de pan">
+            <Link to={moduleHome(user, moduleId)}>{currentModule.fullLabel}</Link>
+            {section && section !== 'General' && (
+              <>
+                <MdChevronRight className="topbar-crumbs-sep" aria-hidden="true" />
+                {sectionHome && sectionHome !== pathname ? <Link to={sectionHome}>{section}</Link> : <span>{section}</span>}
+              </>
+            )}
+            <MdChevronRight className="topbar-crumbs-sep" aria-hidden="true" />
+            <strong aria-current="page">{title || settings.shortName}</strong>
+          </nav>
+        </div>
         <main className="content">
           {/* Al cambiar de sede se recargan los datos de la página actual. */}
           <Suspense fallback={<div className="splash" style={{ minHeight: 240 }}><Spinner /></div>}><Outlet key={site || 'all'} /></Suspense>
