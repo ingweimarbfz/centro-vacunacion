@@ -93,7 +93,7 @@ const NotificationsPage = () => {
           <ol style={{ margin: 0, paddingLeft: 20, lineHeight: 1.8 }}>
             <li>En Telegram abre <b>@BotFather</b>, envía <code>/newbot</code>, ponle nombre (por ejemplo, <i>Integra IPS Avisos</i>) y copia el token.</li>
             <li>Pega el token arriba y pulsa <b>Guardar token</b>; activa el envío general.</li>
-            <li>Crea un grupo de Telegram <b>por sección y por sede</b> (por ejemplo: <i>Temperatura · Aguachica</i>, <i>Vehicular · Valledupar</i>) y <b>agrega el bot</b> a cada uno. Si la dirección quiere ver todo, crea además un grupo y asígnalo a “Todas las sedes”.</li>
+            <li>Crea un grupo de Telegram <b>por sección y por sede</b> (por ejemplo: <i>Temperatura · Aguachica</i>, <i>Ambulancias · Valledupar</i>, <i>Inventario · Seccional</i>) y <b>agrega el bot</b> a cada uno. Si la dirección quiere ver todo, crea además un grupo y asígnalo a “Todas las sedes”.</li>
             <li>Escribe cualquier mensaje en cada grupo y pulsa <b>Buscar grupos</b> aquí.</li>
             <li>En cada sección elige el grupo y su <b>sede</b>, pulsa <b>Asignar</b> y luego <b>Prueba</b> para verificar.</li>
           </ol>
