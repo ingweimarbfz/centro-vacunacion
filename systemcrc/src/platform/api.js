@@ -19,4 +19,4 @@ export const fdate = (iso) => (iso ? new Intl.DateTimeFormat('es-CO', { dateStyl
 export default papi
 
 // Web comercial pública (precios con SEO). Se cambia con REACT_APP_WEB_URL al tener dominio propio.
-export const WEB_URL = (process.env.REACT_APP_WEB_URL || 'https://integra-web-eta.vercel.app').replace(/\/$/, '')
+export const WEB_URL = (import.meta.env.REACT_APP_WEB_URL || 'https://integra-web-eta.vercel.app').replace(/\/$/, '')
