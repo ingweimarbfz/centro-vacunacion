@@ -6,6 +6,7 @@ import { useAuth } from '../../context/AuthContext'
 import { can } from '../../utils/permissions'
 import { PageHead, Card, Modal, Empty, Spinner, useToast, initials } from '../../components/ui'
 import { BLOOD_TYPES, AGRUPACIONES } from './common'
+import { DocInput, PhoneInput, EmailInput } from '../../components/inputs'
 
 const EMPTY = { document: '', carnet: '', firstName: '', lastName: '', bloodType: '', agrupacion: '', phone: '', email: '', active: true, volunteerType: 'base', joinedAt: '', insuranceEntity: '', insurancePolicy: '', insuranceExpiry: '', siteId: '' }
 const today = () => new Intl.DateTimeFormat('en-CA', { timeZone: 'America/Bogota' }).format(new Date())
@@ -17,7 +18,7 @@ const PersonForm = ({ initial, sites, admin, onClose, onSaved }) => {
   const [error, setError] = useState('')
   const [saving, setSaving] = useState(false)
   const set = (k) => (e) => {
-    let v = e.target.type === 'checkbox' ? e.target.checked : e.target.value
+    let v = e.target.type === 'checkbox' ? e.target.checked : e.target.value ?? ''
     if (k === 'phone') v = v.replace(/\D/g, '').slice(0, 10)
     setForm({ ...form, [k]: v })
   }
@@ -40,14 +41,14 @@ const PersonForm = ({ initial, sites, admin, onClose, onSaved }) => {
         <div className="form-grid" style={{ gridTemplateColumns: 'repeat(2, minmax(0, 1fr))' }}>
           <div className="field"><label>Nombres <span className="req">*</span></label><input value={form.firstName} onChange={set('firstName')} autoFocus /></div>
           <div className="field"><label>Apellidos <span className="req">*</span></label><input value={form.lastName} onChange={set('lastName')} /></div>
-          <div className="field"><label>Documento de identidad <span className="req">*</span></label><input value={form.document} onChange={set('document')} inputMode="numeric" /></div>
+          <div className="field"><label>Documento de identidad <span className="req">*</span></label><DocInput value={form.document} onChange={set('document')} /></div>
           <div className="field"><label>No. carnet</label><input value={form.carnet} onChange={set('carnet')} placeholder="Ej. CRC-0210" /></div>
           <div className="field"><label>Grupo sanguíneo</label>
             <select value={form.bloodType} onChange={set('bloodType')}><option value="">Selecciona…</option>{BLOOD_TYPES.map((b) => <option key={b}>{b}</option>)}</select></div>
           <div className="field"><label>Agrupación <span className="req">*</span></label>
             <select value={form.agrupacion} onChange={set('agrupacion')}><option value="">Selecciona…</option>{AGRUPACIONES.map((a) => <option key={a}>{a}</option>)}</select></div>
-          <div className="field"><label>Celular</label><input type="tel" value={form.phone} onChange={set('phone')} placeholder="10 dígitos" inputMode="numeric" /></div>
-          <div className="field"><label>Correo</label><input type="email" value={form.email} onChange={set('email')} /></div>
+          <div className="field"><label>Celular</label><PhoneInput value={form.phone} onChange={set('phone')} /></div>
+          <div className="field"><label>Correo</label><EmailInput value={form.email} onChange={set('email')} /></div>
           <div className="field"><label>Tipo de voluntario</label>
             <select value={form.volunteerType} onChange={set('volunteerType')}><option value="base">Base (mínimo 12 h al mes)</option><option value="apoyo">Apoyo (sin horas mínimas)</option></select></div>
           <div className="field"><label>Fecha de ingreso</label><input type="date" value={form.joinedAt} onChange={set('joinedAt')} /></div>

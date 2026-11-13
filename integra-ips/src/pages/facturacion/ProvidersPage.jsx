@@ -4,6 +4,7 @@ import api, { errorMessage } from '../../api/client'
 import { PageHead, Card, Modal, Empty, Spinner, useToast } from '../../components/ui'
 import { formatMoney } from '../../utils/format'
 import './facturacion.css'
+import { PhoneInput, EmailInput, NitInput } from '../../components/inputs'
 
 const REGIMEN = { contributivo: 'Contributivo', subsidiado: 'Subsidiado', ambos: 'Contributivo y subsidiado', especial: 'Especial' }
 const MODE = { contado: 'Pago inmediato en caja', cuenta_cobro: 'Cuenta de cobro a la entidad' }
@@ -37,7 +38,7 @@ export const EntityForm = ({ initial, defaultCategories = [], onClose, onSaved }
       <div className="stack" style={{ gap: 12 }}>
         <div className="grid grid-2" style={{ gap: 12 }}>
           <div className="field"><label>Nombre o razón social <span className="req">*</span></label><input value={f.name} onChange={set('name')} placeholder="Ej: Frío Técnico del Cesar S.A.S." autoFocus /></div>
-          <div className="field"><label>NIT</label><input value={f.nit} onChange={set('nit')} /></div>
+          <div className="field"><label>NIT</label><NitInput value={f.nit} onChange={set('nit')} /></div>
         </div>
         <div className="field"><label>Categorías <span className="req">*</span></label>
           <div className="chips">{Object.entries(PROVIDER_CATEGORIES).map(([k, v]) => (
@@ -48,8 +49,8 @@ export const EntityForm = ({ initial, defaultCategories = [], onClose, onSaved }
         <div className="field"><label>Descripción</label><input value={f.description} onChange={set('description')} placeholder="Qué servicio o producto presta" /></div>
         <div className="grid grid-2" style={{ gap: 12 }}>
           <div className="field"><label>Persona de contacto</label><input value={f.contactName} onChange={set('contactName')} /></div>
-          <div className="field"><label>Teléfono</label><input value={f.phone} onChange={set('phone')} inputMode="tel" placeholder="300 123 4567" /></div>
-          <div className="field"><label>Correo</label><input type="email" value={f.email} onChange={set('email')} /></div>
+          <div className="field"><label>Teléfono</label><PhoneInput value={f.phone} onChange={set('phone')} /></div>
+          <div className="field"><label>Correo</label><EmailInput value={f.email} onChange={set('email')} /></div>
           <div className="field"><label>Ciudad</label><input value={f.city} onChange={set('city')} /></div>
         </div>
         <div className="field"><label>Dirección</label><input value={f.address} onChange={set('address')} /></div>
@@ -81,7 +82,7 @@ const EpsForm = ({ initial, discounts, onClose, onSaved }) => {
         <div className="form-grid">
           <div className="field span-2"><label>Nombre o razón social <span className="req">*</span></label><input value={f.name} onChange={set('name')} autoFocus /></div>
           <div className="field"><label>Tipo de entidad</label><select value={f.kind || 'eps'} onChange={(e) => setF({ ...f, kind: e.target.value })}>{Object.entries(ENTITY_KINDS).map(([k, l]) => <option key={k} value={k}>{l}</option>)}</select></div>
-          <div className="field"><label>NIT</label><input value={f.nit} onChange={set('nit')} /></div>
+          <div className="field"><label>NIT</label><NitInput value={f.nit} onChange={set('nit')} /></div>
           {(f.kind || 'eps') === 'eps' && <div className="field"><label>Código de la EPS</label><input value={f.code} onChange={set('code')} placeholder="Ej: EPS037" /></div>}
           {(f.kind || 'eps') === 'eps' && <div className="field"><label>Régimen</label><select value={f.regimen} onChange={set('regimen')}><option value="">—</option>{Object.entries(REGIMEN).map(([k, l]) => <option key={k} value={k}>{l}</option>)}</select></div>}
         </div>
@@ -95,7 +96,7 @@ const EpsForm = ({ initial, discounts, onClose, onSaved }) => {
             <div className="field"><label>N° de convenio</label><input value={f.agreementNumber} onChange={set('agreementNumber')} /></div>
             <div className="field"><label>Vigente hasta</label><input type="date" value={f.agreementValidUntil} onChange={set('agreementValidUntil')} /><span className="hint">Vencido = se paga en caja</span></div>
             <div className="field"><label>Contacto de facturación</label><input value={f.billingContact} onChange={set('billingContact')} /></div>
-            <div className="field"><label>Correo de facturación</label><input type="email" value={f.billingEmail} onChange={set('billingEmail')} /></div>
+            <div className="field"><label>Correo de facturación</label><EmailInput value={f.billingEmail} onChange={set('billingEmail')} placeholder="facturacion@empresa.com" /></div>
           </div>
         )}
         <div className="form-grid" style={{ padding: 14, border: '1px solid var(--line)', borderRadius: 12 }}>

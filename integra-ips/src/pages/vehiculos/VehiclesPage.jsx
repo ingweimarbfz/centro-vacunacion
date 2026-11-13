@@ -6,6 +6,7 @@ import { useAuth } from '../../context/AuthContext'
 import { can } from '../../utils/permissions'
 import { PageHead, Card, Modal, Empty, Spinner } from '../../components/ui'
 import { VehicleIcon, StatusPill, DocBadge, km } from './common'
+import { PlateInput } from '../../components/inputs'
 
 export const EMPTY_VEHICLE = {
   movil: '', plate: '', vehicleType: '', brand: '', line: '', modelYear: '', color: '', serial: '', engineNumber: '',
@@ -44,12 +45,12 @@ export const VehicleForm = ({ initial, onClose, onSaved }) => {
       <form id="vehicle-form" onSubmit={submit} noValidate>
         <div className="form-grid" style={{ gridTemplateColumns: 'repeat(3, minmax(0, 1fr))' }}>
           <div className="field"><label>N° de móvil <span className="req">*</span></label><input value={form.movil} onChange={set('movil')} placeholder="Ej. 105" autoFocus /></div>
-          <div className="field"><label>Placa <span className="req">*</span></label><input value={form.plate} onChange={set('plate')} placeholder="ABC123" style={{ textTransform: 'uppercase' }} /></div>
+          <div className="field"><label>Placa <span className="req">*</span></label><PlateInput value={form.plate} onChange={set('plate')} /></div>
           <div className="field"><label>Tipo de vehículo <span className="req">*</span></label>
             <select value={form.vehicleType} onChange={set('vehicleType')}><option value="">Selecciona…</option>{types.map((t) => <option key={t}>{t}</option>)}</select></div>
           <div className="field"><label>Marca</label><input value={form.brand} onChange={set('brand')} /></div>
           <div className="field"><label>Línea / modelo</label><input value={form.line} onChange={set('line')} placeholder="Ej. Hilux 4x4" /></div>
-          <div className="field"><label>Año</label><input type="number" value={form.modelYear} onChange={set('modelYear')} placeholder="2024" /></div>
+          <div className="field"><label>Año</label><input type="number" min="1950" max={new Date().getFullYear() + 1} step="1" value={form.modelYear} onChange={set('modelYear')} placeholder="2024" /></div>
           <div className="field"><label>Color</label><input value={form.color} onChange={set('color')} /></div>
           <div className="field"><label>Serial / VIN</label><input value={form.serial} onChange={set('serial')} /></div>
           <div className="field"><label>N° de motor</label><input value={form.engineNumber} onChange={set('engineNumber')} /></div>

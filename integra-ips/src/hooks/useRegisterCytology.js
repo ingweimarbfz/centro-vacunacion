@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from 'react'
 import api, { errorMessage } from '../api/client'
 import useServiceInvoice from './useServiceInvoice'
+import { sanitize, check } from '../utils/validate'
 
 const PHONE_RE = /^[0-9]{10}$/
 const EMAIL_RE = /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i
@@ -34,6 +35,7 @@ const validate = (d) => {
   if (!d.nombre.trim()) e.nombre = 'Requerido'
   if (!d.apellidos.trim()) e.apellidos = 'Requerido'
   if (!d.numDocumento.trim()) e.numDocumento = 'Requerido'
+  else if (check.doc(d.numDocumento, d.tipoDocumento)) e.numDocumento = check.doc(d.numDocumento, d.tipoDocumento)
   if (!d.fechaNacimiento) e.fechaNacimiento = 'Requerido'
   else if (calcAge(d.fechaNacimiento, d.fechaExamen) === '') e.fechaNacimiento = 'Fecha no válida'
   if (!PHONE_RE.test(d.celular)) e.celular = 'Debe tener 10 dígitos'
@@ -89,6 +91,7 @@ const useRegisterCytology = () => {
     const { name } = e.target
     let { value } = e.target
     if (PHONE_FIELDS.includes(name)) value = value.replace(/\D/g, '').slice(0, 10)
+    if (name === 'numDocumento') value = sanitize.doc(value, dataCytology.tipoDocumento)
     setDataCytology((prev) => ({ ...prev, [name]: value }))
     if (errors[name]) setErrors((prev) => ({ ...prev, [name]: undefined }))
   }

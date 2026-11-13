@@ -12,12 +12,13 @@ const UpgradeModal = ({ onClose }) => {
   const { user } = useAuth()
   const [d, setD] = useState(null); const [err, setErr] = useState('')
   const [pick, setPick] = useState(null); const [cycle, setCycle] = useState('mensual')
-  const [msg, setMsg] = useState(''); const [phone, setPhone] = useState('')
+  const [msg, setMsg] = useState(''); const [phone, setPhone] = useState(''); const [phoneErr, setPhoneErr] = useState(false)
   const [busy, setBusy] = useState(false); const [sent, setSent] = useState(false)
   useEffect(() => { api.get('/plan/opciones').then(({ data }) => { setD(data); setCycle(data.organization?.billingCycle || 'mensual') }).catch((e) => setErr(errorMessage(e))) }, [])
   const open = d?.lastRequest && ['pendiente', 'contactado'].includes(d.lastRequest.status)
   const send = async () => {
     setErr(''); if (!pick) return setErr('Elige el plan que quieres.')
+    if (!/^\d{10}$/.test(phone)) { setPhoneErr(true); return setErr('Escribe un teléfono de contacto de 10 dígitos: es el medio por el que te contactaremos.') }
     setBusy(true)
     try { await api.post('/plan/solicitud', { planId: pick, billingCycle: cycle, message: msg, contactPhone: phone }); setSent(true) } catch (e) { setErr(errorMessage(e)) } finally { setBusy(false) }
   }
@@ -52,7 +53,10 @@ const UpgradeModal = ({ onClose }) => {
           })}</div>
           {d.canRequest && !open && !sent && (
             <div className="form-grid">
-              <div className="field"><label>Teléfono de contacto</label><input value={phone} onChange={(e) => setPhone(e.target.value)} inputMode="tel" /></div>
+              <div className={`field${phoneErr ? ' invalid' : ''}`}><label>Teléfono de contacto <span className="req">*</span></label>
+                <input type="tel" value={phone} onChange={(e) => { setPhone(e.target.value.replace(/\D/g, '').slice(0, 10)); setPhoneErr(false) }} inputMode="numeric" placeholder="3001234567" required aria-invalid={phoneErr || undefined} />
+                <small className={phoneErr ? 'error' : 'hint'}>{phone.length}/10 dígitos{phoneErr ? ' · revisa el número' : ''}</small>
+              </div>
               <div className="field span-all"><label>Comentario (opcional)</label><textarea value={msg} onChange={(e) => setMsg(e.target.value)} placeholder="Qué necesitas: más sedes, usuarios, un módulo…" style={{ minHeight: 60 }} /></div>
             </div>
           )}

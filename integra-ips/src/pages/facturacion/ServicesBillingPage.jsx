@@ -7,6 +7,7 @@ import { tipoDocumento } from '../../utils/dataGeneral'
 import { PageHead, Card, Modal, Empty, Spinner, useToast } from '../../components/ui'
 import { formatMoney } from '../../utils/format'
 import './facturacion.css'
+import { PhoneInput, EmailInput, DocInput, NitInput } from '../../components/inputs'
 
 // Exenciones de copago y cuota moderadora (Acuerdo 260 de 2004 y leyes especiales).
 const EXEMPTIONS = [['', 'Sin exención'], ['urgencias', 'Atención inicial de urgencias'], ['alto_costo', 'Enfermedad de alto costo'], ['ley1438', 'Niño, niña o adolescente exento (Ley 1438, art. 18)'], ['victima', 'Víctima del conflicto (Ley 1448)'], ['indigena', 'Población indígena'], ['otra', 'Otra exención legal']]
@@ -119,18 +120,18 @@ const InvoiceForm = ({ charge, catalog, eps, discounts, onClose, onSaved }) => {
             <div className="field"><label>{f.payerType === 'empresa' ? 'NIT' : 'Documento'} <span className="req">*</span></label>
               <div style={{ display: 'flex', gap: 6 }}>
                 {f.payerType !== 'empresa' && <select value={f.payerDocType} onChange={set('payerDocType')} style={{ width: 110 }}>{tipoDocumento.map((t) => <option key={t.tipoDoc} value={t.tipoDoc}>{t.tipoDoc}</option>)}</select>}
-                <input value={f.payerDocNumber} onChange={set('payerDocNumber')} style={{ flex: 1, minWidth: 0 }} />
+                <div style={{ flex: 1, minWidth: 0, display: 'grid', gap: 4 }}>{f.payerType === 'empresa' ? <NitInput value={f.payerDocNumber} onChange={set('payerDocNumber')} /> : <DocInput value={f.payerDocNumber} onChange={set('payerDocNumber')} docType={f.payerDocType} />}</div>
               </div>
             </div>
-            <div className="field"><label>Teléfono</label><input value={f.payerPhone} onChange={set('payerPhone')} inputMode="tel" /></div>
-            <div className="field"><label>Correo</label><input type="email" value={f.payerEmail} onChange={set('payerEmail')} /></div>
+            <div className="field"><label>Teléfono</label><PhoneInput value={f.payerPhone} onChange={set('payerPhone')} /></div>
+            <div className="field"><label>Correo</label><EmailInput value={f.payerEmail} onChange={set('payerEmail')} /></div>
           </div>
         )}
         {!charge && (
           <div className="field"><label>{f.payerType === 'paciente' ? 'Paciente' : 'Paciente que recibe el servicio (opcional)'}</label>
             <div className="grid grid-2" style={{ gap: 12 }}>
               <select value={f.docType} onChange={set('docType')} aria-label="Tipo de documento">{tipoDocumento.map((t) => <option key={t.tipoDoc} value={t.tipoDoc}>{t.tipoDoc}</option>)}</select>
-              <input value={f.docNumber} onChange={set('docNumber')} inputMode="numeric" placeholder={`N° documento${f.payerType === 'paciente' && svc?.form ? ' *' : ''}`} aria-label="Número de documento" />
+              <div style={{ display: 'grid', gap: 4 }}><DocInput value={f.docNumber} onChange={set('docNumber')} docType={f.docType} placeholder={`N° documento${f.payerType === 'paciente' && svc?.form ? ' *' : ''}`} aria-label="Número de documento" /></div>
               <input value={f.names} onChange={set('names')} placeholder={`Nombres${f.payerType === 'paciente' ? ' *' : ''}`} aria-label="Nombres" />
               <input value={f.surnames} onChange={set('surnames')} placeholder="Apellidos" aria-label="Apellidos" />
             </div>

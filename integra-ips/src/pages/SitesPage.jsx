@@ -4,6 +4,7 @@ import { MdAdd, MdEdit, MdDelete, MdAccountTree, MdErrorOutline, MdLocalHospital
 import api, { errorMessage } from '../api/client'
 import { SITE_TYPES } from '../utils/permissions'
 import { PageHead, Card, Modal, Empty, Spinner, useToast } from '../components/ui'
+import { PhoneInput, EmailInput } from '../components/inputs'
 
 const EMPTY = { type: 'unidad_municipal', name: '', municipality: '', parentId: '', address: '', phone: '', email: '', serviceIds: [], active: true }
 const TYPE_TONE = { seccional: 'brand', unidad_municipal: 'navy', grupo_apoyo: 'info' }
@@ -36,8 +37,8 @@ const SiteForm = ({ initial, seccionales, services, onClose, onSaved }) => {
           <div className="field"><label>Nombre <span className="req">*</span></label><input value={f.name} onChange={set('name')} placeholder="Ej. Unidad Municipal Aguachica" autoFocus /></div>
           <div className="field"><label>Municipio <span className="req">*</span></label><input value={f.municipality} onChange={set('municipality')} /></div>
           <div className="field"><label>Dirección</label><input value={f.address} onChange={set('address')} /></div>
-          <div className="field"><label>Teléfono</label><input value={f.phone} onChange={set('phone')} inputMode="numeric" /></div>
-          <div className="field span-all"><label>Correo</label><input type="email" value={f.email} onChange={set('email')} /></div>
+          <div className="field"><label>Teléfono</label><PhoneInput value={f.phone} onChange={set('phone')} /></div>
+          <div className="field span-all"><label>Correo</label><EmailInput value={f.email} onChange={set('email')} /></div>
           <div className="field span-all">
             <label>Servicios de IPS habilitados</label>
             <div className="rc-checks" style={{ marginTop: 6 }}>

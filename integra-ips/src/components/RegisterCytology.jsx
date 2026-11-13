@@ -97,7 +97,7 @@ const RegisterCytology = () => {
             {F({ name: 'nombre', label: 'Nombre(s)', req: true })}
             {F({ name: 'apellidos', label: 'Apellido(s)', req: true })}
             {S({ name: 'tipoDocumento', label: 'Tipo de documento', options: tipoDocumento, optKey: 'tipoDoc' })}
-            {F({ name: 'numDocumento', label: 'N° documento', req: true, inputMode: 'numeric' })}
+            {F({ name: 'numDocumento', label: 'N° documento', req: true, inputMode: 'numeric', placeholder: '1065123456' })}
             {F({ name: 'lugarExped', label: 'Lugar de expedición' })}
             {F({ name: 'fechaNacimiento', label: 'Fecha de nacimiento', type: 'date', req: true, max: d.fechaExamen })}
             <RO label="Edad" value={edad === '' ? '' : `${edad} años`} hint="Se calcula con la fecha de nacimiento" />
@@ -109,13 +109,13 @@ const RegisterCytology = () => {
 
         <Card title="Contacto" icon={icon(MdPhone)}>
           <div className="form-grid">
-            {F({ name: 'celular', label: 'Celular', type: 'tel', req: true, inputMode: 'numeric', maxLength: 10, placeholder: '10 dígitos' })}
+            {F({ name: 'celular', label: 'Celular', type: 'tel', req: true, inputMode: 'numeric', maxLength: 10, placeholder: '3001234567' })}
             {F({ name: 'email', label: 'Correo electrónico', type: 'email', placeholder: 'nombre@correo.com' })}
             {F({ name: 'direccion', label: 'Dirección' })}
             {F({ name: 'municipio', label: 'Municipio' })}
             {F({ name: 'contacto', label: 'Contacto de emergencia' })}
             {F({ name: 'direccionContacto', label: 'Dirección del contacto' })}
-            {F({ name: 'celularContacto', label: 'Celular del contacto', type: 'tel', inputMode: 'numeric', maxLength: 10, placeholder: '10 dígitos' })}
+            {F({ name: 'celularContacto', label: 'Celular del contacto', type: 'tel', inputMode: 'numeric', maxLength: 10, placeholder: '3001234567' })}
           </div>
         </Card>
 

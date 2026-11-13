@@ -1,4 +1,5 @@
 import React from 'react'
+import { sanitize, check } from '../../utils/validate'
 
 // Datos del traslado asistencial (ambulancias TAB/TAM).
 export const DOC_TYPES = { CC: 'Cédula de ciudadanía', TI: 'Tarjeta de identidad', RC: 'Registro civil', CE: 'Cédula de extranjería', PA: 'Pasaporte', PPT: 'Permiso por protección temporal', MS: 'Menor sin identificación', AS: 'Adulto sin identificación' }
@@ -13,7 +14,10 @@ export const EMPTY_TRANSFER = {
   origin: '', destination: '', diagnosis: '', patientCondition: '', companionName: '', companionPhone: '', authorizationNumber: '', receivingProfessional: '', notes: ''
 }
 const REQUIRED = [['patientName', 'nombre del paciente'], ['document', 'identificación'], ['eps', 'EPS'], ['regime', 'régimen'], ['transferType', 'tipo de traslado'], ['priority', 'prioridad'], ['origin', 'origen'], ['destination', 'destino'], ['diagnosis', 'diagnóstico o motivo']]
-export const missingTransfer = (t) => REQUIRED.filter(([k]) => !String(t[k] || '').trim()).map(([, l]) => l)
+export const missingTransfer = (t) => [
+  ...REQUIRED.filter(([k]) => !String(t[k] || '').trim()).map(([, l]) => l),
+  ...[['identificación válida', check.doc(t.document, t.documentType)], ['teléfono del paciente de 10 dígitos', check.phone(t.phone)], ['teléfono del acompañante de 10 dígitos', check.phone(t.companionPhone)]].filter(([, m]) => m).map(([l]) => l)
+]
 
 const Sel = ({ label, req, value, onChange, options }) => (
   <div className="field"><label>{label} {req && <span className="req">*</span>}</label>
@@ -21,7 +25,8 @@ const Sel = ({ label, req, value, onChange, options }) => (
 )
 
 export const TransferFields = ({ value, onChange }) => {
-  const set = (k) => (e) => onChange({ ...value, [k]: e.target.value })
+  const CLEAN = { phone: sanitize.phone, companionPhone: sanitize.phone, document: (v) => sanitize.doc(v, value.documentType) }
+  const set = (k) => (e) => onChange({ ...value, [k]: CLEAN[k] ? CLEAN[k](e.target.value) : e.target.value })
   const txt = (k, label, req, props = {}) => <div className={`field${props.wide ? ' span-all' : ''}`}><label>{label} {req && <span className="req">*</span>}</label><input value={value[k]} onChange={set(k)} placeholder={props.placeholder} inputMode={props.inputMode} maxLength={props.maxLength} /></div>
   return (
     <div className="transfer-box">
@@ -29,12 +34,12 @@ export const TransferFields = ({ value, onChange }) => {
       <div className="form-grid" style={{ gridTemplateColumns: 'repeat(2, minmax(0, 1fr))' }}>
         {txt('patientName', 'Nombre completo', true, { wide: true })}
         <Sel label="Tipo de documento" req value={value.documentType} onChange={set('documentType')} options={DOC_TYPES} />
-        {txt('document', 'Número de identificación', true, { inputMode: 'numeric' })}
+        {txt('document', 'Número de identificación', true, { inputMode: 'numeric', placeholder: '1065123456' })}
         <Sel label="Sexo" value={value.sex} onChange={set('sex')} options={SEX} />
         <div className="field"><label>Edad (años)</label><input type="number" min="0" max="120" value={value.ageYears} onChange={set('ageYears')} /></div>
         {txt('eps', 'EPS / aseguradora', true, { placeholder: 'Ej. Nueva EPS' })}
         <Sel label="Régimen" req value={value.regime} onChange={set('regime')} options={REGIMES} />
-        {txt('phone', 'Teléfono del paciente', false, { inputMode: 'numeric', maxLength: 10 })}
+        {txt('phone', 'Teléfono del paciente', false, { inputMode: 'numeric', maxLength: 10, placeholder: '3001234567' })}
         <Sel label="Condición del paciente" value={value.patientCondition} onChange={set('patientCondition')} options={CONDITIONS} />
       </div>
       <p className="transfer-title">Traslado</p>
@@ -47,7 +52,7 @@ export const TransferFields = ({ value, onChange }) => {
         {txt('authorizationNumber', 'N.º de autorización / remisión')}
         {txt('receivingProfessional', 'Profesional que recibe')}
         {txt('companionName', 'Acompañante')}
-        {txt('companionPhone', 'Teléfono del acompañante', false, { inputMode: 'numeric', maxLength: 10 })}
+        {txt('companionPhone', 'Teléfono del acompañante', false, { inputMode: 'numeric', maxLength: 10, placeholder: '3001234567' })}
         {txt('notes', 'Observaciones del traslado', false, { wide: true })}
       </div>
     </div>
