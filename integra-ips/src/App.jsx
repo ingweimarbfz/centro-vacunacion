@@ -19,6 +19,7 @@ const RegisterCytology = lazy(() => import('./components/RegisterCytology'))
 const ConsultCytology = lazy(() => import('./components/ConsultCytology'))
 const UsersPage = lazy(() => import('./pages/UsersPage'))
 const SettingsPage = lazy(() => import('./pages/SettingsPage'))
+const NotificationsPage = lazy(() => import('./pages/NotificationsPage'))
 const ProfilePage = lazy(() => import('./pages/ProfilePage'))
 const SocorroDashboard = lazy(() => import('./pages/socorro/SocorroDashboard'))
 const EventsPage = lazy(() => import('./pages/socorro/EventsPage'))
@@ -149,6 +150,7 @@ const App = () => (
             <Route path="servicios-ips" element={<Protected roles={ADMIN}><IpsServicesPage /></Protected>} />
             <Route path="usuarios" element={<Protected roles={ADMIN}><UsersPage /></Protected>} />
             <Route path="configuracion" element={<Protected roles={ADMIN}><SettingsPage /></Protected>} />
+            <Route path="notificaciones" element={<Protected roles={ADMIN}><NotificationsPage /></Protected>} />
             <Route path="perfil" element={<ProfilePage />} />
             <Route path="firma" element={<MySignaturePage />} />
             <Route path="socorro" element={<Protected module="og_dashboard" roles={ALL}><SocorroDashboard /></Protected>} />

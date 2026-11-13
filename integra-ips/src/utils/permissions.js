@@ -1,7 +1,7 @@
 import {
   MdDashboard, MdThermostat, MdNoteAdd, MdManageSearch, MdPeople, MdSettings, MdPerson,
   MdEmergency, MdInventory2, MdBadge, MdLocalHospital, MdLocalShipping, MdDirectionsCar, MdAssignment, MdSpeed,
-  MdMedicalServices, MdAccountTree, MdVolunteerActivism, MdFactCheck, MdSchool, MdWarehouse, MdCategory, MdSwapHoriz, MdHealing, MdAirportShuttle, MdDraw, MdTune, MdInsights, MdGroups, MdRule, MdMenuBook, MdFolderShared, MdMedication, MdReceiptLong, MdStorefront, MdPriceChange, MdAccountBalance, MdVaccines, MdEventRepeat
+  MdMedicalServices, MdAccountTree, MdVolunteerActivism, MdFactCheck, MdSchool, MdWarehouse, MdCategory, MdSwapHoriz, MdHealing, MdAirportShuttle, MdDraw, MdTune, MdInsights, MdGroups, MdRule, MdMenuBook, MdFolderShared, MdMedication, MdReceiptLong, MdStorefront, MdPriceChange, MdAccountBalance, MdVaccines, MdEventRepeat, MdNotificationsActive
 } from 'react-icons/md'
 
 export const ROLE_LABELS = {
@@ -98,7 +98,8 @@ const SHARED = [
       { to: '/bodegas', label: 'Bodegas', icon: MdWarehouse, roles: ADMIN },
       { to: '/servicios-ips', label: 'Servicios de IPS', icon: MdHealing, roles: ADMIN },
       { to: '/usuarios', label: 'Usuarios', icon: MdPeople, roles: ADMIN },
-      { to: '/configuracion', label: 'Configuración', icon: MdSettings, roles: ADMIN }
+      { to: '/configuracion', label: 'Configuración', icon: MdSettings, roles: ADMIN },
+      { to: '/notificaciones', label: 'Notificaciones', icon: MdNotificationsActive, roles: ADMIN }
     ]
   },
   {
