@@ -8,6 +8,7 @@ import useServiceInvoice from '../../hooks/useServiceInvoice'
 import { tipoDocumento } from '../../utils/dataGeneral'
 import { formatMoney } from '../../utils/format'
 import './vacunacion.css'
+import { DocInput, PhoneInput } from '../../components/inputs'
 
 const fmt = (iso) => (iso ? iso.slice(0, 10).split('-').reverse().join('/') : '—')
 const EMPTY = { docType: 'Cédula de ciudadanía', docNumber: '', names: '', surnames: '', birthDate: '', sex: '', phone: '', email: '', address: '', municipality: '', epsId: '', regimen: '', populationGroup: 'Población general', ethnicity: '', vaccineId: '', doseLabel: '', itemId: '', vaccinatorId: '', modality: 'intramural', notes: '' }
@@ -112,7 +113,7 @@ const RegisterVaccination = () => {
         <Card title="Paciente" icon={<MdPerson style={{ color: 'var(--brand)' }} />} subtitle="Escribe el documento: si ya se vacunó antes, se cargan sus datos y su historial">
           <div className="form-grid">
             <div className="field"><label>Tipo de documento</label><select value={f.docType} onChange={set('docType')}>{tipoDocumento.map((t) => <option key={t.tipoDoc} value={t.tipoDoc}>{t.tipoDoc}</option>)}</select></div>
-            <div className="field"><label>N° documento <span className="req">*</span></label><input value={f.docNumber} onChange={set('docNumber')} onBlur={() => lookup(f.docNumber)} inputMode="numeric" /></div>
+            <div className="field"><label>N° documento <span className="req">*</span></label><DocInput value={f.docNumber} onChange={set('docNumber')} docType={f.docType} onBlur={() => lookup(f.docNumber)} /></div>
             <div className="field"><label>Nombres <span className="req">*</span></label><input value={f.names} onChange={set('names')} /></div>
             <div className="field"><label>Apellidos</label><input value={f.surnames} onChange={set('surnames')} /></div>
             <div className="field"><label>Fecha de nacimiento <span className="req">*</span></label><input type="date" value={f.birthDate} max={form.today} onChange={set('birthDate')} />{f.birthDate && <span className="hint">{age(f.birthDate, form.today)} años</span>}</div>
@@ -121,7 +122,7 @@ const RegisterVaccination = () => {
             <div className="field"><label>Pertenencia étnica</label><select value={f.ethnicity} onChange={set('ethnicity')}><option value="">Ninguna</option><option>Indígena</option><option>Afrocolombiano</option><option>Raizal</option><option>Palenquero</option><option>Rrom</option></select></div>
             <div className="field"><label>EPS</label><select value={f.epsId} onChange={set('epsId')}><option value="">Sin EPS</option>{eps.filter((x) => (x.kind || 'eps') === 'eps').map((x) => <option key={x.id} value={x.id}>{x.name}</option>)}</select></div>
             <div className="field"><label>Régimen</label><select value={f.regimen} onChange={set('regimen')}><option value="">—</option><option value="contributivo">Contributivo</option><option value="subsidiado">Subsidiado</option><option value="especial">Especial</option><option value="no_afiliado">No afiliado</option></select></div>
-            <div className="field"><label>Celular</label><input value={f.phone} onChange={set('phone')} inputMode="numeric" maxLength={10} /></div>
+            <div className="field"><label>Celular</label><PhoneInput value={f.phone} onChange={set('phone')} /></div>
             <div className="field"><label>Municipio</label><input value={f.municipality} onChange={set('municipality')} /></div>
             <div className="field span-2"><label>Dirección</label><input value={f.address} onChange={set('address')} /></div>
             <div className="field span-2"><label>Observaciones</label><input value={f.notes} onChange={set('notes')} /></div>

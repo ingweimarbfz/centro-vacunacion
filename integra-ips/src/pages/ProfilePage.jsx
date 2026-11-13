@@ -5,6 +5,7 @@ import { useAuth } from '../context/AuthContext'
 import { ROLE_LABELS, ROLE_DESCRIPTIONS } from '../utils/permissions'
 import { PageHead, Card, Avatar, Spinner, useToast } from '../components/ui'
 import { resizeImage, ACCEPTED_IMAGES } from '../utils/image'
+import { EmailInput } from '../components/inputs'
 
 const ROLE_DESC = ROLE_DESCRIPTIONS
 
@@ -116,7 +117,7 @@ const ProfilePage = () => {
               <div className="form-grid">
                 <div className="field"><label>Nombre</label><input value={info.name} onChange={(e) => setInfo({ ...info, name: e.target.value })} maxLength={60} /></div>
                 <div className="field"><label>Apellidos</label><input value={info.lastName} onChange={(e) => setInfo({ ...info, lastName: e.target.value })} maxLength={60} /></div>
-                <div className="field"><label>Correo</label><input type="email" value={info.email} onChange={(e) => setInfo({ ...info, email: e.target.value })} /></div>
+                <div className="field"><label>Correo</label><EmailInput value={info.email} onChange={(e) => setInfo({ ...info, email: e.target.value })} /></div>
                 <div className="field"><label>Identificación</label><input value={user.identification} readOnly /></div>
                 <div className="field"><label>Usuario</label><input value={user.nameUser} readOnly /></div>
                 <div className="field"><label>Rol</label><input value={ROLE_LABELS[user.role]} readOnly /></div>

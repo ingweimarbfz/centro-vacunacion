@@ -36,7 +36,7 @@ const ShareDialog = ({ kind, refId, onClose }) => {
       {!s ? (err ? <div className="alert bad"><MdErrorOutline /><span>{err}</span></div> : <div className="splash" style={{ minHeight: 120 }}><Spinner /></div>) : (
         <div className="stack" style={{ gap: 12 }}>
           <div className="field"><label>Celular (WhatsApp)</label>
-            <div style={{ display: 'flex', gap: 8 }}><input value={phone} onChange={(e) => setPhone(e.target.value)} inputMode="numeric" placeholder="300 123 4567" style={{ flex: 1, minWidth: 0 }} />
+            <div style={{ display: 'flex', gap: 8 }}><input value={phone} onChange={(e) => setPhone(e.target.value)} inputMode="numeric" placeholder="3001234567" style={{ flex: 1, minWidth: 0 }} />
               <button type="button" className="btn btn-primary" style={{ background: '#25D366', borderColor: '#25D366' }} onClick={whatsapp}><FaWhatsapp /> WhatsApp</button></div>
           </div>
           <div className="field"><label>Correo</label>

@@ -31,7 +31,7 @@ const FolderForm = ({ initial, parent, kinds, onClose, onSaved }) => {
       <div className="stack" style={{ gap: 12 }}>
         <div className="grid grid-2" style={{ gap: 12 }}>
           <div className="field"><label>Número</label><input value={f.code} onChange={set('code')} placeholder={level === 1 ? '1' : '1.1'} /></div>
-          <div className="field"><label>Orden</label><input type="number" value={f.sortOrder} onChange={set('sortOrder')} /></div>
+          <div className="field"><label>Orden</label><input type="number" min="0" step="1" value={f.sortOrder} onChange={set('sortOrder')} placeholder="1" /></div>
         </div>
         <div className="field"><label>Nombre <span className="req">*</span></label><input value={f.name} onChange={set('name')} autoFocus placeholder={level === 1 ? 'Ej: Direccionamiento estratégico' : 'Ej: Políticas institucionales'} /></div>
         {level === 1 && <div className="field"><label>Tipo de ítem</label><select value={f.kind} onChange={set('kind')}>{kinds.map((k) => <option key={k}>{k}</option>)}</select><span className="hint">Sirve para filtrar los ítems y sus documentos.</span></div>}

@@ -73,7 +73,7 @@ const MaintForm = ({ vehicle, initial, drivers, onClose, onSaved }) => {
         <div className="form-grid" style={{ gridTemplateColumns: 'repeat(3, minmax(0, 1fr))' }}>
           <div className="field"><label>Tipo</label><select value={f.type} onChange={set('type')}><option value="preventivo">Preventivo</option><option value="correctivo">Correctivo</option></select></div>
           <div className="field"><label>Fecha</label><input type="date" value={f.date} onChange={set('date')} /></div>
-          <div className="field"><label>Kilometraje</label><input type="number" value={f.km} onChange={set('km')} /></div>
+          <div className="field"><label>Kilometraje</label><input type="number" min="0" step="1" value={f.km} onChange={set('km')} placeholder="45000" /></div>
           <div className="field span-all"><label>Descripción del trabajo <span className="req">*</span></label><textarea value={f.description} onChange={set('description')} style={{ minHeight: 64 }} /></div>
           <div className="field"><label>Taller</label><input value={f.workshop || ''} onChange={set('workshop')} /></div>
           <div className="field"><label>Realizado por (técnico del taller)</label><input value={f.technician} onChange={set('technician')} placeholder="Nombre del empleado del taller" /></div>
@@ -90,7 +90,7 @@ const MaintForm = ({ vehicle, initial, drivers, onClose, onSaved }) => {
           <div className="field"><label>Mano de obra (COP)</label><input type="number" min="0" value={f.laborCost} onChange={set('laborCost')} /></div>
           {f.type === 'preventivo' && <>
             <div className="field"><label>Próximo mantenimiento (fecha)</label><input type="date" value={f.nextDueDate} onChange={set('nextDueDate')} /></div>
-            <div className="field"><label>Próximo mantenimiento (km)</label><input type="number" value={f.nextDueKm} onChange={set('nextDueKm')} placeholder={`Actual: ${vehicle.currentKm}`} /></div>
+            <div className="field"><label>Próximo mantenimiento (km)</label><input type="number" min="0" step="1" value={f.nextDueKm} onChange={set('nextDueKm')} placeholder={`Actual: ${vehicle.currentKm}`} /></div>
           </>}
         </div>
         <div>

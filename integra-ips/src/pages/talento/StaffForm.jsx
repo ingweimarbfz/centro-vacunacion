@@ -5,6 +5,7 @@ import { useAuth } from '../../context/AuthContext'
 import { Modal, Spinner } from '../../components/ui'
 import { resizeImage } from '../../utils/image'
 import { DOC_TYPE_LABELS, SEX, BLOOD, today, useCatalogs } from './common'
+import { sanitize, check } from '../../utils/validate'
 
 const EMPTY = {
   documentType: 'CC', document: '', firstName: '', lastName: '', birthDate: '', sex: '', bloodType: '', phone: '', email: '', address: '', city: '',
@@ -30,13 +31,16 @@ const StaffForm = ({ initial, onClose, onSaved }) => {
   const [error, setError] = useState(''); const [saving, setSaving] = useState(false)
   const fileRef = useRef(null)
   useEffect(() => { if (admin) api.get('/sedes', { params: { sede: undefined } }).then(({ data }) => setSites(data.filter((s) => s.active !== false))).catch(() => {}) }, [admin])
-  const set = (k) => (e) => setF({ ...f, [k]: e.target.type === 'checkbox' ? e.target.checked : e.target.value })
+  const CLEAN = { phone: sanitize.phone, emergencyPhone: sanitize.phone, document: (v) => sanitize.doc(v, f.documentType) }
+  const set = (k) => (e) => setF({ ...f, [k]: e.target.type === 'checkbox' ? e.target.checked : CLEAN[k] ? CLEAN[k](e.target.value) : e.target.value })
   const pickPhoto = async (file) => { if (file) { try { setPhoto(await resizeImage(file, { max: 600, type: 'image/jpeg', quality: 0.85 })) } catch { setError('No se pudo leer la foto') } } }
 
   const submit = async (e) => {
     e.preventDefault(); setError('')
     if (!f.document.trim() || !f.firstName.trim() || !f.lastName.trim()) return setError('Documento, nombres y apellidos son requeridos.')
     if (admin && !editing && !f.siteId) return setError('Selecciona la sede.')
+    const bad = [['N° de documento', check.doc(f.document, f.documentType || 'CC')], ['Teléfono', check.phone(f.phone)], ['Teléfono del contacto de emergencia', check.phone(f.emergencyPhone)], ['Correo', check.email(f.email)]].find(([, m]) => m)
+    if (bad) return setError(`${bad[0]}: ${bad[1]}.`)
     setSaving(true)
     try {
       const body = { ...f, photo: photo || undefined }
@@ -62,14 +66,14 @@ const StaffForm = ({ initial, onClose, onSaved }) => {
         <div><span className="label">Datos personales</span>
           <div className="form-grid" style={{ marginTop: 8 }}>
             <div className="field"><label>Tipo de documento</label><select value={f.documentType} onChange={set('documentType')}>{Object.entries(DOC_TYPE_LABELS).map(([k, l]) => <option key={k} value={k}>{k} · {l}</option>)}</select></div>
-            {field('document', 'N° de documento', { required: true, inputMode: 'numeric' })}
+            {field('document', 'N° de documento', { required: true, inputMode: 'numeric', placeholder: '1065123456' })}
             {field('firstName', 'Nombres', { required: true })}
             {field('lastName', 'Apellidos', { required: true })}
             <div className="field"><label>Fecha de nacimiento</label><input type="date" value={f.birthDate} max={today()} onChange={set('birthDate')} /></div>
             <div className="field"><label>Sexo</label><select value={f.sex} onChange={set('sex')}><option value="">—</option>{Object.entries(SEX).map(([k, l]) => <option key={k} value={k}>{l}</option>)}</select></div>
             <div className="field"><label>Grupo sanguíneo (RH)</label><select value={f.bloodType} onChange={set('bloodType')}><option value="">—</option>{BLOOD.map((b) => <option key={b} value={b}>{b}</option>)}</select></div>
-            {field('phone', 'Teléfono / celular', { inputMode: 'numeric', maxLength: 10 })}
-            {field('email', 'Correo electrónico', { type: 'email' })}
+            {field('phone', 'Teléfono / celular', { inputMode: 'numeric', maxLength: 10, placeholder: '3001234567' })}
+            {field('email', 'Correo electrónico', { type: 'email', placeholder: 'nombre@correo.com' })}
             {field('address', 'Dirección de residencia')}
             {field('city', 'Municipio')}
           </div>
@@ -109,7 +113,7 @@ const StaffForm = ({ initial, onClose, onSaved }) => {
 
         <div><span className="label">Contacto de emergencia y observaciones</span>
           <div className="form-grid" style={{ marginTop: 8 }}>
-            {field('emergencyContact', 'Nombre del contacto')}{field('emergencyPhone', 'Teléfono del contacto', { inputMode: 'numeric' })}
+            {field('emergencyContact', 'Nombre del contacto')}{field('emergencyPhone', 'Teléfono del contacto', { inputMode: 'numeric', placeholder: '3001234567' })}
             <div className="field span-all"><label>Observaciones</label><textarea value={f.notes} onChange={set('notes')} style={{ minHeight: 56 }} /></div>
           </div>
         </div>

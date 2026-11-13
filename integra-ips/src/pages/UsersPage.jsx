@@ -4,6 +4,7 @@ import api, { errorMessage, getSiteFilter } from '../api/client'
 import { useAuth } from '../context/AuthContext'
 import { ROLE_LABELS, ROLE_DESCRIPTIONS, SITE_TYPES, USER_MODULES, USER_MODULE_GROUPS, inPlan } from '../utils/permissions'
 import { PageHead, Card, Modal, Avatar, Empty, Spinner, useToast } from '../components/ui'
+import { DocInput, EmailInput } from '../components/inputs'
 
 const ROLE_TONE = { administrador: 'brand', empleado: 'navy', voluntario: 'ok', conductor: 'info' }
 const EMPTY = { identification: '', name: '', lastName: '', nameUser: '', email: '', password: '', role: 'empleado', siteId: '', active: true, modules: null, remunerado: true }
@@ -78,8 +79,8 @@ const UserForm = ({ initial, sites, byRole, onClose, onSaved }) => {
         <div className="form-grid" style={{ gridTemplateColumns: 'repeat(2, minmax(0, 1fr))' }}>
           <div className="field"><label>Nombre <span className="req">*</span></label><input value={form.name} onChange={set('name')} maxLength={60} autoFocus /></div>
           <div className="field"><label>Apellidos <span className="req">*</span></label><input value={form.lastName} onChange={set('lastName')} maxLength={60} /></div>
-          <div className="field"><label>Identificación <span className="req">*</span></label><input value={form.identification} onChange={set('identification')} maxLength={15} inputMode="numeric" /></div>
-          <div className="field"><label>Correo</label><input type="email" value={form.email || ''} onChange={set('email')} placeholder="nombre@correo.com" /></div>
+          <div className="field"><label>Identificación <span className="req">*</span></label><DocInput value={form.identification} onChange={set('identification')} /></div>
+          <div className="field"><label>Correo</label><EmailInput value={form.email || ''} onChange={set('email')} /></div>
           <div className="field"><label>Usuario <span className="req">*</span></label><input value={form.nameUser} onChange={set('nameUser')} maxLength={30} autoComplete="off" /></div>
           <div className="field">
             <label>{editing ? 'Nueva contraseña' : <>Contraseña <span className="req">*</span></>}</label>

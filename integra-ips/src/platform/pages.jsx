@@ -7,6 +7,7 @@ import {
 import { OrgLegalModal } from './legalPages'
 import papi, { perror, cop, fdate, WEB_URL } from './api'
 import { Head, PCard, PModal, Splash, Spin, Field, useToast } from './ui'
+import { PhoneInput, EmailInput, DocInput, NitInput } from '../components/inputs'
 
 const AUD = { ips: 'IPS', esal: 'Sin ánimo de lucro' }
 const STATUS = { prueba: ['En prueba', 'purple'], activa: ['Activa', 'ok'], suspendida: ['Suspendida', 'warn'], cancelada: ['Cancelada', 'bad'] }
@@ -94,7 +95,7 @@ const PlanForm = ({ initial, catalog, onClose, onSaved }) => {
           <Field label="Código"><input value={f.code} onChange={set('code')} disabled={editing} placeholder="integral" /></Field>
           <Field label="Nombre"><input value={f.name} onChange={set('name')} placeholder="Integral" /></Field>
           <Field label="Se ofrece a"><select value={f.audience} onChange={set('audience')}><option value="ips">IPS (cualquier prestador)</option><option value="esal">Solo entidades sin ánimo de lucro</option></select></Field>
-          <Field label="Orden"><input type="number" value={f.sortOrder} onChange={set('sortOrder')} /></Field>
+          <Field label="Orden"><input type="number" min="0" step="1" value={f.sortOrder} onChange={set('sortOrder')} placeholder="1" /></Field>
           <Field label="Frase" full><input value={f.tagline} onChange={set('tagline')} placeholder="Toda la operación de tu IPS, conectada." /></Field>
         </div>
       </div>
@@ -251,7 +252,7 @@ export const FeaturesPage = () => {
           <Field label="Grupo"><select value={f.group} onChange={set('group')}>{Object.entries(c.groups).map(([k, l]) => <option key={k} value={k}>{l}</option>)}</select></Field>
           <Field label="Módulo del sistema que habilita" hint="Vacío = funcionalidad informativa (no oculta nada)"><select value={f.moduleKey} onChange={set('moduleKey')}><option value="">—</option>{c.moduleKeys.map((k) => <option key={k} value={k}>{k}</option>)}</select></Field>
           <Field label="Descripción"><input value={f.description} onChange={set('description')} /></Field>
-          <Field label="Orden"><input type="number" value={f.sortOrder} onChange={set('sortOrder')} /></Field>
+          <Field label="Orden"><input type="number" min="0" step="1" value={f.sortOrder} onChange={set('sortOrder')} placeholder="1" /></Field>
           {error && <div className="palert bad"><MdErrorOutline /><span>{error}</span></div>}
         </PModal>
       )}
@@ -282,12 +283,12 @@ const OrgForm = ({ initial, plans, catalog, onClose, onSaved }) => {
       <div><div className="pf-section-t">Organización</div>
         <div className="pgrid">
           <Field label="Nombre" full><input value={f.name} onChange={set('name')} /></Field>
-          <Field label="NIT"><input value={f.nit} onChange={set('nit')} /></Field>
+          <Field label="NIT"><NitInput value={f.nit} onChange={set('nit')} /></Field>
           <Field label="Tipo"><select value={f.orgType} onChange={set('orgType')}><option value="ips">IPS</option><option value="esal">Entidad sin ánimo de lucro</option></select></Field>
           <Field label="Ciudad"><input value={f.city} onChange={set('city')} /></Field>
           <Field label="Contacto"><input value={f.contactName} onChange={set('contactName')} /></Field>
-          <Field label="Correo"><input type="email" value={f.contactEmail} onChange={set('contactEmail')} /></Field>
-          <Field label="Teléfono"><input value={f.contactPhone} onChange={set('contactPhone')} /></Field>
+          <Field label="Correo"><EmailInput value={f.contactEmail} onChange={set('contactEmail')} /></Field>
+          <Field label="Teléfono"><PhoneInput value={f.contactPhone} onChange={set('contactPhone')} /></Field>
         </div>
       </div>
       <div><div className="pf-section-t">Suscripción</div>
@@ -333,8 +334,8 @@ const InitOrgModal = ({ org, onClose, onSaved }) => {
         <Field label="Municipio"><input className="pinput" value={f.municipality} onChange={set('municipality')} /></Field>
         <Field label="Nombre del administrador"><input className="pinput" value={f.adminName} onChange={set('adminName')} /></Field>
         <Field label="Apellidos"><input className="pinput" value={f.adminLastName} onChange={set('adminLastName')} /></Field>
-        <Field label="Identificación"><input className="pinput" value={f.adminIdentification} onChange={set('adminIdentification')} /></Field>
-        <Field label="Correo"><input className="pinput" type="email" value={f.adminEmail} onChange={set('adminEmail')} /></Field>
+        <Field label="Identificación"><DocInput className="pinput" value={f.adminIdentification} onChange={set('adminIdentification')} /></Field>
+        <Field label="Correo"><EmailInput className="pinput" value={f.adminEmail} onChange={set('adminEmail')} /></Field>
         <Field label="Usuario" hint="Único en toda la plataforma"><input className="pinput" value={f.adminUsername} onChange={set('adminUsername')} autoComplete="off" /></Field>
         <Field label="Contraseña inicial" hint="Mínimo 8 caracteres; pídele que la cambie al entrar"><input className="pinput" type="password" value={f.adminPassword} onChange={set('adminPassword')} autoComplete="new-password" /></Field>
       </div>
