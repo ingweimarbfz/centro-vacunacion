@@ -2,7 +2,7 @@ import React, { useCallback, useEffect, useMemo, useState } from 'react'
 import { ResponsiveContainer, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Cell } from 'recharts'
 import {
   MdAdd, MdEdit, MdDelete, MdSave, MdCheck, MdErrorOutline, MdApartment, MdPayments, MdTrendingUp, MdWorkspacePremium, MdEventRepeat,
-  MdVerified, MdVolunteerActivism, MdStar, MdExtension, MdClose, MdHome, MdGavel
+  MdVerified, MdVolunteerActivism, MdStar, MdExtension, MdClose, MdHome, MdGavel, MdRocketLaunch
 } from 'react-icons/md'
 import { OrgLegalModal } from './legalPages'
 import papi, { perror, cop, fdate } from './api'
@@ -315,6 +315,34 @@ const OrgForm = ({ initial, plans, catalog, onClose, onSaved }) => {
   )
 }
 
+// Alta del cliente: configuración inicial, su primera sede y su administrador (una sola vez).
+const InitOrgModal = ({ org, onClose, onSaved }) => {
+  const [f, setF] = useState({ siteName: org.city ? `Sede ${org.city}` : 'Sede principal', municipality: org.city || '', adminName: '', adminLastName: '', adminIdentification: '', adminUsername: '', adminEmail: org.contactEmail || '', adminPassword: '' })
+  const [error, setError] = useState(''); const [busy, setBusy] = useState(false)
+  const set = (k) => (e) => setF({ ...f, [k]: e.target.value })
+  const save = async () => {
+    setError(''); setBusy(true)
+    try { await papi.post(`/plataforma/organizaciones/${org.id}/inicializar`, f); onSaved() } catch (e) { setError(perror(e)); setBusy(false) }
+  }
+  return (
+    <PModal title={`Inicializar · ${org.name}`} onClose={onClose}
+      footer={<><button type="button" className="pbtn outline" onClick={onClose}>Cancelar</button><button type="button" className="pbtn primary" onClick={save} disabled={busy}>{busy ? <Spin /> : <MdRocketLaunch />} Crear cliente</button></>}>
+      <p style={{ marginTop: 0, color: 'var(--muted)' }}>Crea la configuración y los catálogos iniciales (servicios de IPS, biológicos, soportes de talento humano y documentos obligatorios), la primera sede con su bodega general y el usuario administrador del cliente. Sus datos quedan separados de los demás clientes.</p>
+      <div className="pgrid">
+        <Field label="Primera sede"><input className="pinput" value={f.siteName} onChange={set('siteName')} /></Field>
+        <Field label="Municipio"><input className="pinput" value={f.municipality} onChange={set('municipality')} /></Field>
+        <Field label="Nombre del administrador"><input className="pinput" value={f.adminName} onChange={set('adminName')} /></Field>
+        <Field label="Apellidos"><input className="pinput" value={f.adminLastName} onChange={set('adminLastName')} /></Field>
+        <Field label="Identificación"><input className="pinput" value={f.adminIdentification} onChange={set('adminIdentification')} /></Field>
+        <Field label="Correo"><input className="pinput" type="email" value={f.adminEmail} onChange={set('adminEmail')} /></Field>
+        <Field label="Usuario" hint="Único en toda la plataforma"><input className="pinput" value={f.adminUsername} onChange={set('adminUsername')} autoComplete="off" /></Field>
+        <Field label="Contraseña inicial" hint="Mínimo 8 caracteres; pídele que la cambie al entrar"><input className="pinput" type="password" value={f.adminPassword} onChange={set('adminPassword')} autoComplete="new-password" /></Field>
+      </div>
+      {error && <div className="palert bad" style={{ marginTop: 12 }}><MdErrorOutline /> {error}</div>}
+    </PModal>
+  )
+}
+
 export const OrgsPage = () => {
   const [orgs, setOrgs] = useState(null); const [plans, setPlans] = useState([]); const [catalog, setCatalog] = useState(null)
   const [modal, setModal] = useState(null); const [q, setQ] = useState(''); const [toast, toastNode] = useToast()
@@ -325,7 +353,7 @@ export const OrgsPage = () => {
   const del = async () => { try { await papi.delete(`/plataforma/organizaciones/${modal.del.id}`); setModal(null); toast('Organización eliminada'); load() } catch (e) { setModal(null); toast(perror(e), 'bad') } }
   return (
     <>
-      <Head title="Organizaciones" subtitle="Clientes, su plan, ciclo de pago y estado. La marcada como “esta instalación” define los módulos del sistema.">
+      <Head title="Organizaciones" subtitle="Clientes, su plan, ciclo de pago y estado. Cada cliente tiene sus propios datos, usuarios y sedes; la marcada “por defecto” es la que muestra la pantalla de inicio de sesión.">
         <button type="button" className="pbtn primary" onClick={() => setModal({ edit: {} })}><MdAdd /> Nueva organización</button>
       </Head>
       <PCard flush>
@@ -334,18 +362,19 @@ export const OrgsPage = () => {
           <thead><tr><th>Organización</th><th>Plan</th><th>Ciclo</th><th>Valor</th><th>Estado</th><th>Renovación</th><th /></tr></thead>
           <tbody>{shown.map((o) => (
             <tr key={o.id}>
-              <td><b>{o.name}</b> {o.isCurrent && <span className="pbadge purple"><MdHome /> Esta instalación</span>}<span className="sub">{[o.orgType === 'esal' ? 'Sin ánimo de lucro' : 'IPS', o.nit && `NIT ${o.nit}`, o.city].filter(Boolean).join(' · ')}</span></td>
+              <td><b>{o.name}</b> {o.isCurrent && <span className="pbadge purple"><MdHome /> Por defecto</span>} {!o.initialized && <span className="pbadge warn">Sin inicializar</span>}<span className="sub">{[o.orgType === 'esal' ? 'Sin ánimo de lucro' : 'IPS', o.nit && `NIT ${o.nit}`, o.city].filter(Boolean).join(' · ')}</span></td>
               <td>{o.planName ? <span className="pbadge purple">{o.planName}</span> : '—'}{o.extraFeatures.length > 0 && <span className="sub">+{o.extraFeatures.length} adicional{o.extraFeatures.length === 1 ? '' : 'es'}</span>}</td>
               <td style={{ textTransform: 'capitalize' }}>{o.billingCycle}</td>
               <td>{cop(o.amount)}<span className="sub">{o.billingCycle === 'anual' ? 'al año' : 'al mes'}</span></td>
               <td><span className={`pbadge ${STATUS[o.status][1]}`}>{STATUS[o.status][0]}</span></td>
               <td>{fdate(o.renewalDate)}</td>
-              <td className="act"><button type="button" className="pbtn ghost sm" onClick={() => setModal({ legal: o })} title="Contrato y acuerdo de datos"><MdGavel /> Documentos</button><button type="button" className="pbtn ghost icon" onClick={() => setModal({ edit: o })} aria-label="Editar"><MdEdit /></button><button type="button" className="pbtn ghost icon" style={{ color: 'var(--bad)' }} onClick={() => setModal({ del: o })} aria-label="Eliminar"><MdDelete /></button></td>
+              <td className="act">{!o.initialized && <button type="button" className="pbtn outline sm" onClick={() => setModal({ init: o })}><MdRocketLaunch /> Inicializar</button>}<button type="button" className="pbtn ghost sm" onClick={() => setModal({ legal: o })} title="Contrato y acuerdo de datos"><MdGavel /> Documentos</button><button type="button" className="pbtn ghost icon" onClick={() => setModal({ edit: o })} aria-label="Editar"><MdEdit /></button><button type="button" className="pbtn ghost icon" style={{ color: 'var(--bad)' }} onClick={() => setModal({ del: o })} aria-label="Eliminar"><MdDelete /></button></td>
             </tr>
           ))}</tbody>
         </table></div>
       </PCard>
       {modal?.edit && <OrgForm initial={modal.edit.id ? modal.edit : null} plans={plans} catalog={catalog} onClose={() => setModal(null)} onSaved={() => { setModal(null); toast('Organización guardada'); load() }} />}
+      {modal?.init && <InitOrgModal org={modal.init} onClose={() => setModal(null)} onSaved={() => { setModal(null); toast('Cliente creado: ya puede iniciar sesión su administrador'); load() }} />}
       {modal?.legal && <OrgLegalModal org={modal.legal} onClose={() => setModal(null)} />}
       {modal?.del && <PModal title="Eliminar organización" size="sm" onClose={() => setModal(null)} footer={<><button type="button" className="pbtn outline" onClick={() => setModal(null)}>Cancelar</button><button type="button" className="pbtn danger" onClick={del}><MdDelete /> Eliminar</button></>}>
         <p style={{ margin: 0 }}>¿Eliminar <b>{modal.del.name}</b>?</p></PModal>}

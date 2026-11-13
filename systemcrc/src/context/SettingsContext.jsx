@@ -1,5 +1,5 @@
 import React, { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react'
-import api from '../api/client'
+import api, { tokenStore } from '../api/client'
 import defaultLogo from '../assets/integraLogo.svg'
 import { BRAND } from '../utils/brand'
 
@@ -28,7 +28,10 @@ export const SettingsProvider = ({ children }) => {
 
   const refresh = useCallback(async () => {
     try {
-      const { data } = await api.get('/configuracion/publica')
+      // Con sesión: la configuración (nombre, logo y colores) de la organización del usuario; sin sesión: la pública.
+      const { data } = tokenStore.get()
+        ? await api.get('/configuracion').catch(() => api.get('/configuracion/publica'))
+        : await api.get('/configuracion/publica')
       setSettings((prev) => ({ ...prev, ...data }))
     } catch {
       /* Si el servidor no responde se usan los valores por defecto */
