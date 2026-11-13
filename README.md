@@ -1,5 +1,5 @@
-# SystemCRC · Frontend
+# Integra IPS · Frontend
 
-Aplicación web (React) de SystemCRC, de la Cruz Roja Colombiana Seccional Cesar: IPS (vacunación, citología, equipos) y Gestión de Socorro y Operaciones (eventos, voluntarios, inventario, flota).
+Aplicación web (React + Vite) de Integra IPS, sistema de información para IPS: servicios de IPS (vacunación, citologías, cadena de frío, equipos), facturación, calidad y estándares de habilitación, inventario, flota, socorro y voluntariado. Multi-cliente: cada institución con sus propios datos.
 
-El código está en `systemcrc/`. Para correrlo: `npm install && npm start`, en http://localhost:3000. La API está en `../systemcrc-backend/systemcrc-backend`.
+El código está en `integra-ips/`. Para correrlo: `npm install && npm start`, en http://localhost:3000. La API está en el repositorio `integra-ips-backend` (carpeta `integra-ips-backend/`).
