@@ -4,7 +4,11 @@ import './index.css';
 
 // /plataforma es una aplicación aparte (planes, funcionalidades y clientes), con su propio estilo y sesión.
 const isPlatform = window.location.pathname.startsWith('/plataforma')
-const App = lazy(() => (isPlatform ? import('./platform/PlatformApp') : import('./App')))
+// Dos lazy() separados: con un ternario dentro de un solo import(), el empaquetador precarga solo los estilos
+// de la aplicación principal y la Plataforma queda sin su hoja de estilos en producción.
+const PlatformApp = lazy(() => import('./platform/PlatformApp'))
+const MainApp = lazy(() => import('./App'))
+const App = isPlatform ? PlatformApp : MainApp
 
 const rootElement = document.getElementById('root');
 
