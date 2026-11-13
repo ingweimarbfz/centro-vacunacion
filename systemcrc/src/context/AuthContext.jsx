@@ -1,11 +1,16 @@
 import React, { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react'
 import api, { tokenStore, setSiteFilter } from '../api/client'
+import { useSettings } from './SettingsContext'
 
 const AuthContext = createContext(null)
 
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null)
   const [loading, setLoading] = useState(true)
+  const { refresh: refreshSettings } = useSettings()
+  // Multi-cliente: al cambiar de usuario se carga la marca (nombre, logo, colores) de su organización.
+  const orgKey = user ? user.id : 0
+  useEffect(() => { refreshSettings() }, [orgKey, refreshSettings])
 
   // Al abrir la app se valida el token guardado.
   useEffect(() => {
