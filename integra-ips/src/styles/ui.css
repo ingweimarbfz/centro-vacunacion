@@ -77,8 +77,9 @@ input, select, textarea { font-family: inherit; }
 .sidebar-user-info span { font-size: 12px; color: var(--muted); }
 
 .main { flex: 1; margin-left: var(--sidebar-w); min-width: 0; display: flex; flex-direction: column; }
+.topbar-wrap { position: sticky; top: 0; z-index: 30; }
 .topbar {
-  position: sticky; top: 0; z-index: 30; height: 64px; background: rgba(255,255,255,.88); backdrop-filter: blur(8px);
+  position: relative; height: 64px; background: rgba(255,255,255,.88); backdrop-filter: blur(8px);
   border-bottom: 1px solid var(--line); display: flex; align-items: center; gap: 16px; padding: 0 28px;
 }
 .topbar-title { flex: 1; min-width: 0; }
@@ -922,3 +923,22 @@ a.th-std:hover { box-shadow: var(--shadow-lg, 0 6px 18px rgba(0,0,0,.08)); }
 .load-more { display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; padding: 12px 20px; border-top: 1px solid var(--line); color: var(--muted); font-size: 13px; }
 .load-more b { color: var(--ink); }
 .nav-section.has-active .nav-section-toggle { color: var(--brand); }
+
+/* Escritorio: la sede pasa a la barra superior, el nombre del usuario se oculta y el buscador se acorta. */
+.topbar-site { display: none; }
+@media screen and (min-width: 1025px) {
+  .topbar-site { display: block; flex: 0 0 auto; }
+  .sidebar-site { display: none; }
+  .user-menu-btn .who { display: none; }
+  .topbar-title { display: none; }
+  .topbar-spacer { flex: 1; }
+  .topbar-crumbs { display: flex; }
+}
+.topbar-spacer { display: none; }
+.topbar-crumbs-sep { color: var(--muted); opacity: .6; font-size: 15px; flex: 0 0 auto; }
+.topbar-crumbs { display: none; align-items: center; gap: 4px; height: 32px; padding: 0 28px; background: rgba(255,255,255,.82); backdrop-filter: blur(8px); border-bottom: 1px solid var(--line-2); box-shadow: 0 1px 2px rgba(17,24,39,.04); font-size: 12px; color: var(--muted); white-space: nowrap; overflow: hidden; }
+.topbar-crumbs a { color: var(--muted); text-decoration: none; overflow: hidden; text-overflow: ellipsis; }
+.topbar-crumbs a:hover { color: var(--brand); text-decoration: underline; }
+.topbar-crumbs strong { color: var(--ink); font-weight: 600; }
+@media screen and (min-width: 1025px) { .topbar-spacer { display: block; } .topbar-crumbs { display: flex; } }
+@media screen and (min-width: 1025px) { .topbar > .menu-toggle { order: 0; } .topbar-site { order: 1; } .topbar-spacer { order: 2; } .topbar-date { order: 3; } .topbar .gsearch { order: 4; } .topbar .user-menu { order: 5; } }
