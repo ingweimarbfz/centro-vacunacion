@@ -5,7 +5,7 @@ import {
   MdVerified, MdVolunteerActivism, MdStar, MdExtension, MdClose, MdHome, MdGavel, MdRocketLaunch
 } from 'react-icons/md'
 import { OrgLegalModal } from './legalPages'
-import papi, { perror, cop, fdate } from './api'
+import papi, { perror, cop, fdate, WEB_URL } from './api'
 import { Head, PCard, PModal, Splash, Spin, Field, useToast } from './ui'
 
 const AUD = { ips: 'IPS', esal: 'Sin ánimo de lucro' }
@@ -161,7 +161,7 @@ export const PlansPage = () => {
   return (
     <>
       <Head title="Planes" subtitle="Precio mensual y anual, límites y funcionalidades de cada plan">
-        <a className="pbtn outline" href="/plataforma/precios" target="_blank" rel="noreferrer">Ver página de precios</a>
+        <a className="pbtn outline" href={`${WEB_URL}/precios`} target="_blank" rel="noreferrer">Ver página de precios</a>
         <button type="button" className="pbtn primary" onClick={() => setModal({ edit: {} })}><MdAdd /> Nuevo plan</button>
       </Head>
       <div className="pf-plans">{plans.map((p) => (

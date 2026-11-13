@@ -17,3 +17,6 @@ export const perror = (e, fb = 'Ocurrió un error. Intenta de nuevo.') => e?.res
 export const cop = (n) => new Intl.NumberFormat('es-CO', { style: 'currency', currency: 'COP', maximumFractionDigits: 0 }).format(Number(n) || 0)
 export const fdate = (iso) => (iso ? new Intl.DateTimeFormat('es-CO', { dateStyle: 'medium', timeZone: 'America/Bogota' }).format(new Date(`${iso.slice(0, 10)}T12:00:00`)) : '—')
 export default papi
+
+// Web comercial pública (precios con SEO). Se cambia con REACT_APP_WEB_URL al tener dominio propio.
+export const WEB_URL = (process.env.REACT_APP_WEB_URL || 'https://integra-web-eta.vercel.app').replace(/\/$/, '')

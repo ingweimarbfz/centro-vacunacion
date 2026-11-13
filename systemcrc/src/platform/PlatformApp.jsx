@@ -1,7 +1,7 @@
 import React, { createContext, useCallback, useContext, useEffect, useState } from 'react'
 import { BrowserRouter, Navigate, NavLink, Outlet, Route, Routes, useLocation } from 'react-router-dom'
 import { MdDashboard, MdWorkspacePremium, MdExtension, MdApartment, MdStorefront, MdLogout, MdMenu, MdLayers, MdErrorOutline, MdOpenInNew, MdGavel, MdUpgrade } from 'react-icons/md'
-import papi, { ptoken, perror } from './api'
+import papi, { ptoken, perror, WEB_URL } from './api'
 import { Spin, Splash } from './ui'
 import { DashboardPage, PlansPage, FeaturesPage, OrgsPage, RequestsPage } from './pages'
 import PricingPage from './PricingPage'
@@ -49,7 +49,7 @@ const Login = () => {
           <div className="pfield"><label className="plabel">Contraseña</label><input type="password" value={f.password} onChange={(e) => setF({ ...f, password: e.target.value })} autoComplete="current-password" /></div>
           {error && <div className="palert bad"><MdErrorOutline /><span>{error}</span></div>}
           <button type="submit" className="pbtn primary" disabled={busy}>{busy ? <Spin /> : null} Ingresar</button>
-          <a href="/plataforma/precios" style={{ textAlign: 'center', fontSize: 13 }}>Ver la página pública de precios</a>
+          <a href={`${WEB_URL}/precios`} target="_blank" rel="noreferrer" style={{ textAlign: 'center', fontSize: 13 }}>Ver la página pública de precios</a>
         </form>
       </div>
     </div>
@@ -75,7 +75,7 @@ const Shell = () => {
         <div className="pf-brand"><img className="pf-logo" src={mark} alt="Integra IPS" /><div><strong>Integra IPS</strong><small>Plataforma de planes</small></div></div>
         {NAV.map(([to, label, I, end]) => <NavLink key={to} to={to} end={end} className={({ isActive }) => `pf-nav${isActive ? ' active' : ''}`}><I /> {label}</NavLink>)}
         <div className="pf-sep">Vista pública</div>
-        <a className="pf-nav" href="/plataforma/precios" target="_blank" rel="noreferrer"><MdStorefront /> Página de precios <MdOpenInNew style={{ marginLeft: 'auto', fontSize: 15 }} /></a>
+        <a className="pf-nav" href={`${WEB_URL}/precios`} target="_blank" rel="noreferrer"><MdStorefront /> Página de precios <MdOpenInNew style={{ marginLeft: 'auto', fontSize: 15 }} /></a>
         <a className="pf-nav" href="/"><MdLayers /> Ir al sistema</a>
         <div className="pf-user"><div><strong>{user.name}</strong><small>{user.username}</small></div><button type="button" onClick={logout} title="Cerrar sesión" aria-label="Cerrar sesión"><MdLogout /></button></div>
       </aside>
