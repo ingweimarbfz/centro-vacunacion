@@ -10,6 +10,7 @@ import GlobalSearch from '../components/GlobalSearch'
 import TemperatureReminder from '../components/TemperatureReminder'
 import { UpgradeButton } from '../components/UpgradePlan'
 
+const NAV_OPEN_KEY = 'cv:nav-open'
 const titleFor = (pathname, moduleId) => {
   for (const s of navSectionsFor(moduleId)) {
     for (const i of s.items) {
@@ -138,6 +139,17 @@ const AppLayout = () => {
 
   useEffect(() => setOpen(false), [pathname])
 
+  // Menú desplegable: cada sección (salvo General) se abre o se cierra; solo una abierta a la vez.
+  // Al navegar se abre la sección de la página actual.
+  const activeSection = sections.find((s) => s.items.some((i) => (i.end ? pathname === i.to : pathname.startsWith(i.to))))?.title || null
+  const navKey = `${NAV_OPEN_KEY}:${moduleId}`
+  const [openSection, setOpenSection] = useState(() => {
+    try { return localStorage.getItem(navKey) || activeSection } catch { return activeSection }
+  })
+  useEffect(() => { if (activeSection && activeSection !== 'General') setOpenSection(activeSection) }, [activeSection, moduleId])
+  useEffect(() => { try { if (openSection) localStorage.setItem(navKey, openSection); else localStorage.removeItem(navKey) } catch { /* sin almacenamiento */ } }, [openSection, navKey])
+  const toggleSection = (title) => setOpenSection((cur) => (cur === title ? null : title))
+
   return (
     <div className={`app${collapsed ? ' sidebar-off' : ''}`}>
       <aside className={`sidebar${open ? ' open' : ''}`}>
@@ -159,16 +171,28 @@ const AppLayout = () => {
           </div>
         )}
         <nav className="sidebar-nav" aria-label="Menú principal">
-          {sections.map((s) => (
-            <div className="nav-section" key={s.title}>
-              <div className="nav-section-title">{s.title}</div>
-              {s.items.map((i) => (
-                <NavLink key={i.to} to={i.to} end={i.end} className={({ isActive }) => `nav-link${isActive ? ' active' : ''}`}>
-                  <i.icon /> {i.label}
-                </NavLink>
-              ))}
-            </div>
-          ))}
+          {sections.map((s) => {
+            const fixed = s.title === 'General'
+            const isOpen = fixed || openSection === s.title
+            return (
+              <div className={`nav-section${fixed ? '' : ' collapsible'}${isOpen ? ' is-open' : ''}${s.title === activeSection ? ' has-active' : ''}`} key={s.title}>
+                {fixed
+                  ? <div className="nav-section-title">{s.title}</div>
+                  : (
+                    <button type="button" className="nav-section-title nav-section-toggle" aria-expanded={isOpen} onClick={() => toggleSection(s.title)}>
+                      <span>{s.title}</span>
+                      {!isOpen && <small className="nav-section-count">{s.items.length}</small>}
+                      <MdKeyboardArrowDown className="nav-section-chevron" />
+                    </button>
+                    )}
+                {isOpen && s.items.map((i) => (
+                  <NavLink key={i.to} to={i.to} end={i.end} className={({ isActive }) => `nav-link${isActive ? ' active' : ''}`}>
+                    <i.icon /> {i.label}
+                  </NavLink>
+                ))}
+              </div>
+            )
+          })}
         </nav>
         <div className="sidebar-footer">
           <div className="sidebar-user">
