@@ -1,5 +1,6 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react'
 import { useSearchParams } from 'react-router-dom'
+import ServiceTabs, { serviceLabel } from './ServiceTabs'
 import {
   MdAdd, MdSearch, MdEdit, MdDelete, MdDownload, MdVisibility, MdErrorOutline, MdSave, MdUploadFile, MdFolder, MdFolderOpen,
   MdCreateNewFolder, MdChevronRight, MdExpandMore, MdEditNote
@@ -15,7 +16,7 @@ import './calidad.css'
 const ordered = (folders, parentId = null, depth = 0) => folders.filter((f) => f.parentId === parentId).flatMap((f) => [{ ...f, depth }, ...ordered(folders, f.id, depth + 1)])
 
 // Carpeta: ítem principal (nivel 1, con tipo) o subcarpeta (hasta el 3.er nivel).
-const FolderForm = ({ initial, parent, kinds, onClose, onSaved }) => {
+const FolderForm = ({ initial, parent, kinds, serviceId, serviceName, onClose, onSaved }) => {
   const editing = Boolean(initial?.id)
   const level = editing ? initial.level : parent ? parent.level + 1 : 1
   const [f, setF] = useState({ name: initial?.name || '', code: initial?.code || '', kind: initial?.kind || kinds[0], description: initial?.description || '', sortOrder: initial?.sortOrder ?? 0, active: initial?.active !== false })
@@ -23,7 +24,7 @@ const FolderForm = ({ initial, parent, kinds, onClose, onSaved }) => {
   const set = (k) => (e) => setF({ ...f, [k]: e.target.type === 'checkbox' ? e.target.checked : e.target.value })
   const save = async () => {
     setErr(''); setBusy(true)
-    try { editing ? await api.put(`/calidad/carpetas/${initial.id}`, f) : await api.post('/calidad/carpetas', { ...f, parentId: parent?.id }); onSaved() } catch (e) { setErr(errorMessage(e)); setBusy(false) }
+    try { editing ? await api.put(`/calidad/carpetas/${initial.id}`, f) : await api.post('/calidad/carpetas', { ...f, parentId: parent?.id, serviceId: parent ? undefined : serviceId }); onSaved() } catch (e) { setErr(errorMessage(e)); setBusy(false) }
   }
   return (
     <Modal title={editing ? `Editar · ${initial.name}` : level === 1 ? 'Nuevo ítem principal' : `Nueva subcarpeta en ${parent.name}`} size="sm" onClose={onClose}
@@ -37,7 +38,7 @@ const FolderForm = ({ initial, parent, kinds, onClose, onSaved }) => {
         {level === 1 && <div className="field"><label>Tipo de ítem</label><select value={f.kind} onChange={set('kind')}>{kinds.map((k) => <option key={k}>{k}</option>)}</select><span className="hint">Sirve para filtrar los ítems y sus documentos.</span></div>}
         <div className="field"><label>Descripción</label><input value={f.description} onChange={set('description')} placeholder="Qué documentos van aquí" /></div>
         {editing && <label className="switch"><input type="checkbox" checked={f.active} onChange={set('active')} /> {f.active ? 'Activa' : 'Inactiva'}</label>}
-        <span className="hint">Nivel {level} de 3.</span>
+        <span className="hint">Nivel {level} de 3 · {serviceName}.</span>
         {err && <div className="alert bad"><MdErrorOutline /><span>{err}</span></div>}
       </div>
     </Modal>
@@ -99,15 +100,18 @@ const DocForm = ({ initial, folders, folderId, categories, html: htmlMode, onClo
 const DocGeneralesPage = () => {
   const { user } = useAuth()
   const admin = user.role === 'administrador'
-  const [params] = useSearchParams()
+  const [params, setParams] = useSearchParams()
+  // Árbol de carpetas del servicio elegido ('general' = documentos generales de la IPS).
+  const svc = params.get('servicio') || 'general'
+  const pickService = (v) => { setSel(null); setParams(v === 'general' ? {} : { servicio: v }) }
   const [toast, toastNode] = useToast()
   const [meta, setMeta] = useState(null); const [docs, setDocs] = useState(null)
   const [sel, setSel] = useState(Number(params.get('carpeta')) || null)
   const [open, setOpen] = useState({})
   const [f, setF] = useState({ q: '', tipoItem: '', tipo: '', subcarpetas: true })
   const [modal, setModal] = useState(null)
-  const loadTree = useCallback(() => api.get('/calidad/carpetas').then(({ data }) => setMeta(data)).catch((e) => toast(errorMessage(e), 'bad')), [toast])
-  const loadDocs = useCallback(() => api.get('/calidad/documentos', { params: { carpeta: sel || undefined, subcarpetas: f.subcarpetas ? 1 : 0, q: f.q || undefined, tipoItem: f.tipoItem || undefined, tipo: f.tipo || undefined } }).then(({ data }) => setDocs(data)).catch((e) => toast(errorMessage(e), 'bad')), [sel, f, toast])
+  const loadTree = useCallback(() => api.get('/calidad/carpetas', { params: { servicio: svc } }).then(({ data }) => setMeta(data)).catch((e) => toast(errorMessage(e), 'bad')), [svc, toast])
+  const loadDocs = useCallback(() => api.get('/calidad/documentos', { params: { servicio: svc, carpeta: sel || undefined, subcarpetas: f.subcarpetas ? 1 : 0, q: f.q || undefined, tipoItem: f.tipoItem || undefined, tipo: f.tipo || undefined } }).then(({ data }) => setDocs(data)).catch((e) => toast(errorMessage(e), 'bad')), [svc, sel, f, toast])
   useEffect(() => { loadTree() }, [loadTree])
   useEffect(() => { loadDocs() }, [loadDocs])
   const folders = useMemo(() => meta?.folders || [], [meta])
@@ -131,24 +135,26 @@ const DocGeneralesPage = () => {
     )
   }
   if (!meta) return <div className="splash"><Spinner /></div>
+  const svcName = serviceLabel(meta.services, svc)
   return (
     <>
-      <PageHead title="Doc. Generales" subtitle="Documentos de calidad organizados por ítem principal y carpetas (hasta 3 niveles)">
+      <PageHead title="Doc. Generales" subtitle="Documentos de calidad y habilitación: cada servicio de IPS tiene su propio árbol de ítems y carpetas (hasta 3 niveles)">
         {admin && <button type="button" className="btn btn-outline" onClick={() => setModal({ folder: {} })}><MdAdd /> Ítem principal</button>}
         <button type="button" className="btn btn-outline" onClick={() => setModal({ doc: {}, html: true })} disabled={!folders.length}><MdEditNote /> Crear en línea</button>
         <button type="button" className="btn btn-primary" onClick={() => setModal({ doc: {} })} disabled={!folders.length}><MdUploadFile /> Cargar documento</button>
       </PageHead>
+      <ServiceTabs services={meta.services} value={svc} onChange={pickService} />
       <div className="qd-layout">
-        <Card flush title="Ítems y carpetas" className="qd-tree-card"
+        <Card flush title="Ítems y carpetas" subtitle={svcName} className="qd-tree-card"
           actions={<select className="input" value={f.tipoItem} onChange={(e) => setF({ ...f, tipoItem: e.target.value })} aria-label="Tipo de ítem" style={{ maxWidth: 170 }}><option value="">Todos los tipos</option>{meta.kinds.map((k) => <option key={k}>{k}</option>)}</select>}>
           <div className="qd-tree">
-            <button type="button" className={`qd-all${!sel ? ' on' : ''}`} onClick={() => setSel(null)}>Todos los documentos</button>
-            {roots.length === 0 ? <Empty icon={<MdFolder />}>{admin ? 'Crea el primer ítem principal.' : 'Aún no hay ítems.'}</Empty> : <ul>{roots.map((x) => <Node key={x.id} x={x} />)}</ul>}
+            <button type="button" className={`qd-all${!sel ? ' on' : ''}`} onClick={() => setSel(null)}>Todos · {svcName}</button>
+            {roots.length === 0 ? <Empty icon={<MdFolder />}>{admin ? `Crea el primer ítem principal de ${svcName}.` : 'Aún no hay ítems.'}</Empty> : <ul>{roots.map((x) => <Node key={x.id} x={x} />)}</ul>}
           </div>
         </Card>
         <div className="stack">
           <Card flush
-            title={current ? <span className="qd-crumbs">{current.path.map((p, i) => <React.Fragment key={p.id}>{i > 0 && <MdChevronRight />}<button type="button" onClick={() => setSel(p.id)}>{p.code ? `${p.code}. ` : ''}{p.name}</button></React.Fragment>)}</span> : 'Todos los documentos'}
+            title={current ? <span className="qd-crumbs">{current.path.map((p, i) => <React.Fragment key={p.id}>{i > 0 && <MdChevronRight />}<button type="button" onClick={() => setSel(p.id)}>{p.code ? `${p.code}. ` : ''}{p.name}</button></React.Fragment>)}</span> : `Todos los documentos · ${svcName}`}
             subtitle={current ? [current.kind && `Tipo: ${current.kind}`, current.description].filter(Boolean).join(' · ') : 'Elige un ítem o carpeta para ver sus documentos'}
             actions={current && admin && <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
               {current.level < meta.maxLevel && <button type="button" className="btn btn-outline btn-sm" onClick={() => setModal({ folder: {}, parent: current })}><MdCreateNewFolder /> Subcarpeta</button>}
@@ -188,7 +194,7 @@ const DocGeneralesPage = () => {
           </Card>
         </div>
       </div>
-      {modal?.folder && <FolderForm initial={modal.folder.id ? modal.folder : null} parent={modal.parent} kinds={meta.kinds} onClose={() => setModal(null)} onSaved={() => reload('Carpeta guardada')} />}
+      {modal?.folder && <FolderForm initial={modal.folder.id ? modal.folder : null} parent={modal.parent} kinds={meta.kinds} serviceId={svc === 'general' ? null : Number(svc)} serviceName={svcName} onClose={() => setModal(null)} onSaved={() => reload('Carpeta guardada')} />}
       {modal?.doc && <DocForm initial={modal.doc.id ? modal.doc : null} folders={folders} folderId={sel} categories={meta.categories} html={modal.html} onClose={() => setModal(null)} onSaved={() => reload('Documento guardado')} />}
       {modal?.view && <Viewer doc={modal.view} onClose={() => setModal(null)} onEdit={(admin || modal.view.createdById === user.id) ? () => setModal({ doc: modal.view }) : undefined} />}
       {toastNode}

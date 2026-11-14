@@ -32,3 +32,13 @@
 @media (max-width: 960px) { .qd-layout { grid-template-columns: 1fr; } }
 .qd-dash-top { display: grid; grid-template-columns: minmax(0, 1.6fr) minmax(0, 1fr); gap: 18px; align-items: start; }
 @media (max-width: 1100px) { .qd-dash-top { grid-template-columns: 1fr; } }
+
+/* Selector de servicio: cada servicio de IPS tiene su propio árbol de documentos */
+.qd-services { display: flex; gap: 6px; flex-wrap: wrap; margin: 0 0 16px; }
+.qd-services button { display: inline-flex; align-items: center; gap: 6px; height: 36px; padding: 0 14px; border: 1px solid var(--line); border-radius: 999px; background: var(--surface, #fff); font: inherit; font-size: 13.5px; color: var(--ink-2, var(--ink)); cursor: pointer; }
+.qd-services button svg { font-size: 17px; color: var(--muted); }
+.qd-services button:hover { border-color: var(--brand); }
+.qd-services button.on { background: var(--brand); border-color: var(--brand); color: #fff; font-weight: 600; }
+.qd-services button.on svg { color: #fff; }
+@media (max-width: 640px) { .qd-services { flex-wrap: nowrap; overflow-x: auto; padding-bottom: 4px; } .qd-services button { flex: 0 0 auto; } }
+.qd-svc-table tr.on td { background: color-mix(in srgb, var(--brand) 6%, transparent); }
