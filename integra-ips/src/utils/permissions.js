@@ -142,6 +142,7 @@ const NAV = {
       items: [
         { to: '/facturacion', label: 'Dashboard de facturación', icon: MdInsights, roles: STAFF, end: true, service: 'any', module: 'facturacion' },
         { to: '/facturacion/servicios', label: 'Servicios facturables', icon: MdMedicalServices, roles: STAFF, service: 'any', module: 'facturacion' },
+        { to: '/facturacion/facturas', label: 'Facturas emitidas', icon: MdReceiptLong, roles: STAFF, service: 'any', module: 'facturacion' },
         { to: '/facturacion/cuentas-cobro', label: 'Cuentas de cobro', icon: MdReceiptLong, roles: STAFF, service: 'any', module: 'facturacion' },
         { to: '/facturacion/tarifario', label: 'Tarifario', icon: MdPriceChange, roles: ADMIN, service: 'any' },
         { to: '/facturacion/impuestos', label: 'Impuestos y numeración', icon: MdAccountBalance, roles: ADMIN, service: 'any' },
@@ -258,6 +259,7 @@ const NAV = {
       { to: '/educacion/certificados', label: 'Certificados', icon: MdWorkspacePremiumIcon, roles: STAFF, module: 'edu_estudiantes' }
     ] },
     { title: 'Finanzas', items: [
+      { to: '/educacion/facturas', label: 'Facturas', icon: MdReceiptLong, roles: STAFF, module: 'edu_estudiantes', end: true },
       { to: '/educacion/cartera', label: 'Cartera', icon: MdAccountBalanceWallet, roles: STAFF, module: 'edu_estudiantes' },
       { to: '/educacion/convenios', label: 'Convenios', icon: MdHandshake, roles: STAFF, module: ['edu_estudiantes', 'edu_programas'] },
       { to: '/educacion/configuracion', label: 'Reglamento, planes de pago y descuentos', icon: MdTune, roles: ADMIN }
