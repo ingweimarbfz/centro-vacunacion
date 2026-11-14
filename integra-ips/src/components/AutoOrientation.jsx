@@ -25,19 +25,39 @@ const needsWidth = (table, original) => {
   // Ancho mínimo en el que la tabla se puede mostrar sin desbordarse.
   sheet.style.width = '1px'
   const min = clone.scrollWidth
+  // Ancho cómodo: cada celda con su contenido en una línea, hasta 55 mm (los textos más largos sí se parten).
+  // Si la tabla tiene muchas columnas con datos, este ancho supera la hoja vertical aunque la mínima quepa
+  // apretando todo en varias líneas.
+  host.classList.add('ao-measure')
+  sheet.style.width = 'max-content'
+  clone.style.width = 'max-content'
+  const natural = clone.scrollWidth
   host.remove()
-  return min
+  return { min, natural }
+}
+
+const ensureMeasureStyle = () => {
+  if (document.getElementById('auto-orientation-measure')) return
+  const st = document.createElement('style')
+  st.id = 'auto-orientation-measure'
+  st.textContent = '.ao-measure td, .ao-measure th { max-width: 55mm; } .ao-measure table { table-layout: auto; }'
+  document.head.appendChild(st)
 }
 
 const check = () => {
   let landscape = false
+  ensureMeasureStyle()
   document.querySelectorAll('.cy-sheet').forEach((sheet) => {
     if (sheet.closest('.th-landscape, .tr-report, [data-orientation="fixed"]')) return
     const tables = [...sheet.querySelectorAll('table')]
-    const widest = tables.reduce((m, t) => Math.max(m, needsWidth(t, sheet)), 0)
-    const land = widest > PORTRAIT + 2
+    const sizes = tables.map((t) => needsWidth(t, sheet))
+    const min = sizes.reduce((m, s) => Math.max(m, s.min), 0)
+    const natural = sizes.reduce((m, s) => Math.max(m, s.natural), 0)
+    // Horizontal si la tabla no cabe en vertical, o si sus datos son tan anchos que en vertical
+    // quedarían apretados en muchas líneas (más de un 15 % por encima del ancho de la hoja).
+    const land = min > PORTRAIT + 2 || natural > PORTRAIT * 1.15
     sheet.classList.toggle('sheet-landscape', land)
-    sheet.classList.toggle('sheet-compact', widest > LANDSCAPE + 2)
+    sheet.classList.toggle('sheet-compact', min > LANDSCAPE + 2)
     if (land) landscape = true
   })
   const existing = document.getElementById(STYLE_ID)
@@ -46,7 +66,8 @@ const check = () => {
     st.id = STYLE_ID
     st.textContent = '@media print { @page { size: letter landscape; margin: 10mm; } }'
     document.head.appendChild(st)
-  } else if (!landscape && existing) existing.remove()
+  } else if (landscape) document.head.appendChild(existing) // al final, para ganarle al @page de las hojas de estilo cargadas después
+  else if (existing) existing.remove()
 }
 
 const AutoOrientation = () => {

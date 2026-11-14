@@ -110,8 +110,11 @@ export const printHtml = (title, body) => {
   const w = window.open('', '_blank')
   if (!w) return
   w.document.write(htmlPage(title, body)); w.document.close()
-  w.onload = () => { w.focus(); w.print() }
-  setTimeout(() => { try { w.focus(); w.print() } catch { /* ventana cerrada */ } }, 600)
+  // Imprime una sola vez: al cargar (imágenes incluidas) o, si el evento no llega, a los 800 ms.
+  let done = false
+  const go = () => { if (done) return; done = true; try { w.focus(); w.print() } catch { /* ventana cerrada */ } }
+  w.onload = go
+  setTimeout(go, 800)
 }
 
 export default RichTextEditor
