@@ -19,7 +19,7 @@ const titleFor = (pathname, moduleId) => {
     }
   }
   // Páginas que no están en el menú (recibos y contratos de Educación).
-  const extra = [['/educacion/recibos', 'Finanzas', 'Recibo de caja'], ['/educacion/facturas', 'Finanzas', 'Factura'], ['/educacion/clases', 'Estudiantes', 'Asistencia de la clase'], ['/educacion/certificados/', 'Estudiantes', 'Certificado'], ['/educacion/grupos/', 'Oferta académica', 'Aula del grupo'], ['/educacion/contratos', 'Estudiantes', 'Contrato de matrícula']].find(([p]) => pathname.startsWith(p))
+  const extra = [['/educacion/recibos', 'Finanzas', 'Recibo de caja'], ['/educacion/facturas/', 'Finanzas', 'Factura'], ['/educacion/clases', 'Estudiantes', 'Asistencia de la clase'], ['/educacion/certificados/', 'Estudiantes', 'Certificado'], ['/educacion/grupos/', 'Oferta académica', 'Aula del grupo'], ['/educacion/contratos', 'Estudiantes', 'Contrato de matrícula']].find(([p]) => pathname.startsWith(p))
   if (extra) return { section: extra[1], title: extra[2] }
   return { section: '', title: '' }
 }

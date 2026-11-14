@@ -75,6 +75,8 @@ const VaccinationCard = lazy(() => import('./pages/vacunacion/VaccinationCard'))
 const VaccinationFollowup = lazy(() => import('./pages/vacunacion/VaccinationFollowup'))
 const VaccinesConfig = lazy(() => import('./pages/vacunacion/VaccinesConfig'))
 const InvoicePage = lazy(() => import('./pages/facturacion/InvoicePage'))
+const InvoiceRegisterPage = lazy(() => import('./pages/facturacion/InvoiceRegisterPage'))
+const EduInvoiceRegisterPage = lazy(() => import('./pages/facturacion/InvoiceRegisterPage').then((m) => ({ default: m.EduInvoiceRegisterPage })))
 const PublicDocument = lazy(() => import('./pages/PublicDocument'))
 const DocGeneralesPage = lazy(() => import('./pages/calidad/DocGeneralesPage'))
 const DocGeneralesDashboard = lazy(() => import('./pages/calidad/DocGeneralesDashboard'))
@@ -169,6 +171,8 @@ const App = () => (
             <Route path="vacunacion/carne/:documento" element={<Protected module="vacunacion" roles={STAFF} service="cadena_frio"><VaccinationCard /></Protected>} />
             <Route path="vacunacion/seguimiento" element={<Protected module="vacunacion" roles={STAFF} service="cadena_frio"><VaccinationFollowup /></Protected>} />
             <Route path="vacunacion/biologicos" element={<Protected roles={ADMIN} service="cadena_frio"><VaccinesConfig /></Protected>} />
+            <Route path="facturacion/facturas" element={<Protected module="facturacion" roles={STAFF} service="any"><InvoiceRegisterPage /></Protected>} />
+            <Route path="educacion/facturas" element={<Protected module="edu_estudiantes" roles={STAFF}><EduInvoiceRegisterPage /></Protected>} />
             <Route path="facturacion/factura/:id" element={<Protected module="facturacion" roles={STAFF} service="any"><InvoicePage /></Protected>} />
             <Route path="estandares/doc-generales" element={<Protected module="doc_generales" roles={STAFF}><DocGeneralesDashboard /></Protected>} />
             <Route path="estandares/doc-generales/documentos" element={<Protected module="doc_generales" roles={STAFF}><DocGeneralesPage /></Protected>} />
