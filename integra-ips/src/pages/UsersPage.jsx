@@ -30,7 +30,7 @@ const ModulesField = ({ role, value, byRole, onChange }) => {
         <div key={group}>
           <span className="label">{USER_MODULE_GROUPS[group]}</span>
           <div className="rc-checks" style={{ marginTop: 6 }}>
-            {items.filter(([k]) => inPlan(me, k) && (k !== 'traslado' || role === 'conductor') && (k !== 'voluntario' || role === 'voluntario')).map(([k, l]) => (
+            {items.filter(([k]) => inPlan(me, k) && (k !== 'traslado' || role === 'conductor') && (k !== 'voluntario' || role === 'voluntario') && (k !== 'edu_portal' || role === 'estudiante') && (k !== 'edu_docente' || role === 'docente')).map(([k, l]) => (
               <label key={k} className={`rc-check${current.includes(k) ? ' on' : ''}`}><input type="checkbox" checked={current.includes(k)} onChange={() => toggle(k)} /> {l}</label>
             ))}
           </div>

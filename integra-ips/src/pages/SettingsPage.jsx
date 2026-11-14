@@ -1,9 +1,11 @@
 import React, { useEffect, useRef, useState } from 'react'
-import { MdSave, MdUpload, MdRestartAlt, MdPalette, MdBusiness, MdErrorOutline, MdImage, MdLogin, MdGavel } from 'react-icons/md'
+import { MdSave, MdUpload, MdRestartAlt, MdPalette, MdBusiness, MdErrorOutline, MdImage, MdLogin, MdGavel, MdSchool } from 'react-icons/md'
 import { Link } from 'react-router-dom'
 import api, { errorMessage } from '../api/client'
 import { useSettings, applyTheme, DEFAULT_SETTINGS } from '../context/SettingsContext'
 import { PageHead, Card, Spinner, useToast } from '../components/ui'
+import { useAuth } from '../context/AuthContext'
+import { inPlan } from '../utils/permissions'
 import { UsersSignaturesCard } from './SignaturePage'
 import DiscountsCard from './DiscountsCard'
 import { resizeImage } from '../utils/image'
@@ -38,6 +40,10 @@ const SettingsPage = () => {
   const [uploading, setUploading] = useState(false)
   const fileRef = useRef(null)
   const loginRef = useRef(null)
+  const eduRef = useRef(null)
+  const { user } = useAuth()
+  // Logo del área de educación: solo si el plan incluye Educación (institución ETDH).
+  const eduInPlan = ['edu_dashboard', 'edu_programas', 'edu_estudiantes'].some((m) => inPlan(user, m))
 
   useEffect(() => {
     api.get('/configuracion').then(({ data }) => setForm(data)).catch((e) => setError(errorMessage(e)))
@@ -49,7 +55,7 @@ const SettingsPage = () => {
 
   const set = (k) => (v) => setForm((f) => ({ ...f, [k]: v?.target ? v.target.value : v }))
 
-  const publish = (data) => setGlobal((g) => ({ ...g, ipsName: data.ipsName, shortName: data.shortName, primaryColor: data.primaryColor, secondaryColor: data.secondaryColor, logoUrl: data.logoUrl, loginImageUrl: data.loginImageUrl, loginDescription: data.loginDescription, loginFooter: data.loginFooter }))
+  const publish = (data) => setGlobal((g) => ({ ...g, ipsName: data.ipsName, shortName: data.shortName, primaryColor: data.primaryColor, secondaryColor: data.secondaryColor, logoUrl: data.logoUrl, eduLogoUrl: data.eduLogoUrl ?? null, loginImageUrl: data.loginImageUrl, loginDescription: data.loginDescription, loginFooter: data.loginFooter }))
 
   const save = async (e) => {
     e.preventDefault()
@@ -97,6 +103,21 @@ const SettingsPage = () => {
   const resetLoginImage = async () => {
     setUploading(true)
     try { const { data } = await api.delete('/configuracion/login-imagen'); setForm((f) => ({ ...f, loginImageUrl: null })); publish(data); toast('Se restauró la imagen por defecto') } catch (err) { toast(errorMessage(err), 'bad') } finally { setUploading(false) }
+  }
+
+  const uploadEduLogo = async (file) => {
+    if (!file) return
+    setUploading(true)
+    try {
+      const image = await resizeImage(file, { max: 800, type: 'image/png' })
+      const { data } = await api.post('/configuracion/logo-educacion', { image })
+      setForm((f) => ({ ...f, eduLogoUrl: data.eduLogoUrl })); publish(data)
+      toast('Logo de educación actualizado')
+    } catch (err) { toast(errorMessage(err), 'bad') } finally { setUploading(false); if (eduRef.current) eduRef.current.value = '' }
+  }
+  const resetEduLogo = async () => {
+    setUploading(true)
+    try { const { data } = await api.delete('/configuracion/logo-educacion'); setForm((f) => ({ ...f, eduLogoUrl: null })); publish(data); toast('Educación usará el logo de la IPS') } catch (err) { toast(errorMessage(err), 'bad') } finally { setUploading(false) }
   }
 
   const resetLogo = async () => {
@@ -179,6 +200,20 @@ const SettingsPage = () => {
               {form.logoUrl && <button type="button" className="btn btn-ghost" style={{ width: '100%', whiteSpace: 'normal' }} onClick={resetLogo} disabled={uploading}><MdRestartAlt /> Usar logo de Integra IPS</button>}
             </div>
           </Card>
+
+          {eduInPlan && (
+            <Card title="Logo de educación" subtitle="Se muestra en el menú al entrar a Educación · si lo dejas vacío se usa el logo de la IPS" icon={<MdSchool style={{ color: 'var(--brand)' }} />}>
+              <div style={{ border: '1px dashed var(--line)', borderRadius: 10, padding: 20, display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: 120, background: '#FAFAFB' }}>
+                <img src={form.eduLogoUrl || form.logoUrl || defaultLogo} alt="Logo de educación" style={{ maxWidth: '100%', maxHeight: 90, objectFit: 'contain', opacity: form.eduLogoUrl ? 1 : 0.55 }} />
+              </div>
+              {!form.eduLogoUrl && <span className="hint" style={{ display: 'block', marginTop: 8 }}>Sin logo propio: Educación muestra el logo de la IPS.</span>}
+              <input ref={eduRef} type="file" accept="image/png,image/jpeg,image/webp,image/svg+xml" hidden onChange={(e) => uploadEduLogo(e.target.files[0])} />
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 8, marginTop: 14 }}>
+                <button type="button" className="btn btn-outline" style={{ width: '100%' }} onClick={() => eduRef.current.click()} disabled={uploading}>{uploading ? <Spinner /> : <MdUpload />} Cargar logo de educación</button>
+                {form.eduLogoUrl && <button type="button" className="btn btn-ghost" style={{ width: '100%', whiteSpace: 'normal' }} onClick={resetEduLogo} disabled={uploading}><MdRestartAlt /> Usar el logo de la IPS</button>}
+              </div>
+            </Card>
+          )}
 
           <Card title="Vista previa">
             <div style={{ border: '1px solid var(--line)', borderRadius: 10, overflow: 'hidden' }}>

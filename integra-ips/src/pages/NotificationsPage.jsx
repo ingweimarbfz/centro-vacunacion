@@ -44,7 +44,7 @@ const NotificationsPage = () => {
           </div>
         </Card>
 
-        <Card title="Grupos por sección y sede" subtitle="Cada grupo recibe solo los avisos de su sede, para no saturar a las demás. Un grupo con “Todas las sedes” recibe todo (útil para la dirección). Una sección solo está disponible si su módulo está en tu plan."
+        <Card title="Grupos por sección y sede" subtitle="Cada grupo recibe solo los avisos de su sede, para no saturar a las demás. Un grupo con “Todas las sedes” recibe todo (útil para la dirección). Una sección solo está disponible si su módulo está en tu plan. Para que cada usuario se una desde “Mis notificaciones”, haz al bot administrador de cada grupo con permiso para invitar usuarios."
           actions={<button type="button" className="btn btn-outline btn-sm" onClick={search} disabled={!d.bot.configured || busy === 'search'}>{busy === 'search' ? <Spinner /> : <MdSearch />} Buscar grupos</button>}>
           <div className="stack" style={{ gap: 14 }}>
             {found && found.length > 0 && <div className="alert info" style={{ margin: 0 }}><MdInfoOutline /><span>Se encontraron {found.length} grupo{found.length === 1 ? '' : 's'} con el bot: {found.map((g) => g.title).join(', ')}. Asígnalos abajo a su sección.</span></div>}

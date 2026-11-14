@@ -9,6 +9,7 @@ export const DEFAULT_SETTINGS = {
   primaryColor: '#E30613',
   secondaryColor: '#1F2A44',
   logoUrl: null,
+  eduLogoUrl: null,
   loginImageUrl: null,
   loginDescription: null,
   loginFooter: null

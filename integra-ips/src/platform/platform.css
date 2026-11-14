@@ -163,6 +163,8 @@
 .pf-esal { margin-top: 46px; display: grid; grid-template-columns: 1fr 1.1fr; gap: 0; border-radius: 22px; overflow: hidden; border: 1px solid rgba(215, 198, 255, .35); background: linear-gradient(120deg, rgba(124, 77, 219, .35), rgba(42, 22, 80, .6)); }
 .pf-esal .l { padding: 34px; }
 .pf-esal .r { padding: 34px; background: rgba(0,0,0,.18); }
+.pf-esal.pf-etdh { background: linear-gradient(120deg, rgba(79, 70, 229, .35), rgba(30, 27, 75, .65)); border-color: rgba(196, 181, 253, .35); }
+.pf-esal.pf-etdh .pill { background: rgba(196, 181, 253, .15); color: #C4B5FD; border-color: rgba(196, 181, 253, .35); }
 .pf-esal .pill { display: inline-flex; align-items: center; gap: 6px; background: rgba(185, 246, 202, .15); color: #B9F6CA; border: 1px solid rgba(185, 246, 202, .35); padding: 5px 12px; border-radius: 99px; font-size: 12px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; }
 .pf-esal h3 { font-family: 'Fraunces', Georgia, serif; font-size: 34px; color: #fff; margin: 14px 0 8px; font-weight: 600; }
 .pf-esal ul { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: 1fr 1fr; gap: 12px 18px; }

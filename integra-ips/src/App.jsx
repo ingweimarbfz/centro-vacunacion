@@ -21,6 +21,7 @@ const UsersPage = lazy(() => import('./pages/UsersPage'))
 const SettingsPage = lazy(() => import('./pages/SettingsPage'))
 const NotificationsPage = lazy(() => import('./pages/NotificationsPage'))
 const ProfilePage = lazy(() => import('./pages/ProfilePage'))
+const MyNotificationsPage = lazy(() => import('./pages/MyNotificationsPage'))
 const SocorroDashboard = lazy(() => import('./pages/socorro/SocorroDashboard'))
 const EventsPage = lazy(() => import('./pages/socorro/EventsPage'))
 const EventDetail = lazy(() => import('./pages/socorro/EventDetail'))
@@ -80,6 +81,39 @@ const DocGeneralesDashboard = lazy(() => import('./pages/calidad/DocGeneralesDas
 const StdChecklistSheet = lazy(() => import('./pages/estandares/StdChecklistSheet'))
 const InventoryBridge = lazy(() => import('./pages/estandares/InventoryBridge'))
 const EquipmentBridge = lazy(() => import('./pages/estandares/EquipmentBridge'))
+// Educación · Institución ETDH (IIPS-019)
+const EduDashboard = lazy(() => import('./pages/academico/EduDashboard'))
+const EduPrograms = lazy(() => import('./pages/academico/ProgramsPage'))
+const EduProgramDetail = lazy(() => import('./pages/academico/ProgramDetail'))
+const EduGroups = lazy(() => import('./pages/academico/GroupsPage'))
+const EduStudents = lazy(() => import('./pages/academico/StudentsPage'))
+const EduStudentDetail = lazy(() => import('./pages/academico/StudentDetail'))
+const EduEnrollments = lazy(() => import('./pages/academico/EnrollmentsPage'))
+const EduMyProgram = lazy(() => import('./pages/academico/MyProgramPage'))
+const EduCartera = lazy(() => import('./pages/academico/CarteraPage'))
+const EduAgreements = lazy(() => import('./pages/academico/AgreementsPage'))
+const EduSettings = lazy(() => import('./pages/academico/AcademicSettingsPage'))
+const EduReceipt = lazy(() => import('./pages/academico/ReceiptPage'))
+const EduContract = lazy(() => import('./pages/academico/ContractPage'))
+const EduInvoice = lazy(() => import('./pages/academico/EduInvoicePage'))
+const EduSchedule = lazy(() => import('./pages/academico/SchedulePage'))
+const EduTeacher = lazy(() => import('./pages/academico/TeacherDashboard'))
+const EduMySchedule = lazy(() => import('./pages/academico/MySchedulePage'))
+const EduTeacherGroups = lazy(() => import('./pages/academico/TeacherPages').then((m) => ({ default: m.TeacherGroupsPage })))
+const EduTeacherGrades = lazy(() => import('./pages/academico/TeacherPages').then((m) => ({ default: m.TeacherGradesPage })))
+const EduTeacherSubs = lazy(() => import('./pages/academico/TeacherPages').then((m) => ({ default: m.TeacherSubmissionsPage })))
+const EduMyCourse = lazy(() => import('./pages/academico/MyCourse'))
+const EduAttendance = lazy(() => import('./pages/academico/AttendancePage'))
+const EduActa = lazy(() => import('./pages/academico/ActaPage'))
+const EduActas = lazy(() => import('./pages/academico/ActasPage'))
+const EduRooms = lazy(() => import('./pages/academico/ClassroomsPage'))
+const EduCourse = lazy(() => import('./pages/academico/CoursePage'))
+const EduCertificates = lazy(() => import('./pages/academico/CertificatesPage'))
+const EduCertificatePrint = lazy(() => import('./pages/academico/CertificatePrint'))
+const EduVerify = lazy(() => import('./pages/academico/VerifyCertificate'))
+const EduReports = lazy(() => import('./pages/academico/ReportsPage'))
+const EduAccreditation = lazy(() => import('./pages/academico/Accreditation').then((m) => ({ default: m.AccreditationDashboard })))
+const EduAccreditationDocs = lazy(() => import('./pages/academico/Accreditation').then((m) => ({ default: m.AccreditationDocs })))
 
 // Protege rutas por sesión y por rol. Si el rol no tiene acceso, vuelve al dashboard.
 const Protected = ({ roles, service, module, grantable, children }) => {
@@ -115,6 +149,8 @@ const App = () => (
         <Routes>
           <Route path="/login" element={<LoginRoute />} />
           <Route path="/p/:token" element={<PublicDocument />} />
+          <Route path="/verificar" element={<EduVerify />} />
+          <Route path="/verificar/:code" element={<EduVerify />} />
           <Route element={<Protected><LegalGate><AppLayout /></LegalGate></Protected>}>
             <Route path="legal/:kind" element={<LegalPage />} />
             <Route index element={<Protected module="ips_dashboard" roles={ALL} service="any"><Dashboard /></Protected>} />
@@ -153,6 +189,7 @@ const App = () => (
             <Route path="notificaciones" element={<Protected roles={ADMIN}><NotificationsPage /></Protected>} />
             <Route path="perfil" element={<ProfilePage />} />
             <Route path="firma" element={<MySignaturePage />} />
+            <Route path="mis-notificaciones" element={<MyNotificationsPage />} />
             <Route path="socorro" element={<Protected module="og_dashboard" roles={ALL}><SocorroDashboard /></Protected>} />
             <Route path="socorro/vehiculos" element={<Protected module="flota" roles={FLEET_DASH}><FleetDashboard /></Protected>} />
             <Route path="socorro/vehiculos/flota" element={<Protected module="flota" roles={FLEET_VIEW}><VehiclesPage /></Protected>} />
@@ -195,6 +232,43 @@ const App = () => (
             <Route path="estandares/talento-humano/listado" element={<Protected module="talento_humano" roles={STAFF}><ThListado /></Protected>} />
             <Route path="estandares/talento-humano/instructivo" element={<Protected module="talento_humano" roles={STAFF}><ThGuide /></Protected>} />
             <Route path="estandares/talento-humano/configuracion" element={<Protected roles={ADMIN}><ThConfig /></Protected>} />
+            <Route path="educacion" element={<Protected module="edu_dashboard" roles={STAFF}><EduDashboard /></Protected>} />
+            <Route path="educacion/programas" element={<Protected module="edu_programas" roles={STAFF}><EduPrograms /></Protected>} />
+            <Route path="educacion/programas/:id" element={<Protected module="edu_programas" roles={STAFF}><EduProgramDetail /></Protected>} />
+            <Route path="educacion/grupos" element={<Protected module="edu_programas" roles={STAFF}><EduGroups /></Protected>} />
+            <Route path="educacion/estudiantes" element={<Protected module="edu_estudiantes" roles={STAFF}><EduStudents /></Protected>} />
+            <Route path="educacion/estudiantes/:id" element={<Protected module="edu_estudiantes" roles={STAFF}><EduStudentDetail /></Protected>} />
+            <Route path="educacion/matriculas" element={<Protected module="edu_estudiantes" roles={STAFF}><EduEnrollments /></Protected>} />
+            <Route path="educacion/mi-programa" element={<Protected module="edu_portal" grantable={false} roles={['estudiante']}><EduMyProgram /></Protected>} />
+            <Route path="educacion/mi-programa/contrato/:id" element={<Protected module="edu_portal" grantable={false} roles={['estudiante']}><EduContract /></Protected>} />
+            <Route path="educacion/mi-programa/recibo/:id" element={<Protected module="edu_portal" grantable={false} roles={['estudiante']}><EduReceipt /></Protected>} />
+            <Route path="educacion/cartera" element={<Protected module="edu_estudiantes" roles={STAFF}><EduCartera /></Protected>} />
+            <Route path="educacion/convenios" element={<Protected module={['edu_estudiantes', 'edu_programas']} roles={STAFF}><EduAgreements /></Protected>} />
+            <Route path="educacion/configuracion" element={<Protected roles={ADMIN}><EduSettings /></Protected>} />
+            <Route path="educacion/recibos/:id" element={<Protected module="edu_estudiantes" roles={STAFF}><EduReceipt /></Protected>} />
+            <Route path="educacion/horarios" element={<Protected module="edu_programas" roles={STAFF}><EduSchedule /></Protected>} />
+            <Route path="educacion/grupos/:id/aula" element={<Protected module={['edu_programas', 'edu_docente']} roles={[...STAFF, 'docente']}><EduCourse /></Protected>} />
+            <Route path="educacion/certificados" element={<Protected module="edu_estudiantes" roles={STAFF}><EduCertificates /></Protected>} />
+            <Route path="educacion/certificados/:id" element={<Protected module="edu_estudiantes" roles={STAFF}><EduCertificatePrint /></Protected>} />
+            <Route path="educacion/mi-programa/certificado/:id" element={<Protected module="edu_portal" grantable={false} roles={['estudiante']}><EduCertificatePrint /></Protected>} />
+            <Route path="educacion/reportes" element={<Protected module={['edu_dashboard', 'edu_estudiantes', 'edu_programas']} roles={STAFF}><EduReports /></Protected>} />
+            <Route path="educacion/acreditacion" element={<Protected module={['edu_dashboard', 'edu_programas']} roles={STAFF}><EduAccreditation /></Protected>} />
+            <Route path="educacion/acreditacion/documentos" element={<Protected module={['edu_dashboard', 'edu_programas']} roles={STAFF}><EduAccreditationDocs /></Protected>} />
+            <Route path="educacion/aulas" element={<Protected module="edu_programas" roles={STAFF}><EduRooms /></Protected>} />
+            <Route path="educacion/actas" element={<Protected module={['edu_programas', 'edu_estudiantes']} roles={STAFF}><EduActas /></Protected>} />
+            <Route path="educacion/clases/:id/asistencia" element={<Protected module={['edu_programas', 'edu_docente']} roles={[...STAFF, 'docente']}><EduAttendance /></Protected>} />
+            <Route path="educacion/clases/:id/acta" element={<Protected module={['edu_programas', 'edu_docente']} roles={[...STAFF, 'docente']}><EduActa /></Protected>} />
+            <Route path="educacion/docente" element={<Protected module="edu_docente" grantable={false} roles={['docente']}><EduTeacher /></Protected>} />
+            <Route path="educacion/docente/horario" element={<Protected module="edu_docente" grantable={false} roles={['docente']}><EduMySchedule /></Protected>} />
+            <Route path="educacion/docente/grupos" element={<Protected module="edu_docente" grantable={false} roles={['docente']}><EduTeacherGroups /></Protected>} />
+            <Route path="educacion/docente/calificaciones" element={<Protected module="edu_docente" grantable={false} roles={['docente']}><EduTeacherGrades /></Protected>} />
+            <Route path="educacion/docente/entregas" element={<Protected module="edu_docente" grantable={false} roles={['docente']}><EduTeacherSubs /></Protected>} />
+            <Route path="educacion/mi-horario" element={<Protected module="edu_portal" grantable={false} roles={['estudiante']}><EduMySchedule /></Protected>} />
+            <Route path="educacion/mi-aula" element={<Protected module="edu_portal" grantable={false} roles={['estudiante']}><EduMyCourse mode="aula" /></Protected>} />
+            <Route path="educacion/mis-notas" element={<Protected module="edu_portal" grantable={false} roles={['estudiante']}><EduMyCourse mode="notas" /></Protected>} />
+            <Route path="educacion/facturas/:id" element={<Protected module="edu_estudiantes" roles={STAFF}><EduInvoice /></Protected>} />
+            <Route path="educacion/mi-programa/factura/:id" element={<Protected module="edu_portal" grantable={false} roles={['estudiante']}><EduInvoice /></Protected>} />
+            <Route path="educacion/contratos/:id" element={<Protected module="edu_estudiantes" roles={STAFF}><EduContract /></Protected>} />
           </Route>
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
