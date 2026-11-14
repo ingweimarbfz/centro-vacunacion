@@ -950,3 +950,7 @@ a.th-std:hover { box-shadow: var(--shadow-lg, 0 6px 18px rgba(0,0,0,.08)); }
 @media screen and (min-width: 1025px) { .topbar > .menu-toggle { order: 0; } .topbar-site { order: 1; } .topbar-spacer { order: 2; } .topbar-date { order: 3; } .topbar .gsearch { order: 4; } .topbar .user-menu { order: 5; } }
 /* Campos con validación incorporada (components/inputs.jsx) */
 .field input.is-invalid, input.pinput.is-invalid { border-color: var(--bad); box-shadow: 0 0 0 3px var(--bad-50); }
+
+/* Libro de facturas: la hoja solo aparece al imprimir */
+.ir-print { display: none; }
+@media print { .ir-print { display: block !important; } }
