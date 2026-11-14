@@ -9,7 +9,7 @@ import papi, { perror, cop, fdate, WEB_URL } from './api'
 import { Head, PCard, PModal, Splash, Spin, Field, useToast } from './ui'
 import { PhoneInput, EmailInput, DocInput, NitInput } from '../components/inputs'
 
-const AUD = { ips: 'IPS', esal: 'Sin ánimo de lucro' }
+const AUD = { ips: 'IPS', esal: 'Sin ánimo de lucro', etdh: 'Institución ETDH' }
 const STATUS = { prueba: ['En prueba', 'purple'], activa: ['Activa', 'ok'], suspendida: ['Suspendida', 'warn'], cancelada: ['Cancelada', 'bad'] }
 const PURPLES = ['#7C4DDB', '#9B78EA', '#4C2889', '#BBA2F2', '#6233B3', '#2A1650']
 
@@ -94,7 +94,7 @@ const PlanForm = ({ initial, catalog, onClose, onSaved }) => {
         <div className="pgrid">
           <Field label="Código"><input value={f.code} onChange={set('code')} disabled={editing} placeholder="integral" /></Field>
           <Field label="Nombre"><input value={f.name} onChange={set('name')} placeholder="Integral" /></Field>
-          <Field label="Se ofrece a"><select value={f.audience} onChange={set('audience')}><option value="ips">IPS (cualquier prestador)</option><option value="esal">Solo entidades sin ánimo de lucro</option></select></Field>
+          <Field label="Se ofrece a"><select value={f.audience} onChange={set('audience')}><option value="ips">IPS (cualquier prestador)</option><option value="esal">Solo entidades sin ánimo de lucro</option><option value="etdh">Institución educativa (ETDH)</option></select></Field>
           <Field label="Orden"><input type="number" min="0" step="1" value={f.sortOrder} onChange={set('sortOrder')} placeholder="1" /></Field>
           <Field label="Frase" full><input value={f.tagline} onChange={set('tagline')} placeholder="Toda la operación de tu IPS, conectada." /></Field>
         </div>
@@ -268,7 +268,7 @@ const OrgForm = ({ initial, plans, catalog, onClose, onSaved }) => {
   const [f, setF] = useState(() => (editing ? Object.fromEntries(Object.keys(EMPTY_ORG).map((k) => [k, initial[k] ?? EMPTY_ORG[k]])) : EMPTY_ORG))
   const [error, setError] = useState(''); const [busy, setBusy] = useState(false)
   const set = (k) => (e) => setF({ ...f, [k]: e.target.type === 'checkbox' ? e.target.checked : e.target.value })
-  const available = plans.filter((p) => p.active && (p.audience === 'ips' || f.orgType === 'esal'))
+  const available = plans.filter((p) => p.active && (p.audience !== 'esal' || f.orgType === 'esal'))
   const plan = plans.find((p) => String(p.id) === String(f.planId))
   const extras = catalog.features.filter((x) => !plan?.features.includes(x.key))
   const save = async () => {
@@ -284,7 +284,7 @@ const OrgForm = ({ initial, plans, catalog, onClose, onSaved }) => {
         <div className="pgrid">
           <Field label="Nombre" full><input value={f.name} onChange={set('name')} /></Field>
           <Field label="NIT"><NitInput value={f.nit} onChange={set('nit')} /></Field>
-          <Field label="Tipo"><select value={f.orgType} onChange={set('orgType')}><option value="ips">IPS</option><option value="esal">Entidad sin ánimo de lucro</option></select></Field>
+          <Field label="Tipo"><select value={f.orgType} onChange={set('orgType')}><option value="ips">IPS</option><option value="esal">Entidad sin ánimo de lucro</option><option value="etdh">Institución educativa (ETDH)</option></select></Field>
           <Field label="Ciudad"><input value={f.city} onChange={set('city')} /></Field>
           <Field label="Contacto"><input value={f.contactName} onChange={set('contactName')} /></Field>
           <Field label="Correo"><EmailInput value={f.contactEmail} onChange={set('contactEmail')} /></Field>
@@ -363,7 +363,7 @@ export const OrgsPage = () => {
           <thead><tr><th>Organización</th><th>Plan</th><th>Ciclo</th><th>Valor</th><th>Estado</th><th>Renovación</th><th /></tr></thead>
           <tbody>{shown.map((o) => (
             <tr key={o.id}>
-              <td><b>{o.name}</b> {o.isCurrent && <span className="pbadge purple"><MdHome /> Por defecto</span>} {!o.initialized && <span className="pbadge warn">Sin inicializar</span>}<span className="sub">{[o.orgType === 'esal' ? 'Sin ánimo de lucro' : 'IPS', o.nit && `NIT ${o.nit}`, o.city].filter(Boolean).join(' · ')}</span></td>
+              <td><b>{o.name}</b> {o.isCurrent && <span className="pbadge purple"><MdHome /> Por defecto</span>} {!o.initialized && <span className="pbadge warn">Sin inicializar</span>}<span className="sub">{[o.orgType === 'esal' ? 'Sin ánimo de lucro' : o.orgType === 'etdh' ? 'Institución ETDH' : 'IPS', o.nit && `NIT ${o.nit}`, o.city].filter(Boolean).join(' · ')}</span></td>
               <td>{o.planName ? <span className="pbadge purple">{o.planName}</span> : '—'}{o.extraFeatures.length > 0 && <span className="sub">+{o.extraFeatures.length} adicional{o.extraFeatures.length === 1 ? '' : 'es'}</span>}</td>
               <td style={{ textTransform: 'capitalize' }}>{o.billingCycle}</td>
               <td>{cop(o.amount)}<span className="sub">{o.billingCycle === 'anual' ? 'al año' : 'al mes'}</span></td>

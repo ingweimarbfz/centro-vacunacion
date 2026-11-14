@@ -18,6 +18,9 @@ const titleFor = (pathname, moduleId) => {
       if (i.end ? pathname === i.to : pathname.startsWith(i.to)) return { section: s.title, title: i.label }
     }
   }
+  // Páginas que no están en el menú (recibos y contratos de Educación).
+  const extra = [['/educacion/recibos', 'Finanzas', 'Recibo de caja'], ['/educacion/facturas', 'Finanzas', 'Factura'], ['/educacion/clases', 'Estudiantes', 'Asistencia de la clase'], ['/educacion/certificados/', 'Estudiantes', 'Certificado'], ['/educacion/grupos/', 'Oferta académica', 'Aula del grupo'], ['/educacion/contratos', 'Estudiantes', 'Contrato de matrícula']].find(([p]) => pathname.startsWith(p))
+  if (extra) return { section: extra[1], title: extra[2] }
   return { section: '', title: '' }
 }
 
@@ -111,7 +114,7 @@ const AppLayout = () => {
     setCollapsed((c) => { try { localStorage.setItem('cv_sidebar', c ? 'on' : 'off') } catch { /* sin almacenamiento */ } return !c })
   }
   // Perfil, usuarios y configuración son compartidos: conservan el módulo en el que se estaba.
-  const shared = ['/perfil', '/firma', '/usuarios', '/configuracion', '/legal'].some((p) => pathname.startsWith(p))
+  const shared = ['/perfil', '/firma', '/mis-notificaciones', '/usuarios', '/configuracion', '/legal'].some((p) => pathname.startsWith(p))
   const [moduleId, setModuleId] = useState(() => {
     if (!shared) return moduleFromPath(pathname)
     const own = modulesForUser(user).map((m) => m.id)
@@ -161,7 +164,8 @@ const AppLayout = () => {
     <div className={`app${collapsed ? ' sidebar-off' : ''}`}>
       <aside className={`sidebar${open ? ' open' : ''}`}>
         <div className="sidebar-brand">
-          <img src={logo} alt={settings.ipsName} />
+          {/* En Educación se muestra el logo del área (Configuración); si no hay uno cargado, el de la IPS. */}
+          <img src={moduleId === 'educacion' && settings.eduLogoUrl ? settings.eduLogoUrl : logo} alt={settings.ipsName} />
         </div>
         <div className="sidebar-site">
           {siteControl}
@@ -176,7 +180,7 @@ const AppLayout = () => {
           </div>
         )}
         <nav className="sidebar-nav" aria-label="Menú principal">
-          {sections.map((s) => {
+          {sections.filter((s) => s.title !== 'Cuenta').map((s) => {
             const fixed = s.title === 'General'
             const isOpen = fixed || openSection === s.title
             return (
@@ -200,6 +204,14 @@ const AppLayout = () => {
           })}
         </nav>
         <div className="sidebar-footer">
+          {/* Cuenta: fuera del menú, siempre al pie, encima del usuario. */}
+          <nav className="sidebar-account" aria-label="Cuenta">
+            {(sections.find((s) => s.title === 'Cuenta')?.items || []).map((i) => (
+              <NavLink key={i.to} to={i.to} end={i.end} className={({ isActive }) => `nav-link${isActive ? ' active' : ''}`}>
+                <i.icon /> {i.label}
+              </NavLink>
+            ))}
+          </nav>
           <div className="sidebar-user">
             <Avatar user={user} size="sm" />
             <div className="sidebar-user-info">
@@ -224,7 +236,7 @@ const AppLayout = () => {
               <small>{currentModule.fullLabel}{section ? ` · ${section}` : ''}</small>
               <strong>{title || settings.shortName}</strong>
             </div>
-            <GlobalSearch />
+            {user.role !== 'estudiante' && <GlobalSearch />}
             <span className="topbar-spacer" />
             <span className="topbar-date hide-md">{todayLabel}</span>
             <div className="topbar-site">{siteControl}</div>

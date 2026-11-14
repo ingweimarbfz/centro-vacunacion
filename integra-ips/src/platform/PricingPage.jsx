@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react'
 import {
-  MdCheck, MdArrowForward, MdStarBorder, MdVolunteerActivism, MdRemove, MdLocalHospital, MdRule, MdInventory2, MdDraw, MdApartment, MdReceiptLong, MdFolderShared,
-  MdShield, MdCloudDone, MdPhoneIphone, MdNotificationsActive, MdThermostat, MdGroups, MdWarning, MdError, MdTrendingUp
+  MdCheck, MdArrowForward, MdStarBorder, MdVolunteerActivism, MdRemove, MdLocalHospital, MdRule, MdInventory2, MdDraw, MdReceiptLong, MdFolderShared,
+  MdShield, MdCloudDone, MdPhoneIphone, MdNotificationsActive, MdThermostat, MdGroups, MdWarning, MdError, MdTrendingUp, MdSchool
 } from 'react-icons/md'
 import papi, { cop } from './api'
 import { Splash } from './ui'
@@ -14,9 +14,9 @@ const MODULES = [
   [MdRule, 'Estándares de habilitación', 'Talento humano, infraestructura, dotación, medicamentos, procesos prioritarios, historia clínica e interdependencia, con carpetas obligatorias y listas de chequeo.'],
   [MdFolderShared, 'Calidad IPS', 'Documentos generales por ítem y carpetas, vigencias, y documentos en línea (misión, visión, políticas) escritos con editor de texto.'],
   [MdInventory2, 'Inventario y flota', 'Bodegas, lotes y fechas de vencimiento, consumo desde vacunación, entregas a servicios, vehículos, preoperacionales y reportes diarios.'],
-  [MdVolunteerActivism, 'Socorro y voluntariado', 'Eventos y emergencias, educación, horas y seguro de cada voluntario, y reportes por agrupación y sede.'],
-  [MdDraw, 'Firmas digitales', 'Cada documento se firma con la firma digital de quien corresponde; los pendientes aparecen en su dashboard.'],
-  [MdApartment, 'Multisede', 'Seccional, unidades y grupos con información separada por sede y una vista consolidada para la dirección.']
+  [MdVolunteerActivism, 'Socorro y voluntariado', 'Eventos y emergencias, actividades de educación comunitaria, horas y seguro de cada voluntario, y reportes por agrupación y sede.'],
+  [MdSchool, 'Educación (institución ETDH)', 'Programas y pensum, matrículas con planes de pago y convenios, horarios y clases virtuales, asistencia con firmas, aula virtual con talleres y notas, portal del estudiante, certificados verificables, SIET y acreditación.'],
+  [MdDraw, 'Firmas, multisede y avisos', 'Cada documento con la firma digital de quien corresponde, información separada por sede con vista consolidada para la dirección, y avisos por Telegram a los que cada usuario se une desde la plataforma.']
 ]
 const WHY = [[MdShield, 'Lista para la visita de verificación'], [MdNotificationsActive, 'Alertas antes de que algo venza'], [MdCloudDone, 'En la nube, sin instalar nada'], [MdPhoneIphone, 'Funciona en computador y celular']]
 
@@ -78,7 +78,7 @@ const Hero = () => (
         <img src={logoDark} alt="Integra IPS" className="pf-hero-logo" />
         <div className="eyebrow">Sistema de información para IPS</div>
         <h2>Toda la operación de tu IPS y la habilitación de tus servicios, en un solo lugar.</h2>
-        <p className="lead">Registra la atención y la vacunación, factura con convenios, controla el inventario y la cadena de frío y mantén al día los estándares de habilitación. El sistema te avisa antes de que algo venza, genera los formatos en PDF con tu logo y deja cada documento firmado digitalmente.</p>
+        <p className="lead">Registra la atención y la vacunación, factura con convenios, controla el inventario y la cadena de frío, mantén al día los estándares de habilitación y administra tu instituto de educación para el trabajo. El sistema te avisa antes de que algo venza, genera los formatos en PDF con tu logo y deja cada documento firmado digitalmente.</p>
         <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap' }}>
           <a className="pf-hero-cta" href="#planes">Ver planes <MdArrowForward /></a>
           <a className="pf-hero-ghost" href="mailto:?subject=Demostración%20Integra%20IPS">Solicitar una demostración</a>
@@ -108,6 +108,7 @@ const PricingPage = () => {
   if (!d) return <div className="pf" style={{ background: '#140A26' }}><Splash /></div>
   const ips = d.plans.filter((p) => p.audience === 'ips')
   const esal = d.plans.filter((p) => p.audience === 'esal')
+  const etdh = d.plans.filter((p) => p.audience === 'etdh')
   const disc = ips[0]?.annualDiscount ?? 16.7
   const price = (p) => (cycle === 'anual' ? p.priceYearMonthly : p.priceMonth)
   const allFeatures = [...new Map(d.plans.flatMap((p) => p.featureLabels).map((f) => [f.key, f])).values()]
@@ -143,7 +144,7 @@ const PricingPage = () => {
             <button type="button" className={cycle === 'anual' ? 'on' : ''} onClick={() => setCycle('anual')}>Anual <em>−{String(disc).replace('.', ',')} %</em></button>
           </div>
         </div>
-        <p className="lead">Servicios de IPS, estándares de habilitación e inventario en una sola plataforma. Elige el plan según el tamaño de tu operación; con pago anual obtienes dos meses gratis.</p>
+        <p className="lead">Servicios de IPS, estándares de habilitación, inventario y educación para el trabajo en una sola plataforma. Elige el plan según el tamaño de tu operación; con pago anual obtienes dos meses gratis.</p>
 
         <div className="pf-tiers">{ips.map((p) => <Tier key={p.id} p={p} />)}</div>
 
@@ -152,7 +153,7 @@ const PricingPage = () => {
             <div className="l">
               <span className="pill"><MdVolunteerActivism /> {p.badge || 'Solo entidades sin ánimo de lucro'}</span>
               <h3>Plan {p.name}</h3>
-              <p style={{ color: 'var(--p-200)', lineHeight: 1.6, margin: '0 0 20px' }}>{p.tagline} Incluye socorro, eventos y emergencias, educación y la gestión completa del voluntariado, además de todos los módulos de IPS y estándares.</p>
+              <p style={{ color: 'var(--p-200)', lineHeight: 1.6, margin: '0 0 20px' }}>{p.tagline} Incluye socorro, eventos y emergencias, la gestión completa del voluntariado y el instituto de educación (ETDH), además de todos los módulos de IPS y estándares.</p>
               <div className="amount" style={{ fontSize: 40, fontWeight: 700, color: '#fff' }}>{cop(price(p))}<small style={{ fontSize: 16, color: 'var(--p-200)', fontWeight: 500 }}> /mes</small></div>
               <div style={{ color: 'var(--p-300)', fontSize: 13, margin: '6px 0 20px' }}>{cycle === 'anual' ? `Pago anual de ${cop(p.priceYear)}` : 'Pago mensual'} · {limits(p)}</div>
               <a className="pbtn" style={{ background: '#B9F6CA', color: '#0B3B1E', height: 48, padding: '0 22px', borderRadius: 12 }} href={`mailto:?subject=${encodeURIComponent(`Plan ${p.name} (${cycle})`)}`}>Solicitar plan {p.name} <MdArrowForward /></a>
@@ -161,6 +162,23 @@ const PricingPage = () => {
             <div className="r">
               <ul>{p.bullets.slice(0, 2).map((b) => <li key={b}><MdCheck /> {b}</li>)}
                 {p.featureLabels.filter((f) => f.group === 'voluntariado').map((f) => <li key={f.key}><MdCheck /> {f.label}</li>)}</ul>
+            </div>
+          </div>
+        ))}
+
+        {etdh.map((p) => (
+          <div key={p.id} className="pf-esal pf-etdh" id="educacion">
+            <div className="l">
+              <span className="pill"><MdSchool /> {p.badge || 'Instituciones ETDH'}</span>
+              <h3>Plan {p.name}</h3>
+              <p style={{ color: 'var(--p-200)', lineHeight: 1.6, margin: '0 0 20px' }}>{p.tagline} Pensado para las reglas del Ministerio de Educación: registro de programas, matrícula, asistencia, certificados y reporte al SIET.</p>
+              <div className="amount" style={{ fontSize: 40, fontWeight: 700, color: '#fff' }}>{cop(price(p))}<small style={{ fontSize: 16, color: 'var(--p-200)', fontWeight: 500 }}> /mes</small></div>
+              <div style={{ color: 'var(--p-300)', fontSize: 13, margin: '6px 0 20px' }}>{cycle === 'anual' ? `Pago anual de ${cop(p.priceYear)}` : 'Pago mensual'} · {limits(p)}</div>
+              <a className="pbtn" style={{ background: '#C4B5FD', color: '#2E1065', height: 48, padding: '0 22px', borderRadius: 12 }} href={`mailto:?subject=${encodeURIComponent(`Plan ${p.name} (${cycle})`)}`}>Solicitar plan {p.name} <MdArrowForward /></a>
+              <p style={{ color: 'var(--p-300)', fontSize: 12.5, marginTop: 14 }}>También incluido en el plan Humanitario. Si eres una IPS con instituto de formación, pregúntanos por la combinación con tu plan.</p>
+            </div>
+            <div className="r">
+              <ul>{p.bullets.map((b) => <li key={b}><MdCheck /> {b}</li>)}</ul>
             </div>
           </div>
         ))}
@@ -184,7 +202,7 @@ const PricingPage = () => {
             </table>
           </div>
         </div>
-        <p style={{ color: 'var(--p-300)', fontSize: 12.5, marginTop: 30 }}>Precios en pesos colombianos. El plan Humanitario se ofrece únicamente a entidades sin ánimo de lucro.</p>
+        <p style={{ color: 'var(--p-300)', fontSize: 12.5, marginTop: 30 }}>Precios en pesos colombianos. El plan Humanitario se ofrece únicamente a entidades sin ánimo de lucro. El plan Educación es para instituciones de Educación para el Trabajo y el Desarrollo Humano.</p>
       </div>
     </div>
   )

@@ -1,21 +1,25 @@
 import {
   MdDashboard, MdThermostat, MdNoteAdd, MdManageSearch, MdPeople, MdSettings, MdPerson,
   MdEmergency, MdInventory2, MdBadge, MdLocalHospital, MdLocalShipping, MdDirectionsCar, MdAssignment, MdSpeed,
-  MdMedicalServices, MdAccountTree, MdVolunteerActivism, MdFactCheck, MdSchool, MdWarehouse, MdCategory, MdSwapHoriz, MdHealing, MdAirportShuttle, MdDraw, MdTune, MdInsights, MdGroups, MdRule, MdMenuBook, MdFolderShared, MdMedication, MdReceiptLong, MdStorefront, MdPriceChange, MdAccountBalance, MdVaccines, MdEventRepeat, MdNotificationsActive
+  MdMedicalServices, MdAccountTree, MdVolunteerActivism, MdFactCheck, MdSchool, MdWarehouse, MdCategory, MdSwapHoriz, MdHealing, MdAirportShuttle, MdDraw, MdTune, MdInsights, MdGroups, MdRule, MdMenuBook, MdFolderShared, MdMedication, MdReceiptLong, MdStorefront, MdPriceChange, MdAccountBalance, MdVaccines, MdEventRepeat, MdNotificationsActive, MdClass, MdHowToReg, MdMenuBook as MdPensum, MdAccountBalanceWallet, MdHandshake, MdMeetingRoom as MdMeetingRoomIcon, MdWorkspacePremium as MdWorkspacePremiumIcon, MdCalendarMonth, MdGrading, MdRateReview, MdLibraryBooks
 } from 'react-icons/md'
 
 export const ROLE_LABELS = {
   administrador: 'Administrador',
   empleado: 'Empleado',
   voluntario: 'Voluntario',
-  conductor: 'Conductor'
+  conductor: 'Conductor',
+  estudiante: 'Estudiante',
+  docente: 'Docente'
 }
 
 export const ROLE_DESCRIPTIONS = {
   administrador: 'Acceso total a todas las sedes: módulos, usuarios, sedes y configuración.',
   empleado: 'Registra y consulta la información de su sede (IPS y Operaciones Generales) y la bodega de su sede.',
   voluntario: 'Su panel de horas y seguro; registra y coordina actividades de su municipio.',
-  conductor: 'Flota vehicular (Operaciones Generales): preoperacional y reportes diarios; y el dashboard de su ambulancia en IPS · Traslado asistencial.'
+  conductor: 'Flota vehicular (Operaciones Generales): preoperacional y reportes diarios; y el dashboard de su ambulancia en IPS · Traslado asistencial.',
+  estudiante: 'Portal del estudiante (Educación): consulta su programa, su pensum y sus matrículas. Se crea desde la ficha del estudiante.',
+  docente: 'Panel del docente (Educación): sus clases del día y de la semana, sus grupos y el enlace a las clases virtuales.'
 }
 
 export const SITE_TYPES = { seccional: 'Seccional', unidad_municipal: 'Unidad municipal', grupo_apoyo: 'Grupo de apoyo' }
@@ -26,7 +30,7 @@ export const EVENT_AREAS = { socorro: 'Socorro', educacion: 'Educación' }
 const ADMIN = ['administrador']
 const STAFF = ['administrador', 'empleado']
 const ALL = ['administrador', 'empleado'] // dashboards generales
-const EVERYONE = ['administrador', 'empleado', 'voluntario', 'conductor']
+const EVERYONE = ['administrador', 'empleado', 'voluntario', 'conductor', 'estudiante', 'docente']
 const EVENTS = ['administrador', 'empleado', 'voluntario']
 const FLEET_VIEW = ['administrador', 'empleado', 'conductor']
 const FLEET_DASH = ['administrador', 'empleado', 'conductor']
@@ -47,9 +51,10 @@ export const siteHas = (user, service) => {
 export const USER_MODULES = {
   ips: [['ips_dashboard', 'Dashboard de IPS'], ['citologias', 'Citologías'], ['vacunacion', 'Vacunación (registro, carnet, seguimiento y ESAVI)'], ['facturacion', 'Facturación, EPS y cuentas de cobro'], ['traslado', 'Traslado asistencial (ambulancias)'], ['temperatura', 'Registro de temperatura'], ['equipos', 'Hoja de vida de equipos']],
   socorro: [['og_dashboard', 'Dashboard de Operaciones Generales'], ['socorro', 'Socorro (eventos y emergencias)'], ['educacion', 'Educación'], ['personas', 'Personas / voluntarios'], ['reporte_voluntarios', 'Reporte de voluntarios'], ['inventario', 'Inventario y bodegas'], ['flota', 'Flota vehicular'], ['voluntario', 'Panel de voluntario']],
-  estandares: [['talento_humano', 'Talento humano (hojas de vida, contratos y chequeo)'], ['procesos_prioritarios', 'Procesos prioritarios (documentos)'], ['interdependencia', 'Interdependencia (carpeta y documentos)'], ['medicamentos', 'Medicamentos, dispositivos e insumos (documentos)'], ['infraestructura', 'Infraestructura (carpeta, seguimiento y documentos)'], ['historia_clinica', 'Historia clínica y registros (carpeta y documentos)'], ['doc_generales', 'Doc. Generales (documentos de calidad por ítem y carpeta)']]
+  estandares: [['talento_humano', 'Talento humano (hojas de vida, contratos y chequeo)'], ['procesos_prioritarios', 'Procesos prioritarios (documentos)'], ['interdependencia', 'Interdependencia (carpeta y documentos)'], ['medicamentos', 'Medicamentos, dispositivos e insumos (documentos)'], ['infraestructura', 'Infraestructura (carpeta, seguimiento y documentos)'], ['historia_clinica', 'Historia clínica y registros (carpeta y documentos)'], ['doc_generales', 'Doc. Generales (documentos de calidad por ítem y carpeta)']],
+  educacion: [['edu_dashboard', 'Dashboard del instituto (director o encargado)'], ['edu_programas', 'Programas, pensum y grupos'], ['edu_estudiantes', 'Estudiantes y matrículas'], ['edu_portal', 'Portal del estudiante'], ['edu_docente', 'Panel del docente']]
 }
-export const USER_MODULE_GROUPS = { ips: 'IPS', socorro: 'Operaciones Generales', estandares: 'Calidad IPS y Estándares' }
+export const USER_MODULE_GROUPS = { ips: 'IPS', socorro: 'Operaciones Generales', estandares: 'Calidad IPS y Estándares', educacion: 'Educación (institución ETDH)' }
 // El plan contratado limita los módulos de todos (también del administrador).
 export const inPlan = (user, m) => !user?.plan?.modules || user.plan.modules.includes(m)
 export const hasModule = (user, mod) => {
@@ -74,7 +79,9 @@ export const canSee = (user, { roles, module, grantable = true, service } = {}) 
 export const MODULES = [
   { id: 'ips', label: 'IPS', fullLabel: 'Servicios de IPS', icon: MdLocalHospital, home: '/', visible: (u) => ownItems('ips', u).length > 0 },
   { id: 'socorro', label: 'Operaciones Generales', fullLabel: 'Operaciones Generales: Socorro y Educación', icon: MdEmergency, home: '/socorro', visible: (u) => ownItems('socorro', u).length > 0 },
-  { id: 'estandares', label: 'Calidad IPS y Estándares', fullLabel: 'Calidad IPS y Estándares', tabs: [{ id: 'estandares', label: 'Estándares' }, { id: 'docs', label: 'Doc. Generales', prefix: '/estandares/doc-generales' }], icon: MdRule, home: '/estandares', visible: (u) => ownItems('estandares', u).length > 0 }
+  { id: 'estandares', label: 'Calidad IPS y Estándares', fullLabel: 'Calidad IPS y Estándares', tabs: [{ id: 'estandares', label: 'Estándares' }, { id: 'docs', label: 'Doc. Generales', prefix: '/estandares/doc-generales' }], icon: MdRule, home: '/estandares', visible: (u) => ownItems('estandares', u).length > 0 },
+  // Académico ETDH (IIPS-019). Las "Actividades de educación" de Operaciones Generales son otra cosa (salidas fuera del aula).
+  { id: 'educacion', label: 'Educación', fullLabel: 'Educación · Institución ETDH', icon: MdSchool, home: '/educacion', visible: (u) => ownItems('educacion', u).length > 0 }
 ]
 export const modulesForUser = (user) => MODULES.filter((m) => m.visible(user))
 
@@ -84,11 +91,13 @@ export const homeFor = (user, preferred) => {
   const first = (m) => ownItems(m, user)[0]?.to
   if (user.role === 'conductor' && canSee(user, { roles: FLEET_DASH, module: 'flota' })) return '/socorro/vehiculos'
   if (user.role === 'voluntario' && canSee(user, { roles: ['voluntario'], module: 'voluntario', grantable: false })) return '/socorro/voluntario'
-  const order = [preferred, 'ips', 'socorro', 'estandares'].filter((m, i, a) => m && NAV[m] && a.indexOf(m) === i)
+  if (user.role === 'docente') return canSee(user, { roles: ['docente'], module: 'edu_docente', grantable: false }) ? '/educacion/docente' : '/perfil'
+  if (user.role === 'estudiante') return canSee(user, { roles: ['estudiante'], module: 'edu_portal', grantable: false }) ? '/educacion/mi-programa' : '/perfil'
+  const order = [preferred, 'ips', 'socorro', 'estandares', 'educacion'].filter((m, i, a) => m && NAV[m] && a.indexOf(m) === i)
   return order.map(first).find(Boolean) || '/perfil'
 }
 
-export const moduleFromPath = (pathname) => (pathname.startsWith('/socorro') ? 'socorro' : pathname.startsWith('/estandares') ? 'estandares' : 'ips')
+export const moduleFromPath = (pathname) => (pathname.startsWith('/socorro') ? 'socorro' : pathname.startsWith('/estandares') ? 'estandares' : pathname.startsWith('/educacion') ? 'educacion' : 'ips')
 
 const SHARED = [
   {
@@ -104,7 +113,7 @@ const SHARED = [
   },
   {
     title: 'Cuenta',
-    items: [{ to: '/perfil', label: 'Mi perfil', icon: MdPerson, roles: EVERYONE }, { to: '/firma', label: 'Mi firma digital', icon: MdDraw, roles: EVERYONE }]
+    items: [{ to: '/perfil', label: 'Mi perfil', icon: MdPerson, roles: EVERYONE }, { to: '/firma', label: 'Mi firma digital', icon: MdDraw, roles: EVERYONE }, { to: '/mis-notificaciones', label: 'Mis notificaciones', icon: MdNotificationsActive, roles: EVERYONE }]
   }
 ]
 
@@ -219,6 +228,44 @@ const NAV = {
     { tab: 'docs', title: 'Doc. Generales', items: [
       { to: '/estandares/doc-generales', label: 'Dashboard', icon: MdDashboard, roles: STAFF, end: true, module: 'doc_generales' },
       { to: '/estandares/doc-generales/documentos', label: 'Documentos y carpetas', icon: MdFolderShared, roles: STAFF, module: 'doc_generales' }
+    ] },
+    ...SHARED
+  ],
+  // Educación · Institución ETDH (Decreto 1075 de 2015).
+  educacion: [
+    { title: 'General', items: [
+      { to: '/educacion', label: 'Dashboard del instituto', icon: MdDashboard, roles: STAFF, end: true, module: 'edu_dashboard' },
+      { to: '/educacion/mi-programa', label: 'Mi programa', icon: MdSchool, roles: ['estudiante'], module: 'edu_portal', grantable: false },
+      { to: '/educacion/mi-horario', label: 'Mi horario', icon: MdCalendarMonth, roles: ['estudiante'], module: 'edu_portal', grantable: false },
+      { to: '/educacion/mi-aula', label: 'Mi aula', icon: MdLibraryBooks, roles: ['estudiante'], module: 'edu_portal', grantable: false },
+      { to: '/educacion/mis-notas', label: 'Mis notas', icon: MdGrading, roles: ['estudiante'], module: 'edu_portal', grantable: false },
+      { to: '/educacion/docente', label: 'Mi panel de docente', icon: MdDashboard, roles: ['docente'], module: 'edu_docente', grantable: false, end: true },
+      { to: '/educacion/docente/horario', label: 'Mi horario', icon: MdCalendarMonth, roles: ['docente'], module: 'edu_docente', grantable: false },
+      { to: '/educacion/docente/grupos', label: 'Mis grupos y aulas', icon: MdGroups, roles: ['docente'], module: 'edu_docente', grantable: false },
+      { to: '/educacion/docente/calificaciones', label: 'Calificaciones', icon: MdGrading, roles: ['docente'], module: 'edu_docente', grantable: false },
+      { to: '/educacion/docente/entregas', label: 'Entregas por revisar', icon: MdRateReview, roles: ['docente'], module: 'edu_docente', grantable: false }
+    ] },
+    { title: 'Oferta académica', items: [
+      { to: '/educacion/programas', label: 'Programas y pensum', icon: MdPensum, roles: STAFF, module: 'edu_programas' },
+      { to: '/educacion/grupos', label: 'Grupos', icon: MdClass, roles: STAFF, module: 'edu_programas' },
+      { to: '/educacion/horarios', label: 'Horarios y clases', icon: MdEventRepeat, roles: STAFF, module: 'edu_programas' },
+      { to: '/educacion/aulas', label: 'Aulas y salones', icon: MdMeetingRoomIcon, roles: STAFF, module: 'edu_programas' }
+    ] },
+    { title: 'Estudiantes', items: [
+      { to: '/educacion/estudiantes', label: 'Estudiantes', icon: MdGroups, roles: STAFF, module: 'edu_estudiantes' },
+      { to: '/educacion/matriculas', label: 'Matrículas', icon: MdHowToReg, roles: STAFF, module: 'edu_estudiantes' },
+      { to: '/educacion/actas', label: 'Asistencia y actas', icon: MdFactCheck, roles: STAFF, module: ['edu_programas', 'edu_estudiantes'] },
+      { to: '/educacion/certificados', label: 'Certificados', icon: MdWorkspacePremiumIcon, roles: STAFF, module: 'edu_estudiantes' }
+    ] },
+    { title: 'Finanzas', items: [
+      { to: '/educacion/cartera', label: 'Cartera', icon: MdAccountBalanceWallet, roles: STAFF, module: 'edu_estudiantes' },
+      { to: '/educacion/convenios', label: 'Convenios', icon: MdHandshake, roles: STAFF, module: ['edu_estudiantes', 'edu_programas'] },
+      { to: '/educacion/configuracion', label: 'Reglamento, planes de pago y descuentos', icon: MdTune, roles: ADMIN }
+    ] },
+    { title: 'Institución', items: [
+      { to: '/educacion/acreditacion', label: 'Acreditación', icon: MdDashboard, roles: STAFF, end: true, module: ['edu_dashboard', 'edu_programas'] },
+      { to: '/educacion/acreditacion/documentos', label: 'Documentos de acreditación', icon: MdFolderShared, roles: STAFF, module: ['edu_dashboard', 'edu_programas'] },
+      { to: '/educacion/reportes', label: 'Reportes y SIET', icon: MdInsights, roles: STAFF, module: ['edu_dashboard', 'edu_estudiantes', 'edu_programas'] }
     ] },
     ...SHARED
   ]

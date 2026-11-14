@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react'
 import { Link, useNavigate, useSearchParams } from 'react-router-dom'
-import ServiceTabs, { serviceLabel } from './ServiceTabs'
+import ServiceTabs, { serviceLabel, useDocArea } from './ServiceTabs'
 import { ResponsiveContainer, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip } from 'recharts'
 import { MdFolderShared, MdDescription, MdWarning, MdEventBusy, MdFolderOff, MdCategory, MdErrorOutline, MdUploadFile, MdMedicalServices } from 'react-icons/md'
 import api, { errorMessage } from '../../api/client'
@@ -14,21 +14,22 @@ const Kpi = ({ label, value, foot, icon, tone = '' }) => (
 
 // Calidad IPS → Doc. Generales → Dashboard: documentos por ítem, vigencias y cargas recientes.
 const DocGeneralesDashboard = () => {
+  const docArea = useDocArea()
   const navigate = useNavigate()
   const [params, setParams] = useSearchParams()
   // 'todos' = toda la IPS; 'general' = documentos generales; <id> = el árbol de ese servicio.
   const svc = params.get('servicio') || 'todos'
   const pick = (v) => setParams(v === 'todos' ? {} : { servicio: v })
   const [d, setD] = useState(null); const [err, setErr] = useState('')
-  useEffect(() => { setD(null); api.get('/calidad/resumen', { params: { servicio: svc === 'todos' ? undefined : svc } }).then(({ data }) => setD(data)).catch((e) => setErr(errorMessage(e))) }, [svc])
-  const docsLink = (extra = {}, service = svc) => { const q = new URLSearchParams({ ...(service && service !== 'todos' && service !== 'general' ? { servicio: service } : {}), ...extra }).toString(); return `/estandares/doc-generales/documentos${q ? `?${q}` : ''}` }
+  useEffect(() => { setD(null); api.get('/calidad/resumen', { params: { area: docArea.area, servicio: svc === 'todos' ? undefined : svc } }).then(({ data }) => setD(data)).catch((e) => setErr(errorMessage(e))) }, [svc, docArea.area])
+  const docsLink = (extra = {}, service = svc) => { const q = new URLSearchParams({ ...(service && service !== 'todos' && service !== 'general' ? { servicio: service } : {}), ...extra }).toString(); return `${docArea.base}/documentos${q ? `?${q}` : ''}` }
   if (err) return <div className="alert bad"><MdErrorOutline /><span>{err}</span></div>
   if (!d) return <div className="splash"><Spinner /></div>
   const k = d.kpis
-  const scopeName = svc === 'todos' ? 'toda la IPS' : serviceLabel(d.services, svc)
+  const scopeName = svc === 'todos' ? docArea.allLabel : serviceLabel(d.services, svc, docArea.generalLabel)
   return (
     <>
-      <PageHead title="Doc. Generales" subtitle={`Resumen de los documentos de calidad y habilitación · ${scopeName}`}>
+      <PageHead title={docArea.area === 'educacion' ? 'Acreditación' : 'Doc. Generales'} subtitle={`${docArea.area === 'educacion' ? 'Documentos de acreditación de la institución' : 'Resumen de los documentos de calidad y habilitación'} · ${scopeName}`}>
         <Link to={docsLink()} className="btn btn-primary"><MdUploadFile /> Ir a documentos</Link>
       </PageHead>
       <ServiceTabs services={d.services} value={svc} onChange={pick} allValue="todos" />
@@ -39,9 +40,9 @@ const DocGeneralesDashboard = () => {
           <Kpi label="Por vencer" value={k.porVencer} foot="En los próximos 30 días" icon={<MdWarning />} tone={k.porVencer ? 'warn' : 'ok'} />
           <Kpi label="Vencidos" value={k.vencidos} foot="Actualízalos" icon={<MdEventBusy />} tone={k.vencidos ? 'warn' : 'ok'} />
         </div>
-        <Card flush title="Documentos por servicio" subtitle="Cada servicio tiene su propio árbol de carpetas. Toca una fila para ver solo ese servicio." icon={<MdMedicalServices style={{ color: 'var(--brand)' }} />}>
+        <Card flush title={`Documentos por ${docArea.scopeLabel}`} subtitle={`Cada ${docArea.scopeLabel} tiene su propio árbol de carpetas. Toca una fila para ver solo ese ${docArea.scopeLabel}.`} icon={<MdMedicalServices style={{ color: 'var(--brand)' }} />}>
           <div className="table-wrap"><table className="table qd-svc-table">
-            <thead><tr><th>Servicio</th><th className="num">Ítems</th><th className="num">Carpetas</th><th className="num">Documentos</th><th className="num">Carpetas vacías</th><th>Vigencia</th></tr></thead>
+            <thead><tr><th>{docArea.scopeLabel === 'programa' ? 'Programa' : 'Servicio'}</th><th className="num">Ítems</th><th className="num">Carpetas</th><th className="num">Documentos</th><th className="num">Carpetas vacías</th><th>Vigencia</th></tr></thead>
             <tbody>{d.byService.map((x) => {
               const v = x.id == null ? 'general' : String(x.id)
               return (
@@ -64,7 +65,7 @@ const DocGeneralesDashboard = () => {
                 <thead><tr><th>Ítem</th><th>Tipo</th><th className="num">Documentos</th><th className="num">Carpetas vacías</th><th>Vigencia</th></tr></thead>
                 <tbody>{d.byItem.map((x) => (
                   <tr key={x.id} style={{ cursor: 'pointer' }} onClick={() => navigate(docsLink({ carpeta: x.id }, x.serviceId == null ? 'general' : String(x.serviceId)))}>
-                    <td><strong style={{ color: 'var(--ink)' }}>{x.code ? `${x.code}. ` : ''}{x.name}</strong>{svc === 'todos' && <div className="hint">{x.serviceId == null ? 'Generales' : serviceLabel(d.services, x.serviceId)}</div>}</td>
+                    <td><strong style={{ color: 'var(--ink)' }}>{x.code ? `${x.code}. ` : ''}{x.name}</strong>{svc === 'todos' && <div className="hint">{x.serviceId == null ? docArea.generalLabel : serviceLabel(d.services, x.serviceId)}</div>}</td>
                     <td><span className="badge">{x.kind}</span></td>
                     <td className="num"><strong>{x.documentos}</strong></td>
                     <td className="num">{x.carpetasVacias ? <span className="badge warn">{x.carpetasVacias}</span> : '0'}</td>

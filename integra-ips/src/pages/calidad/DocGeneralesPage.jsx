@@ -1,6 +1,6 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react'
 import { useSearchParams } from 'react-router-dom'
-import ServiceTabs, { serviceLabel } from './ServiceTabs'
+import ServiceTabs, { serviceLabel, useDocArea } from './ServiceTabs'
 import {
   MdAdd, MdSearch, MdEdit, MdDelete, MdDownload, MdVisibility, MdErrorOutline, MdSave, MdUploadFile, MdFolder, MdFolderOpen,
   MdCreateNewFolder, MdChevronRight, MdExpandMore, MdEditNote
@@ -17,6 +17,7 @@ const ordered = (folders, parentId = null, depth = 0) => folders.filter((f) => f
 
 // Carpeta: ítem principal (nivel 1, con tipo) o subcarpeta (hasta el 3.er nivel).
 const FolderForm = ({ initial, parent, kinds, serviceId, serviceName, onClose, onSaved }) => {
+  const docArea = useDocArea()
   const editing = Boolean(initial?.id)
   const level = editing ? initial.level : parent ? parent.level + 1 : 1
   const [f, setF] = useState({ name: initial?.name || '', code: initial?.code || '', kind: initial?.kind || kinds[0], description: initial?.description || '', sortOrder: initial?.sortOrder ?? 0, active: initial?.active !== false })
@@ -24,7 +25,7 @@ const FolderForm = ({ initial, parent, kinds, serviceId, serviceName, onClose, o
   const set = (k) => (e) => setF({ ...f, [k]: e.target.type === 'checkbox' ? e.target.checked : e.target.value })
   const save = async () => {
     setErr(''); setBusy(true)
-    try { editing ? await api.put(`/calidad/carpetas/${initial.id}`, f) : await api.post('/calidad/carpetas', { ...f, parentId: parent?.id, serviceId: parent ? undefined : serviceId }); onSaved() } catch (e) { setErr(errorMessage(e)); setBusy(false) }
+    try { editing ? await api.put(`/calidad/carpetas/${initial.id}`, f) : await api.post('/calidad/carpetas', { ...f, area: docArea.area, parentId: parent?.id, serviceId: parent ? undefined : serviceId }); onSaved() } catch (e) { setErr(errorMessage(e)); setBusy(false) }
   }
   return (
     <Modal title={editing ? `Editar · ${initial.name}` : level === 1 ? 'Nuevo ítem principal' : `Nueva subcarpeta en ${parent.name}`} size="sm" onClose={onClose}
@@ -98,6 +99,7 @@ const DocForm = ({ initial, folders, folderId, categories, html: htmlMode, onClo
 
 // Calidad IPS → Doc. Generales: ítems principales y carpetas (hasta 3 niveles) con sus documentos.
 const DocGeneralesPage = () => {
+  const docArea = useDocArea()
   const { user } = useAuth()
   const admin = user.role === 'administrador'
   const [params, setParams] = useSearchParams()
@@ -110,8 +112,8 @@ const DocGeneralesPage = () => {
   const [open, setOpen] = useState({})
   const [f, setF] = useState({ q: '', tipoItem: '', tipo: '', subcarpetas: true })
   const [modal, setModal] = useState(null)
-  const loadTree = useCallback(() => api.get('/calidad/carpetas', { params: { servicio: svc } }).then(({ data }) => setMeta(data)).catch((e) => toast(errorMessage(e), 'bad')), [svc, toast])
-  const loadDocs = useCallback(() => api.get('/calidad/documentos', { params: { servicio: svc, carpeta: sel || undefined, subcarpetas: f.subcarpetas ? 1 : 0, q: f.q || undefined, tipoItem: f.tipoItem || undefined, tipo: f.tipo || undefined } }).then(({ data }) => setDocs(data)).catch((e) => toast(errorMessage(e), 'bad')), [svc, sel, f, toast])
+  const loadTree = useCallback(() => api.get('/calidad/carpetas', { params: { servicio: svc, area: docArea.area } }).then(({ data }) => setMeta(data)).catch((e) => toast(errorMessage(e), 'bad')), [svc, toast, docArea.area])
+  const loadDocs = useCallback(() => api.get('/calidad/documentos', { params: { area: docArea.area, servicio: svc, carpeta: sel || undefined, subcarpetas: f.subcarpetas ? 1 : 0, q: f.q || undefined, tipoItem: f.tipoItem || undefined, tipo: f.tipo || undefined } }).then(({ data }) => setDocs(data)).catch((e) => toast(errorMessage(e), 'bad')), [svc, sel, f, toast, docArea.area])
   useEffect(() => { loadTree() }, [loadTree])
   useEffect(() => { loadDocs() }, [loadDocs])
   const folders = useMemo(() => meta?.folders || [], [meta])
@@ -135,10 +137,10 @@ const DocGeneralesPage = () => {
     )
   }
   if (!meta) return <div className="splash"><Spinner /></div>
-  const svcName = serviceLabel(meta.services, svc)
+  const svcName = serviceLabel(meta.services, svc, docArea.generalLabel)
   return (
     <>
-      <PageHead title="Doc. Generales" subtitle="Documentos de calidad y habilitación: cada servicio de IPS tiene su propio árbol de ítems y carpetas (hasta 3 niveles)">
+      <PageHead title={docArea.area === 'educacion' ? 'Acreditación · documentos' : 'Doc. Generales'} subtitle={docArea.area === 'educacion' ? 'Documentos de acreditación de la institución ETDH: árbol institucional y uno por programa (hasta 3 niveles)' : 'Documentos de calidad y habilitación: cada servicio de IPS tiene su propio árbol de ítems y carpetas (hasta 3 niveles)'}>
         {admin && <button type="button" className="btn btn-outline" onClick={() => setModal({ folder: {} })}><MdAdd /> Ítem principal</button>}
         <button type="button" className="btn btn-outline" onClick={() => setModal({ doc: {}, html: true })} disabled={!folders.length}><MdEditNote /> Crear en línea</button>
         <button type="button" className="btn btn-primary" onClick={() => setModal({ doc: {} })} disabled={!folders.length}><MdUploadFile /> Cargar documento</button>
